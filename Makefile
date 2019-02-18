@@ -958,6 +958,9 @@ CC_FLAGS_LTO_CLANG := -flto=thin $(call cc-option, -fsplit-lto-unit)
 else
 CC_FLAGS_LTO_CLANG := -flto
 endif
+ifdef CONFIG_LD_IS_LLD
+KBUILD_LDFLAGS += --lto-O3
+endif
 CC_FLAGS_LTO_CLANG += -fvisibility=default
 
 # Limit inlining across translation units to reduce binary size
