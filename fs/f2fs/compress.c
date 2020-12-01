@@ -881,7 +881,7 @@ bool f2fs_is_sparse_cluster(struct inode *inode, pgoff_t index)
 
 static bool cluster_may_compress(struct compress_ctx *cc)
 {
-	if (!f2fs_compressed_file(cc->inode))
+	if (!f2fs_need_compress_data(cc->inode))
 		return false;
 	if (f2fs_is_atomic_file(cc->inode))
 		return false;
