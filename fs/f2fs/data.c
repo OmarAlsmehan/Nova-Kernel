@@ -3806,8 +3806,7 @@ static int f2fs_set_data_page_dirty(struct page *page)
 		return 0;
 	}
 
-	if (!PageDirty(page)) {
-		__set_page_dirty_nobuffers(page);
+	if (__set_page_dirty_nobuffers(page)) {
 		f2fs_update_dirty_page(inode, page);
 		return 1;
 	}
