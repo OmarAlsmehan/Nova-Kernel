@@ -32,6 +32,8 @@
 #include "dp_rx.h"
 #include "dp_ipa.h"
 
+#pragma GCC diagnostic ignored "-Wframe-larger-than="
+
 /* Ring index for WBM2SW2 release ring */
 #define IPA_TX_COMP_RING_IDX HAL_IPA_TX_COMP_RING_IDX
 
