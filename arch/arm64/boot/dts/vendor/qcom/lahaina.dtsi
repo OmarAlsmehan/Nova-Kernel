@@ -565,7 +565,6 @@
 		reusable;
 		alignment = <0x0 0x400000>;
 		size = <0x0 0x6400000>;
-		status = "disabled";
 	};
 };
 
@@ -4666,6 +4665,7 @@
 		qcom,ipa-holb-monitor-max-cnt-11ad = <10>;
 		qcom,tx-wrapper-cache-max-size = <400>;
 		qcom,ipa-gpi-event-rp-ddr;
+		qcom,register-collection-on-crash;
 		clock-names = "core_clk";
 		clocks = <&clock_rpmh RPMH_IPA_CLK>;
 		qcom,interconnect,num-cases = <5>;

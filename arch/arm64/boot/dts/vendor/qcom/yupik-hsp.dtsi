@@ -1,6 +1,4 @@
-#include <dt-bindings/clock/qcom,gcc-yupik.h>
-#include <dt-bindings/clock/qcom,rpmh.h>
-
+#include "yupik.dtsi"
 / {
 };
 

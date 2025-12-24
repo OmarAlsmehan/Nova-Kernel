@@ -1093,10 +1093,10 @@ alternative_else_nop_endif
 #endif
 	.endm
 
-	#define BHB_MITIGATION_NONE	0
-	#define BHB_MITIGATION_LOOP	1
-	#define BHB_MITIGATION_FW	2
-	#define BHB_MITIGATION_INSN	3
+#define BHB_MITIGATION_NONE	0
+#define BHB_MITIGATION_LOOP	1
+#define BHB_MITIGATION_FW	2
+#define BHB_MITIGATION_INSN	3
 
 	.macro tramp_ventry, vector_start, regsize, kpti, bhb
 	.align	7
@@ -1105,7 +1105,7 @@ alternative_else_nop_endif
 	msr	tpidrro_el0, x30	// Restored in kernel_ventry
 	.endif
 
-		.if	\bhb == BHB_MITIGATION_LOOP
+	.if	\bhb == BHB_MITIGATION_LOOP
 	/*
 	 * This sequence must appear before the first indirect branch. i.e. the
 	 * ret out of tramp_ventry. It appears here because x30 is free.

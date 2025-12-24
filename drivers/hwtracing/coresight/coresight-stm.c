@@ -879,27 +879,23 @@ static int stm_probe(struct amba_device *adev, const struct amba_id *id)
 	if (!IS_ERR(drvdata->atclk)) {
 		ret = clk_prepare_enable(drvdata->atclk);
 		if (ret)
-			goto out;
+			return ret;
 	}
 	dev_set_drvdata(dev, drvdata);
 
 	base = devm_ioremap_resource(dev, res);
-	if (IS_ERR(base)) {
-		ret = PTR_ERR(base);
-		goto out;
-	}
+	if (IS_ERR(base))
+		return PTR_ERR(base);
 	drvdata->base = base;
 
 	ret = stm_get_stimulus_area(dev, &ch_res);
 	if (ret)
-		goto out;
+		return ret;
 	drvdata->chs.phys = ch_res.start;
 
 	base = devm_ioremap_resource(dev, &ch_res);
-	if (IS_ERR(base)) {
-		ret = PTR_ERR(base);
-		goto out;
-	}
+	if (IS_ERR(base))
+		return PTR_ERR(base);
 	drvdata->chs.base = base;
 
 	drvdata->write_bytes = stm_fundamental_data_size(drvdata);
@@ -910,12 +906,16 @@ static int stm_probe(struct amba_device *adev, const struct amba_id *id)
 		drvdata->numsp = stm_num_stimulus_port(drvdata);
 
 	bitmap_size = BITS_TO_LONGS(drvdata->numsp) * sizeof(long);
+#ifdef CONFIG_CORESIGHT_QGKI
+	/* Store the driver data pointer for use in exported functions */
+	ret = stm_set_ost_params(dev, drvdata, bitmap_size);
+	if (ret)
+		return ret;
+#endif
 
 	guaranteed = devm_kzalloc(dev, bitmap_size, GFP_KERNEL);
-	if (!guaranteed) {
-		ret = -ENOMEM;
-		goto out;
-	}
+	if (!guaranteed)
+		return -ENOMEM;
 	drvdata->chs.guaranteed = guaranteed;
 
 	spin_lock_init(&drvdata->spinlock);
@@ -927,8 +927,7 @@ static int stm_probe(struct amba_device *adev, const struct amba_id *id)
 		dev_info(dev,
 			 "%s : stm_register_device failed, probing deferred\n",
 			 desc.name);
-		ret = -EPROBE_DEFER;
-		goto out;
+		return -EPROBE_DEFER;
 	}
 
 	pdata = coresight_get_platform_data(dev);
@@ -950,14 +949,6 @@ static int stm_probe(struct amba_device *adev, const struct amba_id *id)
 		goto stm_unregister;
 	}
 
-#ifdef CONFIG_CORESIGHT_QGKI
-	/* Store the driver data pointer for use in exported functions */
-	ret = stm_set_ost_params(dev, drvdata, bitmap_size);
-	if (ret) {
-		goto stm_unregister;
-	}
-#endif
-
 	pm_runtime_put(&adev->dev);
 
 	dev_info(dev, "%s initialized\n", (char *)coresight_get_uci_data(id));
@@ -965,7 +956,6 @@ static int stm_probe(struct amba_device *adev, const struct amba_id *id)
 
 stm_unregister:
 	stm_unregister_device(&drvdata->stm);
-out:
 	return ret;
 }
 

@@ -2312,11 +2312,6 @@ static ssize_t gds_show_state(char *buf)
 	return sysfs_emit(buf, "%s\n", gds_strings[gds_mitigation]);
 }
 
-static ssize_t gds_show_state(char *buf)
-{
-	return sysfs_emit(buf, "%s\n", gds_strings[gds_mitigation]);
-}
-
 static ssize_t cpu_show_common(struct device *dev, struct device_attribute *attr,
 			       char *buf, unsigned int bug)
 {

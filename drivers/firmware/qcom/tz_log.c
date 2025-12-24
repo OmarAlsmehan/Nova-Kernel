@@ -448,7 +448,6 @@ static uint64_t qseelog_shmbridge_handle;
 static struct encrypted_log_info enc_qseelog_info;
 static struct encrypted_log_info enc_tzlog_info;
 
-#ifdef CONFIG_DEBUG_FS
 /*
  * Debugfs data structure and functions
  */
@@ -1205,7 +1204,6 @@ static const struct file_operations tzdbg_fops = {
 	.read    = tzdbgfs_read,
 	.open    = simple_open,
 };
-#endif
 
 /*
  * Allocates log buffer from ION, registers the buffer at TZ
@@ -1348,7 +1346,6 @@ static void tzdbg_free_encrypted_log_buf(struct platform_device *pdev)
 			enc_qseelog_info.vaddr, enc_qseelog_info.paddr);
 }
 
-#ifdef CONFIG_DEBUG_FS
 static int  tzdbgfs_init(struct platform_device *pdev)
 {
 	int rc = 0;
@@ -1387,7 +1384,6 @@ static void tzdbgfs_exit(struct platform_device *pdev)
 	dent_dir = platform_get_drvdata(pdev);
 	debugfs_remove_recursive(dent_dir);
 }
-#endif
 
 static int __update_hypdbg_base(struct platform_device *pdev,
 			void __iomem *virt_iobase)
@@ -1598,17 +1594,13 @@ static int tz_log_probe(struct platform_device *pdev)
 		goto exit_free_encr_log_buf;
 	}
 
-#ifdef CONFIG_DEBUG_FS
 	if (tzdbgfs_init(pdev))
 		goto exit_free_disp_buf;
-#endif
 	return 0;
 
-#ifdef CONFIG_DEBUG_FS
 exit_free_disp_buf:
 	dma_free_coherent(&pdev->dev, display_buf_size,
 			(void *)tzdbg.disp_buf, disp_buf_paddr);
-#endif			
 exit_free_encr_log_buf:
 	tzdbg_free_encrypted_log_buf(pdev);
 exit_free_qsee_log_buf:
@@ -1621,9 +1613,7 @@ exit_free_diag_buf:
 
 static int tz_log_remove(struct platform_device *pdev)
 {
-#ifdef CONFIG_DEBUG_FS
 	tzdbgfs_exit(pdev);
-#endif	
 	dma_free_coherent(&pdev->dev, display_buf_size,
 			(void *)tzdbg.disp_buf, disp_buf_paddr);
 	tzdbg_free_encrypted_log_buf(pdev);
