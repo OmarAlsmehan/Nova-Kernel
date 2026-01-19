@@ -3500,9 +3500,7 @@ static void s2mu106_usbpd_notify_detach(struct s2mu106_usbpd_data *pdic_data)
 		pdic_data->power_role_dual = DUAL_ROLE_PROP_PR_NONE;
 #elif IS_ENABLED(CONFIG_TYPEC)
 		pd_data->typec_power_role = TYPEC_SINK;
-		typec_set_pwr_role(pd_data->port, TYPEC_SINK);
 		pd_data->typec_data_role = TYPEC_DEVICE;
-		typec_set_data_role(pd_data->port, TYPEC_DEVICE);
 #endif
 #if IS_ENABLED(CONFIG_USB_HOST_NOTIFY)
 		send_otg_notify(o_notify, NOTIFY_EVENT_POWER_SOURCE, 0);
