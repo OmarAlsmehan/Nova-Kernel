@@ -940,15 +940,6 @@ have_ifp:
 			     NEIGH_UPDATE_F_WEAK_OVERRIDE|
 			     NEIGH_UPDATE_F_OVERRIDE,
 			     NDISC_NEIGHBOUR_SOLICITATION, &ndopts);
-
-	if (neigh != NULL && neigh->dev != NULL && !strcmp(neigh->dev->name, "aware_data0")) {
-		pr_info("ipv6 neigh_lookup is done by receiving NS"
-			" from [:%02x%02x] to [:%02x%02x] and sending NA for %s\n",
-			saddr->s6_addr[14], saddr->s6_addr[15], 
-			daddr->s6_addr[14], daddr->s6_addr[15], 
-			neigh->dev->name);
-	}	
-
 	if (neigh || !dev->header_ops) {
 		ndisc_send_na(dev, saddr, &msg->target, !!is_router,
 			      true, (ifp != NULL && inc), inc);
@@ -1064,14 +1055,6 @@ static void ndisc_recv_na(struct sk_buff *skb)
 			     NEIGH_UPDATE_F_OVERRIDE_ISROUTER|
 			     (msg->icmph.icmp6_router ? NEIGH_UPDATE_F_ISROUTER : 0),
 			     NDISC_NEIGHBOUR_ADVERTISEMENT, &ndopts);
-
-		if (neigh->dev != NULL && !strcmp(neigh->dev->name, "aware_data0")) {
-			pr_info("ipv6 neigh_lookup is done by receiving NA"
-				" from [:%02x%02x] to [:%02x%02x] for %s\n",
-				saddr->s6_addr[14], saddr->s6_addr[15], 
-				daddr->s6_addr[14], daddr->s6_addr[15], 
-				dev->name);
-		}
 
 		if ((old_flags & ~neigh->flags) & NTF_ROUTER) {
 			/*
@@ -1857,7 +1840,8 @@ static void ndisc_warn_deprecated_sysctl(struct ctl_table *ctl,
 	}
 }
 
-int ndisc_ifinfo_sysctl_change(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+int ndisc_ifinfo_sysctl_change(struct ctl_table *ctl, int write, void *buffer,
+		size_t *lenp, loff_t *ppos)
 {
 	struct net_device *dev = ctl->extra1;
 	struct inet6_dev *idev;
