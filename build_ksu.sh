@@ -84,7 +84,7 @@ setup_ksu() {
     # التأكد من الانتقال للفرع الصحيح قبل الدمج
     git checkout susfs-rio || git switch susfs-rio
     rm -rf KernelSU drivers/kernelsu
-    curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s susfs-rksu-master
+    curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s dev_susfs
 }
 
 # --- 🏗️ 4. بناء النواة ---
