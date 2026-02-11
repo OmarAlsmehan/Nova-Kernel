@@ -1,0 +1,50 @@
+name: 🚀 NovaKernel KSU Build
+
+# سيظهر اسم العملية في القائمة كـ: Build NovaKernel for a52sxq 📱
+run-name: Build NovaKernel for ${{ inputs.device }} 📱
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: 'Target Device'
+        required: true
+        default: 'a73xq'
+        type: choice
+        options: [a73xq, a52sxq, m52xq]
+
+jobs:
+  build:
+    # سيظهر اسم المرحلة في القائمة الجانبية كـ: Build for a52sxq
+    name: Build for ${{ github.event.inputs.device }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Cloning Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 📦 Preparing Environment
+        run: |
+          chmod +x build_ksu.sh
+          ./build_ksu.sh deps ${{ github.event.inputs.device }}
+
+      - name: 🛠️ Fetching Toolchain
+        run: ./build_ksu.sh tools
+
+      - name: 🧬 Integrating KernelSU & SUSFS
+        run: ./build_ksu.sh ksu
+
+      - name: 🏗️ Compiling NovaKernel
+        run: ./build_ksu.sh build ${{ github.event.inputs.device }}
+
+      - name: 🎁 Finalizing Package
+        run: ./build_ksu.sh pack ${{ github.event.inputs.device }}
+
+      - name: 📤 Uploading Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaKernel-${{ github.event.inputs.device }}-KSU-${{ github.run_id }}
+          path: ~/toolchains/RIO/work_ksu/*
+          compression-level: 9
