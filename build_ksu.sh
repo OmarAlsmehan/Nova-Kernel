@@ -87,7 +87,7 @@ rm -rf KernelSU
 rm -rf drivers/kernelsu
 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 rm -rf KernelSU
-git clone https://github.com/sidex15/KernelSU-Next.git KernelSU
+git clone https://github.com/omarsmehan1/KernelSU-Next.git KernelSU
 cd KernelSU
 git switch legacy
 cd ..
