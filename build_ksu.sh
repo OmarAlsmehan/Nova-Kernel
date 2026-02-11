@@ -80,6 +80,16 @@ fetch_tools() {
 
 # --- 🧬 3. إعداد KernelSU ---
 setup_ksu() {
+rm -rf KernelSU
+rm -rf drivers/kernelsu
+curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+rm -rf KernelSU
+git clone https://github.com/sidex15/KernelSU-Next.git KernelSU
+cd KernelSU
+git switch legacy
+cd ..
+git add .
+git commit -m "9999"
     echo -e "${BLUE}===> Integrating KernelSU & SUSFS...${NC}"
 }
 
