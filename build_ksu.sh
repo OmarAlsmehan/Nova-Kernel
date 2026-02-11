@@ -103,7 +103,8 @@ build_kernel() {
     export IN_KERNEL_MODULES=1
     export DO_NOT_STRIP_MODULES=1
 
-    # GKI
+    chmod +x drivers/kernelsu
+    chmod +x KernelSU/
     export DEFCONF="nova_defconfig"
     export FRAG="${VARIANT}.config"
 
