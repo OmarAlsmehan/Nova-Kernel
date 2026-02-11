@@ -104,7 +104,7 @@ build_kernel() {
     export DO_NOT_STRIP_MODULES=1
 
     # GKI
-    export DEFCONF="rio_defconfig"
+    export DEFCONF="nova_defconfig"
     export FRAG="${VARIANT}.config"
 
     # GKI + aarch64
