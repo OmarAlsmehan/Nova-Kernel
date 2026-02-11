@@ -53,7 +53,10 @@ display_target_banner() {
 install_deps() {
     display_target_banner "$1"
     echo -e "${BLUE}===> Installing System Dependencies...${NC}"
-    sudo apt update && sudo apt install -y git curl zip wget make gcc g++ bc libssl-dev aria2 tar
+    sudo apt update && sudo apt install -y git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils erofs-utils \
+            default-jdk git gnupg flex bison gperf build-essential zip curl libc6-dev libncurses-dev libx11-dev libreadline-dev libgl1 libgl1-mesa-dev \
+            python3 make sudo gcc g++ bc grep tofrodos python3-markdown libxml2-utils xsltproc zlib1g-dev python-is-python3 libc6-dev libtinfo6 \
+            make repo cpio kmod openssl libelf-dev pahole libssl-dev aria2 libarchive-tools zstd rsync --fix-missing && wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
 }
 
 # --- 🛠️ 2. تحميل الأدوات ---
@@ -88,8 +91,6 @@ git clone https://github.com/sidex15/KernelSU-Next.git KernelSU
 cd KernelSU
 git switch legacy
 cd ..
-git add .
-git commit -m "9999"
     echo -e "${BLUE}===> Integrating KernelSU & SUSFS...${NC}"
 }
 
