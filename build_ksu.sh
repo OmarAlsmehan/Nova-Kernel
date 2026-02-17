@@ -159,6 +159,8 @@ android/abi_gki_aarch64_zebra
     # تنظيف مسبق للـ Out
     mkdir -p "$OUT_DIR"
     
+    export KCFLAGS="${KCFLAGS} -O3 -march=armv8.4-a+dotprod -mcpu=cortex-a78"
+    
     make -j$JOBS O="$OUT_DIR" $DEFCONF $FRAG
     make -j$JOBS O="$OUT_DIR"
 
