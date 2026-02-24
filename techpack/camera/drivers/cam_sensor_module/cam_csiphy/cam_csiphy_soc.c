@@ -87,11 +87,11 @@ int32_t cam_csiphy_mem_dmp(struct cam_hw_soc_info *soc_info)
 int32_t cam_csiphy_status_dmp(struct csiphy_device *csiphy_dev)
 {
 	struct csiphy_reg_parms_t *csiphy_reg = NULL;
-	int32_t                    rc = 0;
-	resource_size_t            size = 0;
+	int32_t                   rc = 0;
+	resource_size_t           size = 0;
 	void __iomem              *phy_base = NULL;
-	int                        reg_id = 0;
-	uint32_t                   irq, status_reg, clear_reg;
+	int                       reg_id = 0;
+	uint32_t                  irq, status_reg, clear_reg;
 
 	if (!csiphy_dev) {
 		rc = -EINVAL;
@@ -110,8 +110,13 @@ int32_t cam_csiphy_status_dmp(struct csiphy_device *csiphy_dev)
 
 	if (phy_base != NULL) {
 		for (reg_id = 0; reg_id < size; reg_id++) {
-			irq = cam_io_r(phy_base + status_reg + (0x4 * reg_id));
-			cam_io_w_mb(irq, phy_base + clear_reg + (0x4 * reg_id));
+			uint32_t offset;
+
+			offset = status_reg + (0x4 * reg_id);
+			irq = cam_io_r(phy_base +  offset);
+			offset = clear_reg + (0x4 * reg_id);
+			cam_io_w_mb(irq, phy_base + offset);
+			cam_io_w_mb(0, phy_base + offset);
 
 			CAM_INFO(CAM_CSIPHY,
 				"CSIPHY%d_IRQ_STATUS_ADDR%d = 0x%x",
@@ -193,7 +198,7 @@ int32_t cam_csiphy_enable_hw(struct csiphy_device *csiphy_dev, int32_t index)
 
 	vote_level = csiphy_dev->ctrl_reg->getclockvoting(csiphy_dev, index);
 	rc = cam_soc_util_enable_platform_resource(soc_info, true,
-		vote_level, true);
+		vote_level, ENABLE_IRQ);
 	if (rc < 0) {
 		CAM_ERR(CAM_CSIPHY, "failed to enable platform resources %d",
 			rc);
