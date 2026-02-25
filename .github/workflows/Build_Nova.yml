@@ -1,0 +1,122 @@
+name: NovaKernel Kernel Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Target device"
+        required: true
+        type: choice
+        options:
+          - a73xq
+          - a52sxq
+          - m52xq
+      kernelsu:
+        description: "Enable KernelSU?"
+        required: true
+        type: boolean
+        default: false
+      ksu_repo:
+        description: "KernelSU git URL (leave empty for default)"
+        required: false
+        default: ""
+      debug:
+        description: "SELinux permissive (debug build)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: nova-build-${{ github.event.inputs.variant }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: "${{ github.event.inputs.variant }} [${{ github.event.inputs.kernelsu == 'true' && 'KSU' || 'GKI' }}]"
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout kernel source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            git curl wget jq unzip tar lz4 zip \
+            bc bison flex libssl-dev libelf-dev \
+            python3 python3-pip cpio rsync \
+            make gcc g++ binutils
+          echo "All packages installed"
+
+      - name: Cache toolchains and stock images
+        id: tc-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/toolchains
+          key: nova-tc-clang-r530567-images-v2
+          restore-keys: |
+            nova-tc-clang-r530567-
+
+      - name: Cache kernel out/
+        uses: actions/cache@v4
+        with:
+          path: out/
+          key: "nova-kbuild-${{ github.event.inputs.variant }}-${{ github.event.inputs.kernelsu }}-${{ github.sha }}"
+          restore-keys: |
+            "nova-kbuild-${{ github.event.inputs.variant }}-${{ github.event.inputs.kernelsu }}-"
+
+      - name: Build kernel
+        env:
+          NK_VARIANT:  ${{ github.event.inputs.variant }}
+          NK_KSU:      ${{ github.event.inputs.kernelsu }}
+          NK_KSU_REPO: ${{ github.event.inputs.ksu_repo }}
+          DEBUG:        ${{ github.event.inputs.debug }}
+        run: |
+          chmod +x buildscript.sh
+          ./buildscript.sh
+        timeout-minutes: 120
+
+      - name: Locate output ZIP
+        id: find-zip
+        run: |
+          ZIP=$(find ~/toolchains/NovaKernel -name "*.zip" | head -n1)
+          if [[ -z "$ZIP" ]]; then
+            echo "::error::No ZIP found — build may have failed"
+            exit 1
+          fi
+          echo "zip_path=$ZIP"            >> "$GITHUB_OUTPUT"
+          echo "zip_name=$(basename $ZIP)" >> "$GITHUB_OUTPUT"
+          echo "SHA256: $(sha256sum "$ZIP" | awk '{print $1}')"
+          echo "Size  : $(du -sh "$ZIP" | cut -f1)"
+
+      - name: Upload flashable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.find-zip.outputs.zip_name }}
+          path: ${{ steps.find-zip.outputs.zip_path }}
+          retention-days: 14
+          compression-level: 0
+
+      - name: Write job summary
+        if: always()
+        run: |
+          ZIP="${{ steps.find-zip.outputs.zip_name }}"
+          TYPE="${{ github.event.inputs.kernelsu == 'true' && 'KSU' || 'GKI' }}"
+          DEVICE="${{ github.event.inputs.variant }}"
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## NovaKernel Kernel Build Summary
+
+          | Field     | Value |
+          |-----------|-------|
+          | Device    | \`$DEVICE\` |
+          | Type      | **$TYPE** |
+          | Debug     | ${{ github.event.inputs.debug }} |
+          | Triggered | ${{ github.actor }} |
+          | Commit    | \`${{ github.sha }}\` |
+
+          $([ -n "$ZIP" ] && echo "Output: \`$ZIP\`" || echo "Build failed — no ZIP produced")
+          EOF
+
