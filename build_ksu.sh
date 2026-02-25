@@ -24,8 +24,8 @@ CLANG_URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-
 export PATH="$TC_DIR/clang-r563880c/bin:$PATH"
 
 # AnyKernel3 - Use your custom one or fallback
-AK3_CUSTOM_DIR="$SRC_DIR/AnyKernel3-Custom"  # Put your custom AnyKernel3 here
-AK3_REPO="https://github.com/omarsmehan1/AnyKernel3.git"  # Fallback
+AK3_CUSTOM_DIR="$SRC_DIR/AnyKernel3-Custom"
+AK3_REPO="https://github.com/omarsmehan1/AnyKernel3.git"
 
 # --- ✨ Enhanced Banner ---
 display_banner() {
@@ -46,7 +46,7 @@ display_banner() {
     echo -e "${PURPLE}  | |\  | |_| |\ V / ___ \|   < ${NC}"
     echo -e "${PURPLE}  |_| \_|\___/  \_/_/   \_\_|\_\\${NC}"
     echo -e "${CYAN}============================================================${NC}"
-    echo -e "${WHITE}  🚀 NOVA KERNEL BUILD SYSTEM | VERSION 3.0${NC}"
+    echo -e "${WHITE}  🚀 NOVA KERNEL BUILD SYSTEM | VERSION 3.1 FINAL${NC}"
     echo -e "${WHITE}  💎 ENHANCED WITH ADVANCED ANYKERNEL3${NC}"
     echo -e "${CYAN}============================================================${NC}"
     echo -e "${WHITE}  📱 DEVICE      :${NC} ${GREEN}$device_full_name${NC}"
@@ -206,7 +206,7 @@ build_kernel() {
     export KCFLAGS="${KCFLAGS} -D__ANDROID_COMMON_KERNEL__"
     export STOP_SHIP_TRACEPRINTK=1
     export IN_KERNEL_MODULES=1
-    export DO_NOT_STRIP_MODULES=1
+    export DO_NOT_STRIP_MODULES=1  # ← Critical for cross-compilation!
     
     # Defconfig
     export DEFCONF="nova_defconfig"
@@ -268,14 +268,24 @@ android/abi_gki_aarch64_zebra
     echo -e "\n${GREEN}✔ Build completed successfully in $BUILD_TIME seconds${NC}"
 }
 
-# --- 📦 5. Build Modules ---
+# --- 📦 5. Build Modules (CORRECT FIX from buildscript.sh!) ---
 build_modules() {
     echo -e "${BLUE}===> Building kernel modules...${NC}"
     
+    # ✅ CORRECT FIX: Export DO_NOT_STRIP_MODULES=1
+    # This tells the kernel build system to NOT strip modules
+    # even if INSTALL_MOD_STRIP=1 is used
+    # This is the proper way from buildscript.sh!
+    export DO_NOT_STRIP_MODULES=1
+    
+    # Now we can safely use INSTALL_MOD_STRIP=1
+    # It will be overridden by DO_NOT_STRIP_MODULES=1
     make -j$JOBS -C "$SRC_DIR" O="$OUT_DIR" \
         INSTALL_MOD_PATH=modules \
         INSTALL_MOD_STRIP=1 \
         modules_install
+    
+    echo -e "${CYAN}-> Note: DO_NOT_STRIP_MODULES=1 prevents stripping (cross-compilation safe)${NC}"
     
     # Prepare modules for AnyKernel3
     MODULE_DEST="$AK3_DIR/modules"
@@ -409,7 +419,7 @@ clean_all() {
 
 # --- 🚀 Main Control Logic ---
 show_usage() {
-    echo -e "${CYAN}NovaKernel Build System v3.0${NC}"
+    echo -e "${CYAN}NovaKernel Build System v3.1 FINAL${NC}"
     echo -e ""
     echo -e "${WHITE}Usage:${NC}"
     echo -e "  $0 ${GREEN}deps${NC} <device>              Install dependencies"
