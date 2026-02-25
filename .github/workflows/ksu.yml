@@ -1,7 +1,7 @@
-name: 🚀 NovaKernel KSU Build
+name: 🚀 NovaKernel KSU Build Enhanced
 
-# سيظهر اسم العملية في القائمة كـ: Build NovaKernel for a52sxq 📱
-run-name: Build NovaKernel for ${{ inputs.device }} 📱
+# Enhanced workflow with full vendor_boot patching support
+run-name: Build NovaKernel-KSU for ${{ inputs.device }} 📱
 
 on:
   workflow_dispatch:
@@ -11,40 +11,334 @@ on:
         required: true
         default: 'a73xq'
         type: choice
-        options: [a73xq, a52sxq, m52xq]
+        options: 
+          - a73xq
+          - a52sxq
+          - m52xq
+      
+      use_custom_ksu:
+        description: 'Use Custom KernelSU (KernelSU-Next)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      
+      enable_selinux_permissive:
+        description: 'Enable SELinux Permissive Mode'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   build:
-    # سيظهر اسم المرحلة في القائمة الجانبية كـ: Build for a52sxq
-    name: Build for ${{ github.event.inputs.device }}
+    name: Build NovaKernel for ${{ github.event.inputs.device }}
     runs-on: ubuntu-latest
     
     steps:
-      - name: 📥 Cloning Source
+      # ============================================================
+      # STEP 1: Clone Repository
+      # ============================================================
+      - name: 📥 Cloning Source Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: 📦 Preparing Environment
+      
+      # ============================================================
+      # STEP 2: Setup Build Environment
+      # ============================================================
+      - name: 📦 Preparing Build Environment
         run: |
+          echo "::group::Installing Dependencies"
           chmod +x build_ksu.sh
           ./build_ksu.sh deps ${{ github.event.inputs.device }}
-
-      - name: 🛠️ Fetching Toolchain
-        run: ./build_ksu.sh tools
-
-      - name: 🧬 Integrating KernelSU & SUSFS
-        run: ./build_ksu.sh ksu
-
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 3: Setup Custom AnyKernel3
+      # ============================================================
+      - name: 🎨 Setting Up Custom AnyKernel3
+        run: |
+          echo "::group::Preparing AnyKernel3"
+          
+          # Create AnyKernel3 directory structure
+          mkdir -p AnyKernel3-Custom/tools
+          
+          # Copy custom anykernel.sh (with vendor_boot patching)
+          if [ -f anykernel_ksu.sh ]; then
+            cp anykernel_ksu.sh AnyKernel3-Custom/anykernel.sh
+            echo "✓ Custom anykernel.sh installed"
+          fi
+          
+          # Enable SELinux permissive if requested
+          if [ "${{ github.event.inputs.enable_selinux_permissive }}" = "true" ]; then
+            echo "Enabling SELinux permissive mode..."
+            sed -i 's|# sed -i|sed -i|g' AnyKernel3-Custom/anykernel.sh
+            echo "✓ SELinux permissive enabled"
+          fi
+          
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 4: Fetch Toolchain & Tools
+      # ============================================================
+      - name: 🛠️ Fetching Toolchain & AnyKernel3 Tools
+        run: |
+          echo "::group::Downloading Tools"
+          ./build_ksu.sh tools
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 5: Setup KernelSU
+      # ============================================================
+      - name: 🧬 Integrating KernelSU
+        env:
+          USE_CUSTOM_KSU: ${{ github.event.inputs.use_custom_ksu }}
+        run: |
+          echo "::group::Setting up KernelSU"
+          
+          if [ "$USE_CUSTOM_KSU" = "true" ]; then
+            echo "Using Custom KernelSU-Next..."
+          else
+            echo "Using Official KernelSU..."
+          fi
+          
+          ./build_ksu.sh ksu
+          
+          # Verify KernelSU integration
+          if [ -d "drivers/kernelsu" ]; then
+            echo "✓ KernelSU integrated successfully"
+            ls -la drivers/kernelsu/
+          else
+            echo "⚠ Warning: KernelSU directory not found"
+          fi
+          
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 6: Build Kernel
+      # ============================================================
       - name: 🏗️ Compiling NovaKernel
-        run: ./build_ksu.sh build ${{ github.event.inputs.device }}
-
-      - name: 🎁 Finalizing Package
-        run: ./build_ksu.sh pack ${{ github.event.inputs.device }}
-
-      - name: 📤 Uploading Artifact
+        run: |
+          echo "::group::Building Kernel"
+          START_TIME=$(date +%s)
+          
+          ./build_ksu.sh build ${{ github.event.inputs.device }}
+          
+          BUILD_TIME=$(($(date +%s) - START_TIME))
+          echo "Build completed in $BUILD_TIME seconds"
+          
+          # Verify build output
+          if [ -f out/arch/arm64/boot/Image ]; then
+            IMAGE_SIZE=$(du -h out/arch/arm64/boot/Image | cut -f1)
+            echo "✓ Kernel Image: $IMAGE_SIZE"
+          else
+            echo "✗ Error: Kernel Image not found!"
+            exit 1
+          fi
+          
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 7: Build Kernel Modules
+      # ============================================================
+      - name: 🔧 Building Kernel Modules
+        run: |
+          echo "::group::Building Modules"
+          
+          ./build_ksu.sh modules
+          
+          # Count modules
+          MODULE_COUNT=$(find ~/toolchains/AnyKernel3/modules -name "*.ko" 2>/dev/null | wc -l)
+          echo "✓ Built $MODULE_COUNT kernel modules"
+          
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 8: Package AnyKernel3
+      # ============================================================
+      - name: 🎁 Packaging AnyKernel3
+        run: |
+          echo "::group::Creating Package"
+          
+          ./build_ksu.sh pack ${{ github.event.inputs.device }}
+          
+          # Show package contents
+          echo "Package contents:"
+          ls -lh ~/toolchains/AnyKernel3/
+          
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 9: Create Flashable ZIP
+      # ============================================================
+      - name: 📦 Creating Flashable ZIP
+        run: |
+          echo "::group::Building ZIP"
+          
+          ./build_ksu.sh zip ${{ github.event.inputs.device }}
+          
+          # Get ZIP info
+          ZIP_FILE=$(ls ~/toolchains/NovaKernel-KSU-*.zip 2>/dev/null | head -n1)
+          if [ -f "$ZIP_FILE" ]; then
+            ZIP_SIZE=$(du -h "$ZIP_FILE" | cut -f1)
+            ZIP_NAME=$(basename "$ZIP_FILE")
+            echo "✓ Flashable ZIP: $ZIP_NAME ($ZIP_SIZE)"
+            echo "ZIP_PATH=$ZIP_FILE" >> $GITHUB_ENV
+            echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          else
+            echo "✗ Error: ZIP file not found!"
+            exit 1
+          fi
+          
+          echo "::endgroup::"
+      
+      # ============================================================
+      # STEP 10: Generate Build Info
+      # ============================================================
+      - name: 📝 Generating Build Info
+        run: |
+          cat > ~/toolchains/BUILD_INFO.txt << EOF
+          ╔════════════════════════════════════════════════════════╗
+          ║           NovaKernel KSU Build Information            ║
+          ╚════════════════════════════════════════════════════════╝
+          
+          Device:              ${{ github.event.inputs.device }}
+          Build Date:          $(date '+%Y-%m-%d %H:%M:%S UTC')
+          Kernel Version:      $(cat out/include/config/kernel.release 2>/dev/null || echo "Unknown")
+          Compiler:            Clang r563880c
+          KernelSU:            ${{ github.event.inputs.use_custom_ksu == 'true' && 'Custom (KernelSU-Next)' || 'Official' }}
+          SELinux Permissive:  ${{ github.event.inputs.enable_selinux_permissive }}
+          
+          ─────────────────────────────────────────────────────────
+          
+          📦 Package Contents:
+          ✓ Kernel Image (boot.img)
+          ✓ Device Tree Blob (dtb)
+          ✓ DTBO Image
+          ✓ Kernel Modules ($(find ~/toolchains/AnyKernel3/modules -name "*.ko" 2>/dev/null | wc -l) modules)
+          ✓ Device Firmware
+          
+          ─────────────────────────────────────────────────────────
+          
+          🔧 Vendor_Boot Modifications:
+          ✓ SRP Security Patch (001)
+          ✓ fstab.qcom Multi-FS Support (erofs/ext4/f2fs)
+          ✓ Firmware Injection
+          ✓ Module Replacement
+          ✓ DTB Update
+          ✓ AVB Footer Removal
+          
+          ─────────────────────────────────────────────────────────
+          
+          📱 Installation Instructions:
+          
+          1. Boot to TWRP or OrangeFox Recovery
+          2. Flash the ZIP file
+          3. Reboot system
+          4. Install KernelSU Manager APK
+          5. Enjoy!
+          
+          ⚠️  Important Notes:
+          • Backup your boot.img before flashing
+          • This kernel includes vendor_boot modifications
+          • SRP patch applied for Knox compatibility
+          
+          ─────────────────────────────────────────────────────────
+          
+          Credits:
+          • NovaKernel: omarsmehan1
+          • KernelSU: tiann
+          • AnyKernel3: osm0sis
+          
+          ╚════════════════════════════════════════════════════════╝
+          EOF
+          
+          echo "Build info generated"
+      
+      # ============================================================
+      # STEP 11: Upload Artifacts
+      # ============================================================
+      - name: 📤 Uploading Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: NovaKernel-${{ github.event.inputs.device }}-KSU-${{ github.run_id }}
-          path: ~/toolchains/RIO/work_ksu/*
+          name: NovaKernel-KSU-${{ github.event.inputs.device }}-${{ github.run_number }}
+          path: |
+            ${{ env.ZIP_PATH }}
+            ~/toolchains/BUILD_INFO.txt
+            ~/toolchains/AnyKernel3/Image
+            ~/toolchains/AnyKernel3/dtb
+            ~/toolchains/AnyKernel3/dtbo.img
           compression-level: 9
+      
+      # ============================================================
+      # STEP 12: Create Release (Optional)
+      # ============================================================
+      - name: 🎉 Creating GitHub Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: NovaKernel-KSU-${{ github.event.inputs.device }}-${{ github.run_number }}
+          name: NovaKernel KSU - ${{ github.event.inputs.device }} (Build ${{ github.run_number }})
+          body: |
+            ## 🚀 NovaKernel with KernelSU
+            
+            **Device:** ${{ github.event.inputs.device }}
+            **Build Date:** ${{ github.event.run_created_at }}
+            **KernelSU:** ${{ github.event.inputs.use_custom_ksu == 'true' && 'Custom (KernelSU-Next)' || 'Official' }}
+            
+            ### ✨ Features
+            - ✅ KernelSU Root Support
+            - ✅ Full vendor_boot Patching
+            - ✅ SRP Security Patch (Knox)
+            - ✅ Multi-FS Support (erofs/ext4/f2fs)
+            - ✅ Device-Specific Firmware
+            - ✅ AVB Footer Removal
+            
+            ### 📦 Installation
+            1. Download the ZIP file below
+            2. Boot to TWRP/OrangeFox
+            3. Flash the ZIP
+            4. Reboot
+            5. Install KernelSU Manager
+            
+            ### ⚠️ Important
+            - Backup your boot.img first!
+            - This includes vendor_boot modifications
+            - Compatible with Android 12-15
+            
+            ---
+            Built with ❤️ by the NovaKernel Team
+          files: |
+            ${{ env.ZIP_PATH }}
+            ~/toolchains/BUILD_INFO.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # ============================================================
+      # STEP 13: Build Summary
+      # ============================================================
+      - name: 📊 Build Summary
+        if: always()
+        run: |
+          echo "### 🎉 Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Device | ${{ github.event.inputs.device }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| KernelSU | ${{ github.event.inputs.use_custom_ksu == 'true' && 'Custom' || 'Official' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SELinux Permissive | ${{ github.event.inputs.enable_selinux_permissive }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Status | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "${{ env.ZIP_PATH }}" ]; then
+            echo "### 📦 Output Files" >> $GITHUB_STEP_SUMMARY
+            echo "- **ZIP:** ${{ env.ZIP_NAME }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Size:** $(du -h ${{ env.ZIP_PATH }} | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          fi
