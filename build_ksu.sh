@@ -245,7 +245,7 @@ android/abi_gki_aarch64_zebra
     
     # Version string
     COMREV=$(git rev-parse --verify HEAD --short)
-    export LOCALVERSION="-NovaKernel-KSU-$COMREV-$VARIANT"
+    export LOCALVERSION="-NovaKernel-$COMREV-$VARIANT"
     
     # Performance optimizations
     export KCFLAGS="${KCFLAGS} -O3 -march=armv8.4-a+dotprod -mcpu=cortex-a78"
@@ -282,7 +282,6 @@ build_modules() {
     # It will be overridden by DO_NOT_STRIP_MODULES=1
     make -j$JOBS -C "$SRC_DIR" O="$OUT_DIR" \
         INSTALL_MOD_PATH=modules \
-        INSTALL_MOD_STRIP=1 \
         modules_install
     
     echo -e "${CYAN}-> Note: DO_NOT_STRIP_MODULES=1 prevents stripping (cross-compilation safe)${NC}"
