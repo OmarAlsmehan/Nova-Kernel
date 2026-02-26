@@ -228,8 +228,9 @@ set_progress()    { echo "set_progress $1" >> "$OUTFD"; }
 
 ui_print " "
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-ui_print "          NovaKernel Kernel Installer              "
-ui_print "                    Build by OmarAlsmehan           "
+ui_print "         NovaKernel Kernel Installer       "
+ui_print "         Build by OmarAlsmehan              "
+ui_print "         Thanks to Fraxer for Kernel source "            
 ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 ui_print " "
 set_progress 0
