@@ -151,16 +151,32 @@ build_kernel() {
     export KMI_SYMBOL_LIST=android/abi_gki_aarch64
     export ADDITIONAL_KMI_SYMBOL_LISTS="
 android/abi_gki_aarch64_cuttlefish
+android/abi_gki_aarch64_db845c
 android/abi_gki_aarch64_exynos
+android/abi_gki_aarch64_exynosauto
+android/abi_gki_aarch64_fcnt
 android/abi_gki_aarch64_galaxy
+android/abi_gki_aarch64_goldfish
+android/abi_gki_aarch64_hikey960
+android/abi_gki_aarch64_imx
+android/abi_gki_aarch64_oneplus
+android/abi_gki_aarch64_microsoft
+android/abi_gki_aarch64_oplus
 android/abi_gki_aarch64_qcom
+android/abi_gki_aarch64_sony
+android/abi_gki_aarch64_sonywalkman
+android/abi_gki_aarch64_sunxi
+android/abi_gki_aarch64_trimble
+android/abi_gki_aarch64_unisoc
+android/abi_gki_aarch64_vivo
 android/abi_gki_aarch64_xiaomi
+android/abi_gki_aarch64_zebra
 "
     export TRIM_NONLISTED_KMI=0 KMI_SYMBOL_LIST_ADD_ONLY=1
     export KMI_SYMBOL_LIST_STRICT_MODE=0 KMI_ENFORCED=0
 
     COMREV=$(git rev-parse --short HEAD)
-    export LOCALVERSION="-${BRANCH}-${KMI_GENERATION}-${COMREV}-nova-${VARIANT}${KSU_SUFFIX}"
+    export LOCALVERSION="-NovaKernel-${BRANCH}-${KMI_GENERATION}-${COMREV}-${VARIANT}"
 
     log_sep
     log_kv "Device:"    "$DEVICE ($VARIANT)"
@@ -404,7 +420,7 @@ gen_zip() {
     local IMG_DIR="$ZIP_DIR/images"
 
     wget -q "https://raw.githubusercontent.com/OmarAlsmehan/AnyKernel3/refs/heads/master/banner" -O "$IMG_DIR/banner"
-    cp -a "$IMG_DIR/banner"      "$ZIP_DIR/"
+    mv -a "$IMG_DIR/banner"      "$ZIP_DIR/"
     cp -a "$SRC/boot.img"        "$IMG_DIR/"
     cp -a "$SRC/dtbo.img"        "$IMG_DIR/"
     cp -a "$SRC/vendor_boot.img" "$IMG_DIR/"
