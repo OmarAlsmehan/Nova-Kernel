@@ -420,7 +420,7 @@ gen_zip() {
     local IMG_DIR="$ZIP_DIR/images"
 
     wget -q "https://raw.githubusercontent.com/OmarAlsmehan/AnyKernel3/refs/heads/master/banner" -O "$IMG_DIR/banner"
-    mv -a "$IMG_DIR/banner"      "$ZIP_DIR/"
+    mv "$IMG_DIR/banner"      "$ZIP_DIR/"
     cp -a "$SRC/boot.img"        "$IMG_DIR/"
     cp -a "$SRC/dtbo.img"        "$IMG_DIR/"
     cp -a "$SRC/vendor_boot.img" "$IMG_DIR/"
