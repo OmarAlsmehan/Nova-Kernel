@@ -1,0 +1,228 @@
+name: NovaKernel Kernel Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Target device"
+        required: true
+        type: choice
+        options:
+          - all
+          - a73xq
+          - a52sxq
+          - m52xq
+
+      kernelsu:
+        description: "Enable KernelSU?"
+        required: true
+        type: boolean
+        default: false
+
+      ksu_repo:
+        description: "KernelSU-Next repo URL (optional)"
+        required: false
+        default: ""
+
+      debug:
+        description: "SELinux permissive (debug build)"
+        required: false
+        type: boolean
+        default: false
+
+      upload_to_telegram:
+        description: "Upload build to Telegram?"
+        required: true
+        type: boolean
+        default: true
+
+      changelog:
+        description: "Build changelog / notes"
+        required: false
+        default: "No changelog provided"
+
+concurrency:
+  group: nova-build-${{ github.event.inputs.variant }}-${{ github.run_number }}
+  cancel-in-progress: true
+
+jobs:
+
+# ───────── Setup Matrix ─────────
+  setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: 🗂️  Prepare build matrix
+        id: set-matrix
+        run: |
+          case "${{ github.event.inputs.variant }}" in
+            all)    echo 'matrix=["a73xq","a52sxq","m52xq"]' >> "$GITHUB_OUTPUT" ;;
+            a73xq)  echo 'matrix=["a73xq"]'                  >> "$GITHUB_OUTPUT" ;;
+            a52sxq) echo 'matrix=["a52sxq"]'                 >> "$GITHUB_OUTPUT" ;;
+            m52xq)  echo 'matrix=["m52xq"]'                  >> "$GITHUB_OUTPUT" ;;
+          esac
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🚀  NovaKernel — Build Dispatch"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Variant   : ${{ github.event.inputs.variant }}"
+          echo "  KernelSU  : ${{ github.event.inputs.kernelsu }}"
+          echo "  Debug     : ${{ github.event.inputs.debug }}"
+          echo "  Telegram  : ${{ github.event.inputs.upload_to_telegram }}"
+          echo "  Triggered : ${{ github.actor }}"
+          echo "  Commit    : ${{ github.sha }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# ───────── Build Job ─────────
+  build:
+    needs: setup
+    runs-on: ubuntu-24.04
+    name: "🔨 Build (${{ matrix.device }})"
+
+    strategy:
+      matrix:
+        device: ${{ fromJSON(needs.setup.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+
+      - name: 📥  Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 📦  Install dependencies
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Installing build dependencies..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            git curl wget jq unzip tar lz4 zip \
+            bc bison flex libssl-dev libelf-dev \
+            python3 python3-pip cpio rsync \
+            make gcc g++ binutils
+          echo "  ✔  Dependencies installed"
+
+      - name: 📂  Restore toolchains cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/toolchains
+          key: nova-tc-${{ matrix.device }}-v3
+
+      - name: 💡  Cache status
+        run: |
+          if [[ "${{ steps.cache-restore.outputs.cache-hit }}" == "true" ]]; then
+            echo "  ✔  Cache hit — toolchains restored from cache"
+          else
+            echo "  ℹ  Cache miss — toolchains will be downloaded fresh"
+          fi
+
+      - name: 🔨  Build kernel
+        env:
+          NK_VARIANT:   ${{ matrix.device }}
+          NK_KSU:       ${{ github.event.inputs.kernelsu }}
+          NK_KSU_REPO:  ${{ github.event.inputs.ksu_repo }}
+          DEBUG:        ${{ github.event.inputs.debug }}
+        run: |
+          chmod +x buildscript.sh
+          ./buildscript.sh
+
+      - name: 💾  Save toolchains cache
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/toolchains
+          key: nova-tc-${{ matrix.device }}-v3
+
+      - name: 🔍  Locate output ZIP
+        id: find-zip
+        run: |
+          case "${{ matrix.device }}" in
+            a73xq)  DEVICE_DIR="A73"  ;;
+            a52sxq) DEVICE_DIR="A52S" ;;
+            m52xq)  DEVICE_DIR="M52"  ;;
+          esac
+
+          ZIP=$(find "$HOME/toolchains/NovaKernel/$DEVICE_DIR" -name "*.zip" | head -n1)
+
+          if [[ -z "$ZIP" ]]; then
+            echo "::error::No ZIP found for $DEVICE_DIR"
+            exit 1
+          fi
+
+          ZIP_NAME=$(basename "$ZIP")
+          ZIP_SIZE=$(du -sh "$ZIP" | cut -f1)
+          ZIP_SHA=$(sha256sum "$ZIP" | awk '{print $1}')
+
+          echo "zip_path=$ZIP"      >> "$GITHUB_OUTPUT"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  📦  Output ZIP"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Name   : $ZIP_NAME"
+          echo "  Size   : $ZIP_SIZE"
+          echo "  SHA256 : $ZIP_SHA"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: ⬆️   Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.find-zip.outputs.zip_name }}
+          path: ${{ steps.find-zip.outputs.zip_path }}
+          compression-level: 0
+
+# ───────── Telegram Upload ─────────
+      - name: 📤  Upload to Telegram
+        if: success() && github.event.inputs.upload_to_telegram == 'true'
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
+          CHANGELOG:    ${{ github.event.inputs.changelog }}
+        run: |
+          ZIP="${{ steps.find-zip.outputs.zip_path }}"
+          ZIP_NAME="${{ steps.find-zip.outputs.zip_name }}"
+          DEVICE="${{ matrix.device }}"
+          TYPE="${{ github.event.inputs.kernelsu == 'true' && 'KSU' || 'GKI' }}"
+          TIME=$(date +"%Y-%m-%d %H:%M")
+
+          CAPTION=$(printf "NovaKernel Build\n\nDevice: %s\nType: %s\nTime: %s\n\nChangelog:\n%s" \
+            "$DEVICE" "$TYPE" "$TIME" "$CHANGELOG")
+
+          echo "  📤  Sending to Telegram..."
+          curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument" \
+            -F chat_id="$TG_CHAT_ID" \
+            -F document=@"$ZIP;filename=$ZIP_NAME" \
+            -F caption="$CAPTION"
+          echo "  ✔  Uploaded: $ZIP_NAME"
+
+# ───────── Job Summary ─────────
+      - name: 📋  Write job summary
+        if: always()
+        run: |
+          ZIP="${{ steps.find-zip.outputs.zip_name }}"
+          DEVICE="${{ matrix.device }}"
+          TYPE="${{ github.event.inputs.kernelsu == 'true' && 'KSU' || 'GKI' }}"
+          CHANGELOG="${{ github.event.inputs.changelog }}"
+
+          {
+            echo "## 🚀 NovaKernel — \`$DEVICE\` [\`$TYPE\`]"
+            echo ""
+            echo "> ### 📝 Changelog"
+            echo "> $CHANGELOG"
+            echo ""
+            echo "| Field | Value |"
+            echo "|:------|:------|"
+            echo "| 📱 Device    | \`$DEVICE\` |"
+            echo "| 🏷️  Type     | \`$TYPE\` |"
+            echo "| 📦 Output    | \`$ZIP\` |"
+            echo "| 🔖 Commit    | \`${{ github.sha }}\` |"
+            echo "| 👤 Triggered | @${{ github.actor }} |"
+            echo "| 🕐 Time      | $(date '+%Y-%m-%d %H:%M:%S UTC') |"
+          } >> "$GITHUB_STEP_SUMMARY"
