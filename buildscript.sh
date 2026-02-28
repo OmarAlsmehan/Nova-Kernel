@@ -419,8 +419,7 @@ gen_zip() {
     local ZIP_DIR="$TC_DIR/NovaKernel/$DEVICE/ZIP"
     local IMG_DIR="$ZIP_DIR/images"
 
-    wget -q "https://raw.githubusercontent.com/OmarAlsmehan/AnyKernel3/refs/heads/master/banner" -O "$IMG_DIR/banner"
-    mv "$IMG_DIR/banner"      "$ZIP_DIR/"
+    wget -q "https://raw.githubusercontent.com/OmarAlsmehan/AnyKernel3/refs/heads/master/banner" -O "$ZIP_DIR/banner"
     cp -a "$SRC/boot.img"        "$IMG_DIR/"
     cp -a "$SRC/dtbo.img"        "$IMG_DIR/"
     cp -a "$SRC/vendor_boot.img" "$IMG_DIR/"
