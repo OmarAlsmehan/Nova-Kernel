@@ -107,19 +107,41 @@ jobs:
             make gcc g++ binutils
           echo "  ✔  Dependencies installed"
 
-      - name: 📂  Restore toolchains cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/toolchains
-          key: nova-tc-${{ matrix.device }}-v3
-
-      - name: 💡  Cache status
+      # ───────── Detect clang version ─────────
+      - name: 🔎 Detect clang version
+        id: clangver
+        shell: bash
         run: |
-          if [[ "${{ steps.cache-restore.outputs.cache-hit }}" == "true" ]]; then
-            echo "  ✔  Cache hit — toolchains restored from cache"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Detecting clang version from buildscript"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          CLANGVER=$(grep -oP 'CLANGVER="\K[^"]+' buildscript.sh)
+
+          if [[ -z "$CLANGVER" ]]; then
+            echo "::error::Failed to detect CLANGVER from buildscript.sh"
+            exit 1
+          fi
+
+          echo "Detected clang version: $CLANGVER"
+          echo "version=$CLANGVER" >> "$GITHUB_OUTPUT"
+
+      # ───────── Restore clang cache ─────────
+      - name: 📂 Restore clang cache
+        id: clang-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/toolchains/${{ steps.clangver.outputs.version }}
+          key: clang-${{ runner.os }}-${{ steps.clangver.outputs.version }}
+          restore-keys: |
+            clang-${{ runner.os }}-
+
+      - name: 💡 Cache status
+        run: |
+          if [[ "${{ steps.clang-cache.outputs.cache-hit }}" == "true" ]]; then
+            echo "  ✔  Clang restored from cache"
           else
-            echo "  ℹ  Cache miss — toolchains will be downloaded fresh"
+            echo "  ℹ  No cache found — clang will download once"
           fi
 
       - name: 🔨  Build kernel
@@ -132,12 +154,13 @@ jobs:
           chmod +x buildscript.sh
           ./buildscript.sh
 
-      - name: 💾  Save toolchains cache
-        if: steps.cache-restore.outputs.cache-hit != 'true'
+      # ───────── Save clang cache ─────────
+      - name: 💾 Save clang cache
+        if: steps.clang-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ~/toolchains
-          key: nova-tc-${{ matrix.device }}-v3
+          path: ~/toolchains/${{ steps.clangver.outputs.version }}
+          key: clang-${{ runner.os }}-${{ steps.clangver.outputs.version }}
 
       - name: 🔍  Locate output ZIP
         id: find-zip
@@ -178,7 +201,6 @@ jobs:
           path: ${{ steps.find-zip.outputs.zip_path }}
           compression-level: 0
 
-# ───────── Telegram Upload ─────────
       - name: 📤  Upload to Telegram
         if: success() && github.event.inputs.upload_to_telegram == 'true'
         env:
@@ -202,7 +224,6 @@ jobs:
             -F caption="$CAPTION"
           echo "  ✔  Uploaded: $ZIP_NAME"
 
-# ───────── Job Summary ─────────
       - name: 📋  Write job summary
         if: always()
         run: |
