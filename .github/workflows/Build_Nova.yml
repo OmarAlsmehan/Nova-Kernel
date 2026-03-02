@@ -1,4 +1,4 @@
-name: NovaKernel Kernel Build
+name: 🚀NovaKernel Kernel Build
 
 on:
   workflow_dispatch:
@@ -97,7 +97,7 @@ jobs:
         with:
           name: ${{ steps.find-zip.outputs.zip_name }}
           path: ${{ steps.find-zip.outputs.zip_path }}
-          retention-days: 14
+          retention-days: 5
           compression-level: 0
 
       - name: Write job summary
