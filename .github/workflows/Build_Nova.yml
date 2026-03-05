@@ -24,6 +24,24 @@ on:
         required: false
         default: ""
 
+      ksu_branch:
+        description: "KernelSU-Next branch"
+        required: false
+        type: choice
+        default: "legacy"
+        options:
+          - legacy
+          - main
+          - next
+          - susfs-main
+          - susfs-next
+          - custom
+
+      ksu_branch_custom:
+        description: "Custom branch name (only if ksu_branch = custom)"
+        required: false
+        default: ""
+
       debug:
         description: "SELinux permissive (debug build)"
         required: false
@@ -146,10 +164,11 @@ jobs:
 
       - name: 🔨  Build kernel
         env:
-          NK_VARIANT:   ${{ matrix.device }}
-          NK_KSU:       ${{ github.event.inputs.kernelsu }}
-          NK_KSU_REPO:  ${{ github.event.inputs.ksu_repo }}
-          DEBUG:        ${{ github.event.inputs.debug }}
+          NK_VARIANT:        ${{ matrix.device }}
+          NK_KSU:            ${{ github.event.inputs.kernelsu }}
+          NK_KSU_REPO:       ${{ github.event.inputs.ksu_repo }}
+          NK_KSU_BRANCH:     ${{ github.event.inputs.ksu_branch == 'custom' && github.event.inputs.ksu_branch_custom || github.event.inputs.ksu_branch }}
+          DEBUG:             ${{ github.event.inputs.debug }}
         run: |
           chmod +x buildscript.sh
           ./buildscript.sh
