@@ -14,6 +14,7 @@
 
 # Default defconfig to use for builds.
 export CONFIG=nethunter_defconfig
+export FRAG=a73xq.config
 
 # Default directory where kernel is located in.
 KDIR=$(pwd)
@@ -50,9 +51,6 @@ export PROCS
 # Compiler to use for builds.
 export COMPILER=clang
 
-# Module building support. Set 1 to enable. | Set 0 to disable.
-export MODULE=0
-
 # Requirements
 if [ "${ci}" != 1 ]; then
     if ! hash dialog make curl wget unzip find 2>/dev/null; then
@@ -78,26 +76,54 @@ if [[ "${COMPILER}" = gcc ]]; then
 
 elif [[ "${COMPILER}" = clang ]]; then
     if [ ! -d "${KDIR}/clang" ]; then
-       mkdir clang;wget -O clang.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/tags/android-12.0.0_r12/clang-r416183b1.tar.gz;tar -xf clang.tar.gz -C clang;rm -rf clang.tar.gz;git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 arm64;git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 arm 
+       mkdir clang;wget -O clang.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r563880c.tar.gz;tar -xf clang.tar.gz -C clang;rm -rf clang.tar.gz
     fi
 
     KBUILD_COMPILER_STRING=$("${KDIR}"/clang/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')
     export KBUILD_COMPILER_STRING
-    export PATH=$KDIR/clang/bin/:$KDIR/arm64/bin:$KDIR/arm/bin:/usr/bin/:${PATH}
+
+    export CLANG_PREBUILT_BIN=$KDIR/clang/bin
+    export PATH=$CLANG_PREBUILT_BIN/:/usr/bin/:${PATH}
     MAKE+=(
         ARCH=arm64
-        O=out
-        CROSS_COMPILE=aarch64-linux-android-
-        CROSS_COMPILE_ARM32=arm-linux-androideabi-
-        CLANG_TRIPLE=aarch64-linux-gnu-
-        CC=${KDIR}/clang/bin/clang 
+	    O=out
+	    KMI_GENERATION=2
+	    LLVM=1
+	    DEPMOD=depmod
+	    KCFLAGS="${KCFLAGS} -D__ANDROID_COMMON_KERNEL__"
+	    STOP_SHIP_TRACEPRINTK=1
+	    IN_KERNEL_MODULES=1
+	    DO_NOT_STRIP_MODULES=1
+	    ABI_DEFINITION=android/abi_gki_aarch64.xml
+	    KMI_SYMBOL_LIST=android/abi_gki_aarch64
+	    ADDITIONAL_KMI_SYMBOL_LISTS="
+android/abi_gki_aarch64_cuttlefish
+android/abi_gki_aarch64_db845c
+android/abi_gki_aarch64_exynos
+android/abi_gki_aarch64_exynosauto
+android/abi_gki_aarch64_fcnt
+android/abi_gki_aarch64_galaxy
+android/abi_gki_aarch64_goldfish
+android/abi_gki_aarch64_hikey960
+android/abi_gki_aarch64_imx
+android/abi_gki_aarch64_oneplus
+android/abi_gki_aarch64_microsoft
+android/abi_gki_aarch64_oplus
+android/abi_gki_aarch64_qcom
+android/abi_gki_aarch64_sony
+android/abi_gki_aarch64_sonywalkman
+android/abi_gki_aarch64_sunxi
+android/abi_gki_aarch64_trimble
+android/abi_gki_aarch64_unisoc
+android/abi_gki_aarch64_vivo
+android/abi_gki_aarch64_xiaomi
+android/abi_gki_aarch64_zebra
+"
+        TRIM_NONLISTED_KMI=0
+        KMI_SYMBOL_LIST_ADD_ONLY=1
+        KMI_SYMBOL_LIST_STRICT_MODE=0
+        KMI_ENFORCED=0
     )
-fi
-
-if [[ "${MODULE}" = 1 ]]; then
-    if [ ! -d "${KDIR}"/modules ]; then
-        git clone --depth=1 https://github.com/MrR0b0X/nethunter-modules "${KDIR}"/modules
-    fi
 fi
 
 if [ ! -d "${KDIR}/anykernel3/" ]; then
@@ -124,9 +150,6 @@ else
     export VERSION=$version
     kver=$KBUILD_BUILD_VERSION
     zipn=Nethunter-a73q-${VERSION}
-    if [[ "${MODULE}" = "1" ]]; then
-        modn="${zipn}-modules"
-    fi
 fi
 
 # A function to exit on SIGINT.
@@ -164,7 +187,7 @@ clean() {
 # A function to regenerate defconfig.
 rgn() {
     echo -e "\n\e[1;93m[*] Regenerating defconfig! \e[0m"
-    make "${MAKE[@]}" $CONFIG
+    make "${MAKE[@]}" $CONFIG $FRAG
     cp -rf "${KDIR}"/out/.config "${KDIR}"/arch/arm64/configs/$CONFIG
     echo -e "\n\e[1;32m[✓] Defconfig regenerated! \e[0m"
 }
@@ -222,22 +245,174 @@ dtb() {
     echo -e "\n\e[1;32m[✓] Built DTBS! \e[0m"
 }
 
-# A function to build out-of-tree modules.
+# Build modules and pack them into vendor_boot.img.
 mod() {
     if [[ "${TGI}" != "0" ]]; then
-        tg "*Building Modules!*"
+        tg "*Building Modules*"
     fi
     rgn
     echo -e "\n\e[1;93m[*] Building Modules! \e[0m"
     mkdir -p "${KDIR}"/out/modules
     make "${MAKE[@]}" modules_prepare
-    make -j"$PROCS" "${MAKE[@]}" modules INSTALL_MOD_PATH="${KDIR}"/out/modules
-    make "${MAKE[@]}" modules_install INSTALL_MOD_PATH="${KDIR}"/out/modules
-    find "${KDIR}"/out/modules -type f -iname '*.ko' -exec cp {} "${KDIR}"/modules/system/lib/modules/ \;
-    cd "${KDIR}"/modules || exit 1
-    zip -r9 "${modn}".zip . -x ".git*" -x "README.md" -x "LICENSE" -x "*.zip"
-    cd ../
-    echo -e "\n\e[1;32m[✓] Built Modules! \e[0m"
+    make -j"$PROCS" "${MAKE[@]}" modules INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="${KDIR}"/out/modules
+    make "${MAKE[@]}" modules_install INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="${KDIR}"/out/modules
+
+    # -----------------------------------------------------------------
+    # 1. Ensure helper tools (magiskboot, avbtool) are present
+    # -----------------------------------------------------------------
+    TOOLSDIR="${KDIR}/toolz"
+    mkdir -p "$TOOLSDIR"
+
+    # magiskboot
+    if [[ ! -f "$TOOLSDIR/magiskboot" ]]; then
+        echo "  -> Downloading magiskboot from Magisk release..."
+        APK_URL="$(curl -s "https://api.github.com/repos/topjohnwu/Magisk/releases" | grep -oE 'https://[^\"]+\.apk' | grep 'Magisk[-.]v' | head -n 1)"
+        wget -O "$TOOLSDIR/magisk.apk" "$APK_URL"
+        unzip -p "$TOOLSDIR/magisk.apk" "lib/x86_64/libmagiskboot.so" > "$TOOLSDIR/magiskboot"
+        chmod +x "$TOOLSDIR/magiskboot"
+        rm -f "$TOOLSDIR/magisk.apk"
+    fi
+
+    # avbtool
+    if [[ ! -f "$TOOLSDIR/avbtool" ]]; then
+        echo "  -> Downloading avbtool..."
+        AVBTOOL_URL="https://android.googlesource.com/platform/external/avb/+/refs/heads/main/avbtool.py?format=TEXT"
+        curl -s "$AVBTOOL_URL" | base64 --decode > "$TOOLSDIR/avbtool"
+        chmod +x "$TOOLSDIR/avbtool"
+    fi
+
+    export PATH="$TOOLSDIR:$PATH"
+
+    # -----------------------------------------------------------------
+    # 2. Obtain the stock vendor_boot.img for A73
+    # -----------------------------------------------------------------
+    VENDOR_ZIP_URL="https://github.com/nicodotgit/proprietary_vendor_samsung_a73xq/releases/download/A736BXXSAGZA1_OJM/A736BXXSAGZA1_kernel.tar"
+    VENDOR_IMG_LZ4="vendor_boot.img.lz4"
+    VENDOR_IMG="$TOOLSDIR/vendor_boot.img"
+    if [[ ! -f "$VENDOR_IMG" ]]; then
+        echo "  -> Downloading stock vendor_boot.img for A73..."
+        wget -O "$TOOLSDIR/kernel.tar" "$VENDOR_ZIP_URL"
+        tar xf "$TOOLSDIR/kernel.tar" -C "$TOOLSDIR" "$VENDOR_IMG_LZ4"
+        # Decompress LZ4
+        lz4 -d --rm "$TOOLSDIR/vendor_boot.img.lz4" "$VENDOR_IMG"
+        rm -f "$TOOLSDIR/kernel.tar"
+    fi
+
+    # Working copy in out/
+    VENDOR_BOOT_OUT="${KDIR}/out/arch/arm64/boot/vendor_boot.img"
+    mkdir -p "$(dirname "$VENDOR_BOOT_OUT")"
+    cp "$VENDOR_IMG" "$VENDOR_BOOT_OUT"
+
+    # -----------------------------------------------------------------
+    # 3. Erase footer, unpack, and modify vendor_boot
+    # -----------------------------------------------------------------
+    TEMP_DIR="${KDIR}/out/vendor_boot_repack"
+    mkdir -p "$TEMP_DIR"
+    cd "$TEMP_DIR" || exit 1
+
+    avbtool erase_footer --image "$VENDOR_BOOT_OUT"
+    magiskboot unpack -h "$VENDOR_BOOT_OUT"  # preserve header
+
+    # Adjust header (set slot suffix to 001)
+    sed -Ei 's/(name=SRP[[:alnum:]]*)[0-9]{3}/\1001/' header
+    [[ "$DEBUG" == "true" ]] && sed -i '2 s/$/ androidboot.selinux=permissive/' header
+
+    # -----------------------------------------------------------------
+    # 4. Replace DTB with the one we just built
+    # ----------------------------------------------------------------- 
+    DTB_SRC="${KDIR}/out/arch/arm64/boot/dts/vendor/qcom/yupik.dtb"
+    if [ -f "$DTB_SRC" ]; then
+        rm dtb && cp "$DTB_SRC" dtb
+    else
+        echo -e "\e[1;33m[!] yupik.dtb not found, keeping original DTB\e[0m"
+    fi
+
+    # -----------------------------------------------------------------
+    # 5. Extract and modify fstab.qcom
+    # -----------------------------------------------------------------
+    magiskboot cpio ramdisk.cpio "extract first_stage_ramdisk/fstab.qcom fstab.qcom"
+    awk 'BEGIN{OFS="\t"} /^(system|vendor|product|odm)\s/&&!seen[$1]++ \
+        {rest=$4;for(i=5;i<=NF;i++)rest=rest"\t"$i; \
+        for(i=1;i<=3;i++) print $1,$2,(i==1?"erofs":i==2?"ext4":"f2fs"),rest;next}1' \
+        fstab.qcom > fstab.qcom.new
+
+    # -----------------------------------------------------------------
+    # 6. Prepare cpio commands
+    # -----------------------------------------------------------------
+    declare -a cpio_cmds=()
+
+    # Remove old fstab, add modified one
+    cpio_cmds+=("rm first_stage_ramdisk/fstab.qcom")
+    if [ -s fstab.qcom.new ]; then
+        cpio_cmds+=("add 0644 first_stage_ramdisk/fstab.qcom fstab.qcom.new")
+    fi
+
+    # Add firmware (for A73)
+    FW_SRC_DIR="${KDIR}/firmware/tsp_synaptics"
+    if [ -d "$FW_SRC_DIR" ]; then
+        cpio_cmds+=("mkdir 0755 lib/firmware")
+        cpio_cmds+=("mkdir 0755 lib/firmware/tsp_synaptics")
+        for f in s3908_a73xq_boe.bin s3908_a73xq_csot.bin s3908_a73xq_sdc.bin s3908_a73xq_sdc_4th.bin; do
+            if [ -f "$FW_SRC_DIR/$f" ]; then
+                cpio_cmds+=("add 0644 lib/firmware/tsp_synaptics/$f $FW_SRC_DIR/$f")
+            fi
+        done
+    else
+        echo -e "\e[1;33m[!] Firmware directory not found, skipping firmware\e[0m"
+    fi
+
+    # Remove old modules and add newly built ones
+    cpio_cmds+=("rm -r lib/modules")
+    cpio_cmds+=("mkdir 0755 lib/modules")
+
+    # Get kernel release
+    KERNEL_RELEASE=$(cat "${KDIR}/out/include/config/kernel.release" 2>/dev/null)
+    if [ -n "$KERNEL_RELEASE" ]; then
+        MODULE_DIR="${KDIR}/out/modules/lib/modules/$KERNEL_RELEASE"
+        if [ -d "$MODULE_DIR" ]; then
+            # Add all .ko files
+            for ko in $(find "$MODULE_DIR" -name '*.ko' -type f); do
+                cpio_cmds+=("add 0644 lib/modules/$(basename "$ko") $ko")
+            done
+
+            # Add module metadata files with transformations
+            for f in modules.alias modules.softdep modules.dep modules.order; do
+                if [ -f "$MODULE_DIR/$f" ]; then
+                    case "$f" in
+                        modules.order)
+                            sed 's/.*\///g' "$MODULE_DIR/$f" > "$TEMP_DIR/modules.load"
+                            cpio_cmds+=("add 0644 lib/modules/modules.load $TEMP_DIR/modules.load")
+                            ;;
+                        modules.dep)
+                            cp "$MODULE_DIR/$f" "$TEMP_DIR/modules.dep"
+                            sed -i 's|\(kernel\/[^: ]*\/\)\([^: ]*\.ko\)|/lib/modules/\2|g' "$TEMP_DIR/modules.dep"
+                            cpio_cmds+=("add 0644 lib/modules/modules.dep $TEMP_DIR/modules.dep")
+                            ;;
+                        *)
+                            cpio_cmds+=("add 0644 lib/modules/$f $MODULE_DIR/$f")
+                            ;;
+                    esac
+                fi
+            done
+        else
+            echo -e "\e[1;33m[!] Module directory not found, skipping modules\e[0m"
+        fi
+    else
+        echo -e "\e[1;33m[!] Kernel release not found, skipping modules\e[0m"
+    fi
+
+    # Apply all cpio modifications
+    magiskboot cpio ramdisk.cpio "${cpio_cmds[@]}"
+
+    # -----------------------------------------------------------------
+    # 7. Repack vendor_boot.img
+    # -----------------------------------------------------------------
+    magiskboot repack "$VENDOR_BOOT_OUT" vendor_boot.img
+    mv -f vendor_boot.img "$VENDOR_BOOT_OUT"
+    cd "${KDIR}" || exit 1
+    rm -rf "$TEMP_DIR"
+
+    echo -e "\n\e[1;32m[✓] vendor_boot.img rebuilt with new modules & firmware\e[0m"
 }
 
 # A function to build an AnyKernel3 zip.
@@ -248,15 +423,14 @@ mkzip() {
     echo -e "\n\e[1;93m[*] Building zip! \e[0m"
     mv "${KDIR}"/out/arch/arm64/boot/Image "${KDIR}"/anykernel3
     mv "${KDIR}"/out/arch/arm64/boot/dtbo.img "${KDIR}"/anykernel3
+    if [ -f "${KDIR}/out/arch/arm64/boot/vendor_boot.img" ]; then
+        cp "${KDIR}/out/arch/arm64/boot/vendor_boot.img" "${KDIR}/anykernel3"
+    fi
     cd "${KDIR}"/anykernel3 || exit 1
     zip -r9 "$zipn".zip . -x ".git*" -x "README.md" -x "LICENSE" -x "*.zip"
     echo -e "\n\e[1;32m[✓] Built zip! \e[0m"
     if [[ "${TGI}" != "0" ]]; then
         tgs "${zipn}.zip" "*#${kver} ${KBUILD_COMPILER_STRING}*"
-    fi
-    if [[ "${MODULE}" = "1" ]]; then
-        cd ../modules || exit 1
-        tgs "${modn}.zip" "*#${kver} ${KBUILD_COMPILER_STRING}*"
     fi
 }
 
