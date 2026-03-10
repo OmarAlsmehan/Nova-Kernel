@@ -77,7 +77,7 @@ fetch_tools() {
     if [[ ! -d "$CLANG_PREBUILT_BIN" ]]; then
         log_step "Downloading Clang ($CLANGVER)..."
         mkdir -p "$TC_DIR/$CLANGVER"
-        local url="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/$CLANGVER.tar.gz"
+        local url="https://github.com/OmarAlsmehan/Android-tools/releases/download/clang-r563880c-1/clang-r563880c.tar.gz"
         wget -q --show-progress "$url" -P "$TC_DIR"
         tar xf "$TC_DIR/$CLANGVER.tar.gz" -C "$TC_DIR/$CLANGVER"
         rm "$TC_DIR/$CLANGVER.tar.gz"
@@ -146,7 +146,7 @@ build_kernel() {
     export BRANCH="android11" KMI_GENERATION=2 LLVM=1 DEPMOD=depmod
     export KCFLAGS="${KCFLAGS} -D__ANDROID_COMMON_KERNEL__"
     export STOP_SHIP_TRACEPRINTK=1 IN_KERNEL_MODULES=1 DO_NOT_STRIP_MODULES=1
-    export DEFCONF="nova_defconfig" FRAG="${VARIANT}.config"
+    export DEFCONF="rio_defconfig" FRAG="a73xq.config"
     export ABI_DEFINITION=android/abi_gki_aarch64.xml
     export KMI_SYMBOL_LIST=android/abi_gki_aarch64
     export ADDITIONAL_KMI_SYMBOL_LISTS="
