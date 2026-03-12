@@ -315,4 +315,7 @@ if SEC_A73XQ_PROJECT
 source "drivers/battery/charger/s2mu106_charger/Kconfig"
 endif
 source "drivers/battery/common/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+if !SEC_A73XQ_PROJECT
+source "drivers/usb/typec/sm/sm5714/Kconfig"
+endif
 endmenu

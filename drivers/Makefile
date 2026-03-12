@@ -272,3 +272,6 @@ ifdef CONFIG_SEC_A73XQ_PROJECT
 obj-y += battery/charger/s2mu106_charger/
 endif
 obj-y += battery/common/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifndef CONFIG_SEC_A73XQ_PROJECT
+obj-y += usb/typec/sm/sm5714/
+endif
