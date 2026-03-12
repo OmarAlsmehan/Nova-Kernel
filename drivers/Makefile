@@ -218,6 +218,9 @@ ifndef CONFIG_SEC_A73XQ_PROJECT
 obj-y += sti/abc/
 obj-y += muic/common/
 endif
+ifdef CONFIG_SEC_A52SXQ_PROJECT
+obj-y += battery/fuelgauge/sm5714_fuelgauge/
+endif
 obj-y += input/input_boost/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += security/samsung/tzic/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += battery/core/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
@@ -242,6 +245,9 @@ obj-y += regulator/s2mpb03/
 endif
 ifdef CONFIG_SEC_A73XQ_PROJECT
 obj-y += battery/charger/sm5451_charger/
+endif
+ifdef CONFIG_SEC_M52XQ_PROJECT
+obj-y += battery/fuelgauge/sm5714_fuelgauge/
 endif
 obj-y += input/misc/hall/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 ifdef CONFIG_SEC_A73XQ_PROJECT

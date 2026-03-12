@@ -261,6 +261,9 @@ source "drivers/sti/abc/Kconfig"
 source "drivers/muic/common/Kconfig"
 endif
 source "drivers/sti/common/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+if SEC_A52SXQ_PROJECT
+source "drivers/battery/fuelgauge/sm5714_fuelgauge/Kconfig"
+endif
 source "drivers/input/input_boost/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 source "drivers/security/samsung/tzic/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 source "drivers/battery/core/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
@@ -285,6 +288,9 @@ source "drivers/regulator/s2mpb03/Kconfig"
 endif
 if SEC_A73XQ_PROJECT
 source "drivers/battery/charger/sm5451_charger/Kconfig"
+endif
+if SEC_M52XQ_PROJECT
+source "drivers/battery/fuelgauge/sm5714_fuelgauge/Kconfig"
 endif
 source "drivers/input/misc/hall/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 if SEC_A73XQ_PROJECT
