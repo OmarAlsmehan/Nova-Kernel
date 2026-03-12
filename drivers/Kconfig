@@ -251,6 +251,9 @@ if SEC_A73XQ_PROJECT
 source "drivers/usb/typec/slsi/common/Kconfig"
 endif
 source "drivers/misc/drb/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+if !SEC_A73XQ_PROJECT
+source "drivers/battery/charger/sm5714_charger/Kconfig"
+endif
 source "drivers/vibrator/common/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 source "drivers/security/samsung/five_tee_driver/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 if !SEC_A73XQ_PROJECT
