@@ -44,4 +44,7 @@ obj-$(CONFIG_HDM)			+= hdm/
 obj-y += samsung/defex_lsm/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += samsung/proca/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += samsung/proca/gaf/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A52SXQ_PROJECT
+obj-y += samsung/dsms/
+endif
 obj-y += samsung/five/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
