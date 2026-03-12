@@ -39,6 +39,11 @@ source "test/Kconfig"
 
 if !SEC_A73XQ_PROJECT
 source "techpack/display/msm/samsung/S6E3FC3_AMS646YD01_LO/Kconfig"
+if SEC_M52XQ_PROJECT
+source "techpack/display/msm/samsung/SW83109_BF067XMM/Kconfig"
+source "techpack/display/msm/samsung/S6E3HAB_AMB667AN01/Kconfig"
+source "techpack/display/msm/samsung/S6E3FA9_AMB667UM36/Kconfig"
+endif
 endif
 if SEC_A73XQ_PROJECT
 source "techpack/display/msm/samsung/SW83109_WM6676Z21/Kconfig"
