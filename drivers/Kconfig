@@ -300,6 +300,9 @@ source "drivers/vibrator/slsi/s2mu106/Kconfig"
 source "drivers/regulator/s2mpb03/Kconfig"
 source "drivers/muic/slsi/s2mu106/Kconfig"
 endif
+if !SEC_A73XQ_PROJECT
+source "drivers/muic/sm/sm5714/Kconfig"
+endif
 source "drivers/input/sec_input/stm/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 if SEC_A73XQ_PROJECT
 source "drivers/battery/fuelgauge/s2mu106_fuelgauge/Kconfig"

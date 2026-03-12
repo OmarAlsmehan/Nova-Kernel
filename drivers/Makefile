@@ -257,6 +257,9 @@ obj-y += vibrator/slsi/s2mu106/
 obj-y += regulator/s2mpb03/
 obj-y += muic/slsi/s2mu106/
 endif
+ifndef CONFIG_SEC_A73XQ_PROJECT
+obj-y += muic/sm/sm5714/
+endif
 obj-y += input/sec_input/stm/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 ifdef CONFIG_SEC_A73XQ_PROJECT
 obj-y += battery/fuelgauge/s2mu106_fuelgauge/
