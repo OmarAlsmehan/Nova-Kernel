@@ -242,6 +242,7 @@ endif
 obj-y += vibrator/dc/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 ifndef CONFIG_SEC_A73XQ_PROJECT
 obj-y += regulator/s2mpb03/
+obj-y += mfd/sm/sm5714/
 endif
 ifdef CONFIG_SEC_A73XQ_PROJECT
 obj-y += battery/charger/sm5451_charger/
