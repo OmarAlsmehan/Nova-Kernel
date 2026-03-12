@@ -7,7 +7,7 @@
  */
 
 #include <linux/kernel.h>
-#include <test/mock.h>
+#include <kunit/mock.h>
 
 static bool match_any(struct mock_param_matcher *pmatcher,
 		      struct test_stream *stream,
@@ -119,6 +119,13 @@ DEFINE_MATCHER_WITH_TYPENAME(longlong, long long);
 DEFINE_MATCHER_WITH_TYPENAME(ulonglong, unsigned long long);
 
 DEFINE_MATCHER_WITH_TYPENAME(ptr, void *);
+
+DEFINE_MATCHER_STRUCT(bool, bool)
+DEFINE_TO_MATCHER_STRUCT(bool)
+DEFINE_MATCH_FUNC(bool, bool, eq, ==)
+DEFINE_MATCH_FACTORY(bool, bool, eq)
+DEFINE_MATCH_FUNC(bool, bool, ne, !=)
+DEFINE_MATCH_FACTORY(bool, bool, ne)
 
 struct mock_memeq_matcher {
 	struct mock_param_matcher matcher;
@@ -444,6 +451,7 @@ struct mock_param_capturer *mock_ptr_capturer_create(
 #define DEFINE_RETURN_ACTION(type) \
 		DEFINE_RETURN_ACTION_WITH_TYPENAME(type, type)
 
+DEFINE_RETURN_ACTION(bool);
 DEFINE_RETURN_ACTION(u8);
 DEFINE_RETURN_ACTION(u16);
 DEFINE_RETURN_ACTION(u32);
@@ -628,4 +636,103 @@ struct mock_param_formatter *mock_struct_formatter(
 	formatter->entries = entries;
 
 	return &formatter->formatter;
+}
+
+/* Composite matchers: match_and, match_or. */
+
+struct mock_composite_binary_matcher {
+	struct mock_param_matcher *left_matcher;
+	struct mock_param_matcher *right_matcher;
+	struct mock_param_matcher matcher;
+};
+
+#define DEFINE_COMPOSITE_BINARY_MATCH_FUNC(combine_op, op_name)                \
+bool match_##op_name(struct mock_param_matcher *pmatcher,                      \
+		     struct test_stream *stream,                              \
+		     const void *pactual)                                      \
+{                                                                              \
+	bool result;                                                           \
+	struct mock_composite_binary_matcher *compound_matcher =               \
+			container_of(pmatcher,                                 \
+				     struct mock_composite_binary_matcher,     \
+				     matcher);                                 \
+									       \
+	stream->add(stream, "((");                                        \
+	result = compound_matcher->left_matcher->match(                        \
+	    compound_matcher->left_matcher, stream, pactual);                  \
+	stream->add(stream, ") " #op_name " ((");                         \
+	result combine_op compound_matcher->right_matcher->match(              \
+	 compound_matcher->right_matcher, stream, pactual);                    \
+	stream->add(stream, "))");                                        \
+									       \
+	return result;                                                         \
+}                                                                              \
+
+#define DEFINE_COMPOSITE_BINARY_MATCHER_FACTORY(combine_op, op_name)           \
+struct mock_param_matcher *op_name(struct test *test,                 \
+				    struct mock_param_matcher *left_matcher,  \
+				    struct mock_param_matcher *right_matcher) \
+{                                                                              \
+	struct mock_composite_binary_matcher *matcher;                         \
+									       \
+	matcher = test_kmalloc(test,                                          \
+				sizeof(*matcher),                              \
+				GFP_KERNEL);                                   \
+	if (!matcher)                                                          \
+		return NULL;                                                   \
+									       \
+	matcher->matcher.match = match_##op_name;                              \
+	matcher->left_matcher = left_matcher;                                  \
+	matcher->right_matcher = right_matcher;                                \
+	return &matcher->matcher;                                              \
+}                                                                              \
+
+#define COMPOSITE_BINARY_MATCHER(combine_op, op_name)                          \
+	DEFINE_COMPOSITE_BINARY_MATCH_FUNC(combine_op, op_name)                \
+	DEFINE_COMPOSITE_BINARY_MATCHER_FACTORY(combine_op, op_name)           \
+
+/* Conjunction of the inner matchers. */
+COMPOSITE_BINARY_MATCHER(&=, and);
+/* Disjunction of the inner matchers. */
+COMPOSITE_BINARY_MATCHER(|=, or);
+
+struct mock_composite_unary_matcher {
+	struct mock_param_matcher *inner_matcher;
+	struct mock_param_matcher matcher;
+};
+
+bool match_not(struct mock_param_matcher *pmatcher,
+	       struct test_stream *stream,
+	       const void *pactual)
+{
+	bool result;
+	struct mock_composite_unary_matcher *compound_matcher =
+			container_of(pmatcher,
+				     struct mock_composite_unary_matcher,
+				     matcher);
+
+	stream->add(stream, "not (");
+	result = !compound_matcher->inner_matcher->match(
+	    compound_matcher->inner_matcher,
+	    stream,
+	    pactual);
+	stream->add(stream, ")");
+	return result;
+}
+
+/* Negates the result of the inner matcher */
+struct mock_param_matcher *not(struct test *test,
+			       struct mock_param_matcher *inner_matcher)
+{
+	struct mock_composite_unary_matcher *matcher;
+
+	matcher = test_kmalloc(test,
+			       sizeof(*matcher),
+			       GFP_KERNEL);
+	if (!matcher)
+		return NULL;
+
+	matcher->matcher.match = match_not;
+	matcher->inner_matcher = inner_matcher;
+	return &matcher->matcher;
 }

@@ -30,6 +30,10 @@
 #include "rpmsg_internal.h"
 #include "qcom_glink_native.h"
 
+#if IS_ENABLED(CONFIG_SEC_PM)
+#include <linux/wakeup_reason.h>
+#endif
+
 #define GLINK_LOG_PAGE_CNT 2
 #define GLINK_INFO(ctxt, x, ...)					  \
 	ipc_log_string(ctxt, "[%s]: "x, __func__, ##__VA_ARGS__)
@@ -538,7 +542,6 @@ static void qcom_glink_handle_intent_req_ack(struct qcom_glink *glink,
 					     unsigned int cid, bool granted)
 {
 	struct glink_channel *channel;
-
 	channel = qcom_glink_channel_ref_get(glink, true, cid);
 	if (!channel) {
 		dev_err(glink->dev, "unable to find channel\n");
@@ -1050,7 +1053,7 @@ static int qcom_glink_rx_data(struct qcom_glink *glink, size_t avail)
 			intent = kzalloc(sizeof(*intent), GFP_ATOMIC);
 			if (!intent) {
 				qcom_glink_channel_ref_put(channel);
-				return -ENOMEM;
+ 				return -ENOMEM;
 			}
 
 			intent->data = kmalloc(chunk_size + left_size,
@@ -1165,7 +1168,7 @@ static void qcom_glink_handle_intent(struct qcom_glink *glink,
 	msg = kmalloc(msglen, GFP_ATOMIC);
 	if (!msg) {
 		qcom_glink_channel_ref_put(channel);
-		return;
+ 		return;
 	}
 
 	qcom_glink_rx_peak(glink, msg, 0, msglen);
@@ -1296,6 +1299,9 @@ static irqreturn_t qcom_glink_native_intr(int irq, void *data)
 
 	if (should_wake) {
 		pr_info("%s: %d triggered %s\n", __func__, irq, glink->irqname);
+#if IS_ENABLED(CONFIG_SEC_PM)
+		log_irq_wakeup_reason(irq);
+#endif
 		glink_resume_pkt = true;
 		pm_system_wakeup();
 	}

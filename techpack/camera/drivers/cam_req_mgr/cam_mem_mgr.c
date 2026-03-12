@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2016-2021, 2022 The Linux Foundation. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -219,6 +218,21 @@ static int32_t cam_mem_get_slot(void)
 	mutex_lock(&tbl.m_lock);
 	idx = find_first_zero_bit(tbl.bitmap, tbl.bits);
 	if (idx >= CAM_MEM_BUFQ_MAX || idx <= 0) {
+	
+	CAM_ERR(CAM_MEM,
+			"Dumping tbl info idx = %d",idx);
+	
+	for (idx = 0; idx < CAM_MEM_BUFQ_MAX; idx++)
+	{
+		CAM_DBG(CAM_MEM,
+		"Ion buf at idx = %d  fd = %d, imported %d, dma_buf %pK len = %d is_active = %d",
+		idx, tbl.bufq[idx].fd,
+		tbl.bufq[idx].is_imported,
+		tbl.bufq[idx].dma_buf,
+		tbl.bufq[idx].len,
+		tbl.bufq[idx].active);
+	}
+	
 		mutex_unlock(&tbl.m_lock);
 		return -ENOMEM;
 	}
@@ -228,6 +242,14 @@ static int32_t cam_mem_get_slot(void)
 	ktime_get_real_ts64(&(tbl.bufq[idx].timestamp));
 	mutex_init(&tbl.bufq[idx].q_lock);
 	mutex_unlock(&tbl.m_lock);
+	
+	CAM_DBG(CAM_MEM,
+		"Ion buf at idx = %d  fd = %d, imported %d, dma_buf %pK len = %d is_active = %d",
+		idx, tbl.bufq[idx].fd,
+		tbl.bufq[idx].is_imported,
+		tbl.bufq[idx].dma_buf,
+		tbl.bufq[idx].len,
+		tbl.bufq[idx].active);
 
 	return idx;
 }
@@ -236,6 +258,12 @@ static void cam_mem_put_slot(int32_t idx)
 {
 	mutex_lock(&tbl.m_lock);
 	mutex_lock(&tbl.bufq[idx].q_lock);
+	CAM_DBG(CAM_MEM,
+		"Ion buf at idx = %d freeing fd = %d, imported %d, dma_buf %pK len = %d",
+		idx, tbl.bufq[idx].fd,
+		tbl.bufq[idx].is_imported,
+		tbl.bufq[idx].dma_buf,
+		tbl.bufq[idx].len);
 	tbl.bufq[idx].active = false;
 	tbl.bufq[idx].is_internal = false;
 	memset(&tbl.bufq[idx].timestamp, 0, sizeof(struct timespec64));
@@ -312,7 +340,7 @@ int cam_mem_get_cpu_buf(int32_t buf_handle, uintptr_t *vaddr_ptr, size_t *len)
 		return -EINVAL;
 
 	idx = CAM_MEM_MGR_GET_HDL_IDX(buf_handle);
-
+	
 	if (idx >= CAM_MEM_BUFQ_MAX || idx <= 0)
 		return -EINVAL;
 
@@ -1095,9 +1123,9 @@ static void cam_mem_util_unmap(struct kref *kref)
 		return;
 	}
 
-	client = tbl.bufq[idx].smmu_mapping_client;
-
 	CAM_DBG(CAM_MEM, "Flags = %X idx %d", tbl.bufq[idx].flags, idx);
+	client = tbl.bufq[idx].smmu_mapping_client;
+	CAM_DBG(CAM_MEM, "Flags = %X idx %d is_active = %d", tbl.bufq[idx].flags, idx, tbl.bufq[idx].active);
 
 	mutex_lock(&tbl.m_lock);
 	if ((!tbl.bufq[idx].active) &&
@@ -1153,10 +1181,11 @@ static void cam_mem_util_unmap(struct kref *kref)
 		sizeof(int32_t) * CAM_MEM_MMU_MAX_HANDLE);
 
 	CAM_DBG(CAM_MEM,
-		"Ion buf at idx = %d freeing fd = %d, imported %d, dma_buf %pK",
+		"Ion buf at idx = %d freeing fd = %d, imported %d, dma_buf %pK len = %d",
 		idx, tbl.bufq[idx].fd,
 		tbl.bufq[idx].is_imported,
-		tbl.bufq[idx].dma_buf);
+		tbl.bufq[idx].dma_buf,
+		tbl.bufq[idx].len);
 
 	if (tbl.bufq[idx].dma_buf)
 		dma_buf_put(tbl.bufq[idx].dma_buf);
@@ -1172,7 +1201,6 @@ static void cam_mem_util_unmap(struct kref *kref)
 	mutex_destroy(&tbl.bufq[idx].q_lock);
 	clear_bit(idx, tbl.bitmap);
 	mutex_unlock(&tbl.m_lock);
-
 }
 
 void cam_mem_put_cpu_buf(int32_t buf_handle)
@@ -1212,7 +1240,6 @@ void cam_mem_put_cpu_buf(int32_t buf_handle)
 }
 EXPORT_SYMBOL(cam_mem_put_cpu_buf);
 
-
 int cam_mem_mgr_release(struct cam_mem_mgr_release_cmd *cmd)
 {
 	int idx;
@@ -1248,7 +1275,7 @@ int cam_mem_mgr_release(struct cam_mem_mgr_release_cmd *cmd)
 	}
 
 	CAM_DBG(CAM_MEM, "Releasing hdl = %x, idx = %d", cmd->buf_handle, idx);
-
+	
 	if (kref_put(&tbl.bufq[idx].krefcount, cam_mem_util_unmap))
 		CAM_DBG(CAM_MEM,
 			"Called unmap from here, buf_handle: %u, idx: %d",

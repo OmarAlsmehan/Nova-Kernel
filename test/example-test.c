@@ -6,8 +6,8 @@
  * Author: Brendan Higgins <brendanhiggins@google.com>
  */
 
-#include <test/test.h>
-#include <test/mock.h>
+#include <kunit/test.h>
+#include <kunit/mock.h>
 
 struct example {
 	int (*foo)(struct example *example, int num);

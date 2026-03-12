@@ -41,6 +41,7 @@
 #define CCI_MAX_DELAY 1000000
 
 #define CCI_TIMEOUT msecs_to_jiffies(1500)
+#define CCI_TIMEOUT_100ms msecs_to_jiffies(100)
 #define NUM_QUEUES 2
 
 #define MSM_CCI_WRITE_DATA_PAYLOAD_SIZE_11 11

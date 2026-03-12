@@ -7,8 +7,8 @@
  */
 
 #include <linux/slab.h>
-#include <test/test.h>
-#include <test/string-stream.h>
+#include <kunit/test.h>
+#include <kunit/string-stream.h>
 
 static void string_stream_test_get_string(struct test *test)
 {
@@ -58,3 +58,4 @@ static struct test_module string_stream_test_module = {
 	.test_cases = string_stream_test_cases
 };
 module_test(string_stream_test_module);
+

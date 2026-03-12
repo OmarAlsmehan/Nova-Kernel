@@ -247,7 +247,6 @@ static int cam_csiphy_component_bind(struct device *dev,
 
 	cam_csiphy_register_baseaddress(new_csiphy_dev);
 
-
 	CAM_DBG(CAM_CSIPHY, "%s component bound successfully",
 		pdev->name);
 	return rc;

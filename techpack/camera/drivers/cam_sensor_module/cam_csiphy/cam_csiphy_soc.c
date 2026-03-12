@@ -130,6 +130,8 @@ int32_t cam_csiphy_status_dmp(struct csiphy_device *csiphy_dev)
 	return rc;
 }
 
+
+
 enum cam_vote_level get_clk_vote_default(struct csiphy_device *csiphy_dev,
 	int32_t index)
 {

@@ -9,7 +9,7 @@
 #include <linux/mm.h>
 #include <linux/io.h>
 #include <linux/kernel.h>
-#include <test/mock.h>
+#include <kunit/mock.h>
 
 DEFINE_FUNCTION_MOCK(readb,
 		     RETURNS(u8), PARAMS(const volatile void __iomem *));

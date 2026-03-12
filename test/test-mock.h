@@ -6,8 +6,8 @@
  * Author: Brendan Higgins <brendanhiggins@google.com>
  */
 
-#include <test/test.h>
-#include <test/mock.h>
+#include <kunit/test.h>
+#include <kunit/mock.h>
 
 DECLARE_STRUCT_CLASS_MOCK_PREREQS(test);
 

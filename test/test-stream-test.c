@@ -6,9 +6,9 @@
  * Author: Brendan Higgins <brendanhiggins@google.com>
  */
 
-#include <test/test.h>
-#include <test/mock.h>
-#include <test/test-stream.h>
+#include <kunit/test.h>
+#include <kunit/mock.h>
+#include <kunit/test-stream.h>
 
 #include "test-mock.h"
 

@@ -7,7 +7,7 @@
  */
 
 #include <linux/platform_device.h>
-#include <test/mock.h>
+#include <kunit/mock.h>
 
 static inline struct platform_driver *platform_driver_find(const char *name)
 {
@@ -45,7 +45,7 @@ struct device_node *of_fake_node(struct test *test, const char *name);
  */
 struct platform_device *
 of_fake_probe_platform(struct test *test,
-		       const struct platform_driver *driver,
+		       struct platform_driver *driver,
 		       const char *node_name);
 
 /**

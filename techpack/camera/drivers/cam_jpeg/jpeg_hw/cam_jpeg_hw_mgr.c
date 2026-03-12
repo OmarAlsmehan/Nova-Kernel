@@ -469,10 +469,8 @@ static int cam_jpeg_insert_cdm_change_base(
 	*ch_base_iova_addr = 0;
 	ch_base_iova_addr += size;
 	*ch_base_iova_addr = 0;
-
 	cam_mem_put_cpu_buf(
 		config_args->hw_update_entries[CAM_JPEG_CHBASE].handle);
-
 	return rc;
 }
 

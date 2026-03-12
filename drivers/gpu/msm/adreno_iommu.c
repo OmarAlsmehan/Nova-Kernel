@@ -251,7 +251,7 @@ static unsigned int _adreno_iommu_set_pt_v2_a6xx(struct kgsl_device *device,
 		*cmds++ = cp_type4_packet(A6XX_CP_MISC_CNTL, 1);
 		*cmds++ = 0;
 	}
-
+	
 	/* Wait for performance counter clear to finish */
 	if (!adreno_dev->perfcounter) {
 		*cmds++ = cp_type7_packet(CP_WAIT_REG_MEM, 6);
@@ -261,7 +261,7 @@ static unsigned int _adreno_iommu_set_pt_v2_a6xx(struct kgsl_device *device,
 		*cmds++ = 0x1;
 		*cmds++ = 0x1;
 		*cmds++ = 0x0;
-	}
+	}	
 
 	return cmds - cmds_orig;
 }
@@ -401,7 +401,8 @@ int adreno_iommu_set_pt_ctx(struct adreno_ringbuffer *rb,
 	struct kgsl_device *device = KGSL_DEVICE(adreno_dev);
 	struct kgsl_pagetable *cur_pt = device->mmu.defaultpagetable;
 	unsigned int *cmds = NULL, count = 0;
-	int result = 0;
+ 	int result = 0;
+ 
 
 	cmds = kmalloc(PAGE_SIZE, GFP_KERNEL);
 	if (cmds == NULL)

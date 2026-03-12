@@ -160,7 +160,6 @@ int cam_packet_util_get_kmd_buffer(struct cam_packet *packet,
 	kmd_buf->offset     = cmd_desc->offset + packet->kmd_cmd_buf_offset;
 	kmd_buf->size       = cmd_desc->size - cmd_desc->length;
 	kmd_buf->used_bytes = 0;
-
 rel_kmd_buf:
 	cam_mem_put_cpu_buf(cmd_desc->mem_handle);
 	return rc;
@@ -219,7 +218,7 @@ void cam_packet_dump_patch_info(struct cam_packet *packet,
 
 		if (!(*dst_cpu_addr))
 			CAM_ERR(CAM_ICP, "Null at dst addr %p", dst_cpu_addr);
-
+		
 		cam_mem_put_cpu_buf(patch_desc[i].dst_buf_hdl);
 	}
 }

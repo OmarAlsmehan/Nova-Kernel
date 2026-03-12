@@ -7,9 +7,9 @@
  * Author: Brendan Higgins <brendanhiggins@google.com>
  */
 
-#include <test/test.h>
-#include <test/test-stream.h>
-#include <test/string-stream.h>
+#include <kunit/test.h>
+#include <kunit/test-stream.h>
+#include <kunit/string-stream.h>
 
 static void test_stream_set_level(struct test_stream *this,
 				  const char *level)
@@ -44,6 +44,7 @@ static void test_stream_append(struct test_stream *this,
 	}
 
 	this->add(this, other_content);
+	kfree(other_content);
 }
 
 static void test_stream_clear(struct test_stream *this)
@@ -132,3 +133,4 @@ struct test_stream *test_new_stream(struct test *test)
 	else
 		return NULL;
 }
+EXPORT_SYMBOL(test_new_stream);

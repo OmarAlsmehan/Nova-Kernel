@@ -1619,6 +1619,7 @@ int32_t npu_host_unload_network(struct npu_client *client,
 		pr_err("fw in error state, skip unload network in fw\n");
 		goto free_network;
 	}
+
 	network->is_unloading = true;
 
 	pr_debug("Unload network %lld\n", network->id);
@@ -1869,6 +1870,12 @@ int32_t npu_host_exec_network_v2(struct npu_client *client,
 	if (network->fw_error) {
 		pr_err("fw is in error state\n");
 		ret = -EIO;
+		goto exec_v2_done;
+	}
+
+	if (network->is_executing) {
+		pr_err("network is already in execution\n");
+		ret = -EINVAL;
 		goto exec_v2_done;
 	}
 

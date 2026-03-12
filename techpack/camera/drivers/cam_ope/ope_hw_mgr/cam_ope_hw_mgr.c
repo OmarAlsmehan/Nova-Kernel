@@ -3067,7 +3067,6 @@ static int cam_ope_mgr_release_hw(void *hw_priv, void *hw_release_args)
 	return rc;
 }
 
-
 static int cam_ope_packet_generic_blob_handler(void *user_data,
 	uint32_t blob_type, uint32_t blob_size, uint8_t *blob_data)
 {
@@ -3329,6 +3328,7 @@ static int cam_ope_mgr_prepare_hw_update(void *hw_priv,
 	set_bit(request_idx, ctx_data->bitmap);
 	cam_ope_mgr_put_cmd_buf(packet);
 	mutex_unlock(&ctx_data->ctx_mutex);
+
 	CAM_DBG(CAM_REQ, "Prepare Hw update Successful request_id: %d  ctx: %d",
 		packet->header.request_id, ctx_data->ctx_id);
 	return rc;
