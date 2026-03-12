@@ -4038,7 +4038,7 @@ static int f2fs_ioc_stat_compress_file(struct file *filp, unsigned long arg)
 
 	if (!f2fs_sb_has_compression(F2FS_I_SB(inode)))
 		return -EOPNOTSUPP;
-	
+
 	if (copy_from_user(&compStat, (struct f2fs_sec_stat_compfile __user *)arg,
 				sizeof(compStat)))
 		return -EFAULT;
@@ -4055,11 +4055,11 @@ static int f2fs_ioc_stat_compress_file(struct file *filp, unsigned long arg)
 
 	if (compStat.in_init)
 		memset(&heimdallfs_stat, 0x0, sizeof(heimdallfs_stat));
-	
+
 	if (compStat.in_scan) {
 		heimdallfs_stat.nr_pkgs++;
 		heimdallfs_stat.nr_pkg_blks += compStat.st_blocks;
-		
+
 		if (unlikely(f2fs_compressed_file(inode)) && (compStat.st_compressed_blocks > 0)) {
 			heimdallfs_stat.nr_comp_pkgs++;
 			heimdallfs_stat.nr_comp_pkg_blks += compStat.st_blocks;
@@ -4074,7 +4074,7 @@ static int f2fs_ioc_stat_compress_file(struct file *filp, unsigned long arg)
 				sizeof(compStat)))
 		return -EFAULT;
 
-	return 0; 
+	return 0;
 }
 
 static int f2fs_ioc_get_compress_option(struct file *filp, unsigned long arg)
@@ -4457,7 +4457,7 @@ long f2fs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	case F2FS_IOC_GET_VALID_NODE_COUNT:
 		return f2fs_ioc_get_valid_node_count(filp, arg);
 	case F2FS_IOC_STAT_COMPRESS_FILE:
- 		return f2fs_ioc_stat_compress_file(filp, arg);
+		return f2fs_ioc_stat_compress_file(filp, arg);
 #ifdef CONFIG_FSCRYPT_SDP
 	case FS_IOC_GET_SDP_INFO:
 	case FS_IOC_SET_SDP_POLICY:

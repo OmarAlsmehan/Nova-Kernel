@@ -1467,6 +1467,7 @@ static void call_timer_fn(struct timer_list *timer,
 	 * call here and in del_timer_sync().
 	 */
 	lock_map_acquire(&lockdep_map);
+
 #if IS_ENABLED(CONFIG_SEC_DEBUG_MSG_LOG)
 	sec_debug_msg_log("timer %pS entry", fn);
 #endif
@@ -2256,4 +2257,3 @@ int get_cpu_where_timer_on(struct timer_list *timer)
 	return -1;
 }
 #endif
-

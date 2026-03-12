@@ -876,16 +876,15 @@ static void handle_free_generic_req(struct qmi_handle *handle,
 		free_resp.resp.error = QMI_ERR_NONE_V01;
 
 #ifdef CONFIG_CP_DYNAMIC_MEM_RESERVE
-		if(index == DHMS_MEM_CLIENT_MODEM_V01){
+		if (index == DHMS_MEM_CLIENT_MODEM_V01) {
 			memshare_unset_nhlos_permission(memblock[index].phy_addr,
-			memsh_drv->memshare_rd_dev->size);
+				memsh_drv->memshare_rd_dev->size);
 			memblock[index].hyp_mapping = 0;
 			memsh_drv->memshare_rd_dev->data_ready = 0;
-		}
-		else{
+		} else {
 			dev_err(memsh_drv->dev,
-			"memshare_free: cannot unset nhlos permission for client_id: %d\n",
-			index);
+				"memshare_free: cannot unset nhlos permission for client_id: %d\n",
+				index);
 		}
 #endif
 	}
@@ -1134,7 +1133,6 @@ static int memshare_child_probe(struct platform_device *pdev)
 			dev_err(memsh_drv->dev, "memshare: client_id %d / size %x\n", client_id, size);
 		}
 #endif
-
 	}
 	else if (strcmp(name, "adsp") == 0)
 		memblock[num_clients].peripheral = DHMS_MEM_PROC_ADSP_V01;

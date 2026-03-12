@@ -196,9 +196,9 @@ static int dsi_pwr_enable_vregs(struct dsi_regulator_info *regs, bool enable)
 				 * but panel_reset or lcd_rst regulator should not be controlled here
 				 */
 				if ((vdd->aot_reset_regulator || vdd->aot_reset_regulator_late)
-					&& !display->is_cont_splash_enabled
-					&& (!strcmp(vreg->vreg_name, "panel_reset")
-						|| !strcmp(vreg->vreg_name, "lcd_rst"))) {
+				    && !display->is_cont_splash_enabled
+				    && (!strcmp(vreg->vreg_name, "panel_reset")
+				    || !strcmp(vreg->vreg_name, "lcd_rst"))) {
 					DSI_INFO("aot_reset_regulator(_late) -> dsi_panel_reset_regulator\n");
 					continue;
 				}
@@ -250,9 +250,9 @@ static int dsi_pwr_enable_vregs(struct dsi_regulator_info *regs, bool enable)
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 			if (panel && vdd && display) {
 				if ((vdd->aot_reset_regulator || vdd->aot_reset_regulator_late)
-					&& !display->is_cont_splash_enabled
-					&& (!strcmp(vreg->vreg_name, "panel_reset")
-						|| !strcmp(vreg->vreg_name, "lcd_rst"))) {
+				    && !display->is_cont_splash_enabled
+				    && (!strcmp(vreg->vreg_name, "panel_reset")
+				    || !strcmp(vreg->vreg_name, "lcd_rst"))) {
 					DSI_INFO("aot_reset_regulator skip reset off here\n");
 					continue;
 				}

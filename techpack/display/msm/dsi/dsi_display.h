@@ -801,6 +801,7 @@ int dsi_display_dump_clks_state(struct dsi_display *display);
 int dsi_display_ctrl_init(struct dsi_display *display);
 int dsi_display_ctrl_deinit(struct dsi_display *display);
 #endif
+
 /**
  * dsi_display_dfps_update_parent() - update dsi clock parent to src clock
  * @display:         Handle to display

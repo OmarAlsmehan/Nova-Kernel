@@ -302,7 +302,6 @@ extern void sec_pcie_set_ep_driver_loaded(struct pci_dev *dev, bool is_loaded);
 extern int sec_pcie_l1ss_enable(int ctrl_id);
 extern int sec_pcie_l1ss_disable(int ctrl_id);
 #else
-
 static inline void sec_pcie_set_use_ep_loaded(dev) {}
 static inline void sec_pcie_set_ep_driver_loaded(dev, is_loaded) {}
 

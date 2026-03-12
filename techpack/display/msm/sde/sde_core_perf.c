@@ -1010,9 +1010,9 @@ void sde_core_perf_crtc_update(struct drm_crtc *crtc,
 			if (vdd->vrr.support_vrr_based_bl &&
 					(vdd->vrr.running_vrr_mdp || vdd->vrr.running_vrr)) {
 				SDE_INFO("[SDE_0] During VRR (%d|%d): keep max SDE core clock (%lld -> %lld hz)\n",
-						vdd->vrr.running_vrr_mdp,
-						vdd->vrr.running_vrr,
-						clk_rate, kms->perf.max_core_clk_rate);
+					vdd->vrr.running_vrr_mdp,
+					vdd->vrr.running_vrr,
+					clk_rate, kms->perf.max_core_clk_rate);
 				clk_rate = kms->perf.max_core_clk_rate;
 			}
 		}
@@ -1022,9 +1022,9 @@ void sde_core_perf_crtc_update(struct drm_crtc *crtc,
 			if (vdd->vrr.support_vrr_based_bl &&
 					(vdd->vrr.running_vrr_mdp || vdd->vrr.running_vrr)) {
 				SDE_INFO("[SDE_1] During VRR (%d|%d): keep max SDE core clock (%lld -> %lld hz)\n",
-						vdd->vrr.running_vrr_mdp,
-						vdd->vrr.running_vrr,
-						clk_rate, kms->perf.max_core_clk_rate);
+					vdd->vrr.running_vrr_mdp,
+					vdd->vrr.running_vrr,
+					clk_rate, kms->perf.max_core_clk_rate);
 				clk_rate = kms->perf.max_core_clk_rate;
 			}
 		}
@@ -1304,10 +1304,10 @@ int ss_set_max_sde_core_clk(struct drm_device *ddev)
 	/* To prevent sde clk setting failure, enable sde core clock. */
 	pm_runtime_get_sync(ddev->dev);
 	ret = sde_power_clk_set_rate(perf->phandle,
-			perf->clk_name, perf->max_core_clk_rate);
+		perf->clk_name, perf->max_core_clk_rate);
 	if (ret)
 		SDE_ERROR("failed to set %s clock rate %llu, ret: %d\n",
-				perf->clk_name, perf->max_core_clk_rate, ret);
+			perf->clk_name, perf->max_core_clk_rate, ret);
 	pm_runtime_put_sync(ddev->dev);
 
 	SDE_INFO("set max core clk %lld hz\n", perf->max_core_clk_rate);
@@ -1340,7 +1340,7 @@ int ss_set_normal_sde_core_clk(struct drm_device *ddev)
 	ret = sde_power_clk_set_rate(perf->phandle, perf->clk_name, clk_rate);
 	if (ret)
 		SDE_ERROR("failed to set %s clock rate %llu, ret: %d\n",
-				perf->clk_name, clk_rate, ret);
+			perf->clk_name, clk_rate, ret);
 	pm_runtime_put_sync(ddev->dev);
 
 	SDE_INFO("set normal core clk %llu hz\n", clk_rate);
@@ -1404,14 +1404,14 @@ static ssize_t sysfs_sde_core_perf_mode_write(struct device *dev,
 		/* run the driver with max clk and BW vote */
 		perf->perf_tune.min_core_clk = perf->max_core_clk_rate;
 		perf->perf_tune.min_bus_vote =
-				(u64) cfg->max_bw_high * 1000;
+			(u64) cfg->max_bw_high * 1000;
 
 		ret = sde_power_clk_set_rate(perf->phandle,
-				perf->clk_name, perf->max_core_clk_rate);
+			perf->clk_name, perf->max_core_clk_rate);
 		if (ret) {
 			SDE_ERROR("failed to set %s clock rate %llu, ret: %d\n",
-					perf->clk_name,
-					perf->max_core_clk_rate, ret);
+				perf->clk_name,
+				perf->max_core_clk_rate, ret);
 			/* reset the perf tune params to 0 */
 			perf->perf_tune.min_core_clk = 0;
 			perf->perf_tune.min_bus_vote = 0;

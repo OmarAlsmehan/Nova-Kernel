@@ -118,8 +118,8 @@ config FAT_DEFAULT_UTF8
 
 config FAT_SUPPORT_STLOG
 	bool "Enable storage log"
-	default y
 	depends on FAT_FS && PROC_STLOG
+	default y
 
 config FAT_UEVENT
 	bool "enable uevent"

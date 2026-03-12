@@ -1842,9 +1842,9 @@ static size_t binder_get_object(struct binder_proc *proc,
 
 	read_size = min_t(size_t, sizeof(*object), buffer->data_size - offset);
 	if (offset > buffer->data_size || read_size < sizeof(*hdr) ||
-		!IS_ALIGNED(offset, sizeof(u32)))
+	    !IS_ALIGNED(offset, sizeof(u32)))
 		return 0;
-		
+
 	if (u) {
 		if (copy_from_user(object, u + offset, read_size))
 			return 0;
@@ -3073,7 +3073,7 @@ static void freecess_sync_binder_report(struct binder_proc *proc,
 
 	if ((!(tr->flags & TF_ONE_WAY)) && target_proc
 		&& target_proc->tsk && task_euid(target_proc->tsk).val > 10000
-		&& (proc->pid != target_proc->pid) 
+		&& (proc->pid != target_proc->pid)
 		&& thread_group_is_frozen(target_proc->tsk)) {
 		//if sync binder, we don't need detecting info, so set code and interfacename as default value.
 		binder_report(target_proc->tsk, 0, "sync_binder", tr->flags & TF_ONE_WAY);
@@ -3488,7 +3488,7 @@ static void binder_transaction(struct binder_proc *proc,
 	}
 
 #ifdef CONFIG_SAMSUNG_FREECESS
-	freecess_async_binder_report(proc, target_proc, tr, t); 
+	freecess_async_binder_report(proc, target_proc, tr, t);
 #endif
 
 	off_start_offset = ALIGN(tr->data_size, sizeof(void *));

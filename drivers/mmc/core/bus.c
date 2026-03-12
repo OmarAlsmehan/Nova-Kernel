@@ -428,7 +428,7 @@ void mmc_remove_card(struct mmc_card *card)
 			}
 			ST_LOG("%s: \"GE\":\"%d\",\"CC\":\"%d\",\"ECC\":\"%d\",\"WP\":\"%d\"," \
 					"\"OOR\":\"%d\",\"CRC\":\"%lld\",\"TMO\":\"%lld\"\n",
-					mmc_hostname(card->host), 
+					mmc_hostname(card->host),
 					err_log[0].ge_cnt, err_log[0].cc_cnt, err_log[0].ecc_cnt,
 					err_log[0].wp_cnt, err_log[0].oor_cnt, total_c_cnt, total_t_cnt);
 #endif

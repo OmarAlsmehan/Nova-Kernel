@@ -6625,6 +6625,7 @@ struct asm_enc_cfg_blk_param_v2 {
 } __packed;
 
 #define AVS_MEDIA_ID_SBM_ID 0x00010C19
+
 struct asm_sbm_param_t {
     uint32_t      target_delay;
     uint32_t      prev_delay;

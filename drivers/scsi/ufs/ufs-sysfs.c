@@ -1091,7 +1091,7 @@ void SEC_ufs_utp_error_check(struct scsi_cmnd *cmd, u8 tm_cmd)
 	struct SEC_UFS_counting *err_info = &SEC_err_info;
 	struct SEC_UFS_UTP_count *utp_err = &(err_info->UTP_count);
 	int opcode = 0;
-	
+
 	switch (tm_cmd) {
 	case UFS_QUERY_TASK:
 		SEC_UFS_ERR_COUNT_INC(utp_err->UTMR_query_task_count, U8_MAX);

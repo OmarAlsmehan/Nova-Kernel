@@ -30,8 +30,6 @@ void writel(u32, const volatile void __iomem *);
 void writeq(u64, const volatile void __iomem *);
 #endif /* CONFIG_64BIT */
 
-
-
 #define readb_relaxed readb_relaxed
 u8 readb_relaxed(const volatile void __iomem *);
 

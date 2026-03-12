@@ -15,7 +15,6 @@
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
 
-
 #if IS_ENABLED(CONFIG_SEC_DEBUG_APPS_CLK_LOGGING)
 #include <linux/sec_debug.h>
 #include <linux/sec_smem.h>

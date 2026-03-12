@@ -1354,7 +1354,7 @@ static u32 pcie_get_cur_link_bw(u32 rc_idx, u32 *speed, u32 *width)
 	u32 shift = offset % 4;
 
 	if (shift) {
-		offset = (offset >> 2) << 2;  
+		offset = (offset >> 2) << 2;
 	}
 	val = readl_relaxed(dev->dm_core + offset);
 
@@ -2782,7 +2782,7 @@ static ssize_t pcie_sec_phy_write(struct file *file,
 		ret = sscanf(pos, " %u", &sec_phy_cur_erase_idx);
 		if (ret != 1)
 			return -EINVAL;
-		
+
 		if (sec_phy_cur_erase_idx < 0 ||
 			sec_phy_cur_erase_idx >= MAX_SEC_PHY_TEST_NUM) {
 			pr_err("PCIE SEC: erase idx is wrong.\n");
@@ -4157,7 +4157,7 @@ static int pcie_phy_init(struct msm_pcie_dev_t *dev)
 	if (max_retries[dev->rc_idx] < retries)
 		max_retries[dev->rc_idx] = retries;
 	total_enable_cnt[dev->rc_idx]++;
-	
+
 	PCIE_ERR(dev, "RC%d: number of PHY retries:%ld(Max:%d, Total:%ld).\n",
 		dev->rc_idx, retries, max_retries[dev->rc_idx], total_enable_cnt[dev->rc_idx]);
 #else
@@ -4651,7 +4651,6 @@ static int msm_pcie_get_bw_scale(struct msm_pcie_dev_t *pcie_dev)
 
 #ifdef CONFIG_SEC_PCIE
 static int msm_pcie_get_phy_override(struct msm_pcie_dev_t *pcie_dev, int size) {
-
 	int ret, size_ovr;
 	struct platform_device *pdev = pcie_dev->pdev;
 	struct msm_pcie_phy_info_t *old_sequence;
@@ -4669,13 +4668,13 @@ static int msm_pcie_get_phy_override(struct msm_pcie_dev_t *pcie_dev, int size) 
 	pcie_dev->phy_sequence = devm_kzalloc(&pdev->dev, size + size_ovr, GFP_KERNEL);
 	if (!pcie_dev->phy_sequence) {
 		pcie_dev->phy_sequence = old_sequence;
-		
+
 		PCIE_DBG(pcie_dev,
 			"PCIe: RC%d: phy sequence override devm_kzalloc fail\n",
 			pcie_dev->rc_idx);
 		return 0;
 	}
-		
+
 	memcpy(pcie_dev->phy_sequence, old_sequence, size);
 	pcie_dev->phy_len += size_ovr / ((unsigned int)sizeof(*pcie_dev->phy_sequence));
 	ret = of_property_read_u32_array(pdev->dev.of_node,
@@ -4693,7 +4692,7 @@ static int msm_pcie_get_phy_override(struct msm_pcie_dev_t *pcie_dev, int size) 
 			pcie_dev->rc_idx);
 		return 0;
 	}
-	
+
 	devm_kfree(&pdev->dev, old_sequence);
 	return 0;
 }
@@ -6418,7 +6417,7 @@ static void msm_pcie_handle_linkdown(struct msm_pcie_dev_t *dev)
 	if (!dev->suspending && dev->linkdown_panic) {
 		/* PCIe registers dump on link down */
 		PCIE_DUMP(dev, "PCIe:Linkdown IRQ for RC%d Dumping PCIe registers\n",
-				dev->rc_idx);
+			dev->rc_idx);
 		pcie_phy_dump(dev);
 		pcie_parf_dump(dev);
 		pcie_dm_core_dump(dev);
@@ -7287,7 +7286,7 @@ static int msm_pcie_probe(struct platform_device *pdev)
 	pcie_dev->ep_loaded = false;
 #endif
 
-#ifdef CONFIG_SEC_PCIE	
+#ifdef CONFIG_SEC_PCIE
 	pcie_dev->ignore_pcie_error =
 		of_property_read_bool((&pdev->dev)->of_node,
 				"ignore-pcie-error");
@@ -8447,7 +8446,7 @@ static ssize_t sec_show_l1ss_stat(struct device *in_dev,
 		if (!(val & BIT(11)))
 			count += scnprintf(buf + count, PAGE_SIZE - count,
 					"\tL1 - Not Support\n");
-		
+
 		pci_read_config_dword(pdev, pdev->pcie_cap + PCI_EXP_LNKCTL, &val);
 		count += scnprintf(buf + count, PAGE_SIZE - count,
 				"\tL0s %s\n",val & PCI_EXP_LNKCTL_ASPM_L0S ? "E" : "D");
@@ -8484,7 +8483,7 @@ static ssize_t sec_show_l1ss_stat(struct device *in_dev,
 		pci_read_config_dword(pdev, pdev->pcie_cap + PCI_EXP_DEVCTL2, &val);
 		count += scnprintf(buf + count, PAGE_SIZE - count,
 						"\t        (DEV_CTL2:0x%08x)\n", val);
-		
+
 		l1ss_ltr_cap_id_offset = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_LTR);
 		if (l1ss_ltr_cap_id_offset) {
 			pci_read_config_dword(pdev,
@@ -9374,7 +9373,7 @@ static int msm_pcie_pm_resume(struct pci_dev *dev,
 			 pcie_dev->rc_idx);
 		pci_load_and_free_saved_state(dev, &pcie_dev->saved_state);
 		pci_restore_state(dev);
- 	}
+	}
 
 #ifdef CONFIG_SEC_PCIE_L1SS
 	/*
@@ -9770,7 +9769,7 @@ static int msm_pcie_drv_suspend(struct msm_pcie_dev_t *pcie_dev,
 #endif
 
 	PCIE_ERR(pcie_dev, "PCIe: RC%d: prevnet_l1=%d LTSSM_STATE=:%s\n",
-		pcie_dev->rc_idx, 
+		pcie_dev->rc_idx,
 		pcie_dev->prevent_l1,
 		TO_LTSSM_STR(readl_relaxed(pcie_dev->parf + PCIE20_PARF_LTSSM) & 0x3f));
 

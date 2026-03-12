@@ -2391,7 +2391,7 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct udp_table *udptable,
 								memcpy(NF_CONN_NPA_VENDOR_DATA_GET(ct)->parent_process_name, SOCK_NPA_VENDOR_DATA_GET(sk)->dns_process_name, sizeof(NF_CONN_NPA_VENDOR_DATA_GET(ct)->parent_process_name)-1);
 							}
 							knox_collect_conntrack_data(ct, NCM_FLOW_TYPE_OPEN, 3);
-						}	
+						}
 					}
 				}
 			}
@@ -2451,7 +2451,7 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct udp_table *udptable,
 								memcpy(NF_CONN_NPA_VENDOR_DATA_GET(ct)->parent_process_name, SOCK_NPA_VENDOR_DATA_GET(sk)->dns_process_name, sizeof(NF_CONN_NPA_VENDOR_DATA_GET(ct)->parent_process_name)-1);
 							}
 							knox_collect_conntrack_data(ct, NCM_FLOW_TYPE_OPEN, 3);
-						}	
+						}
 					}
 				}
 			}

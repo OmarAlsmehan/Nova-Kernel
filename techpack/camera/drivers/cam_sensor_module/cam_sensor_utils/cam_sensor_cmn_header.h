@@ -411,24 +411,24 @@ struct msm_sensor_init_params {
 };
 
 enum msm_sensor_sec_camera_id_t {
-    SEC_DEFAULT_SENSOR              = 0,
-    SEC_WIDE_SENSOR                 = SEC_DEFAULT_SENSOR,
-    SEC_FRONT_SENSOR                = 1,
-    SEC_ULTRA_WIDE_SENSOR           = 2,
-    SEC_TELE_SENSOR                 = 3,
-    SEC_MACRO_SENSOR                = 4,
-    SEC_REAR_TOF_SENSOR             = 5,
-    SEC_FRONT_TOF_SENSOR            = 6,
-    SEC_TELE2_SENSOR                = 7,
-    SEC_RESERVE2_SENSOR             = 8,
-    SEC_FRONT_AUX1_SENSOR           = 9,
-    SEC_RESERVE3_SENSOR             = 10,
-    SEC_RESERVE4_SENSOR             = 11,
-    SEC_FRONT_TOP_SENSOR            = 12,
-    SEC_FRONT_FULL_SENSOR           = 13,
-    SEC_FRONT_TOP_FULL_SENSOR       = 14,
-    SEC_TELE_BINNING_SENSOR         = 15,
-    SEC_SENSOR_ID_MAX
+	SEC_DEFAULT_SENSOR        = 0,
+	SEC_WIDE_SENSOR           = SEC_DEFAULT_SENSOR,
+	SEC_FRONT_SENSOR          = 1,
+	SEC_ULTRA_WIDE_SENSOR     = 2,
+	SEC_TELE_SENSOR           = 3,
+	SEC_MACRO_SENSOR          = 4,
+	SEC_REAR_TOF_SENSOR       = 5,
+	SEC_FRONT_TOF_SENSOR      = 6,
+	SEC_TELE2_SENSOR          = 7,
+	SEC_RESERVE2_SENSOR       = 8,
+	SEC_FRONT_AUX1_SENSOR     = 9,
+	SEC_RESERVE3_SENSOR       = 10,
+	SEC_RESERVE4_SENSOR       = 11,
+	SEC_FRONT_TOP_SENSOR      = 12,
+	SEC_FRONT_FULL_SENSOR     = 13,
+	SEC_FRONT_TOP_FULL_SENSOR = 14,
+	SEC_TELE_BINNING_SENSOR   = 15,
+	SEC_SENSOR_ID_MAX,
 };
 
 enum msm_sensor_camera_id_t {

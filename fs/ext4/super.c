@@ -473,7 +473,7 @@ static void ext4_handle_error(struct super_block *sb, char *buf)
 	if (test_opt(sb, WARN_ON_ERROR))
 		WARN_ON_ONCE(1);
 
-	if (sb_rdonly(sb) || ignore_fs_panic || ignore_fs_panic)
+	if (sb_rdonly(sb) || test_opt(sb, ERRORS_CONT) || ignore_fs_panic)
 		return;
 
 	EXT4_SB(sb)->s_mount_flags |= EXT4_MF_FS_ABORTED;
@@ -498,7 +498,7 @@ static void ext4_handle_error(struct super_block *sb, char *buf)
 			return;
 		if (ufs_debug_func)
 			ufs_debug_func(NULL);
-		panic("EXT4(%s:%s\n", sb->s_id, buf?buf:"no message)");
+		panic("EXT4(%s:%s\n", sb->s_id, buf ? buf : "no message)");
 	}
 }
 
@@ -1440,8 +1440,9 @@ retry:
 #if defined(CONFIG_DDAR) || defined(CONFIG_FSCRYPT_SDP)
 static inline int ext4_get_knox_context(struct inode *inode,
 		const char *name, void *buffer, size_t buffer_size) {
-	return ext4_xattr_get(inode, EXT4_XATTR_INDEX_ENCRYPTION,	name, buffer, buffer_size);
+	return ext4_xattr_get(inode, EXT4_XATTR_INDEX_ENCRYPTION, name, buffer, buffer_size);
 }
+
 static inline int ext4_set_knox_context(struct inode *inode,
 		const char *name, const void *value, size_t size, void *fs_data) {
 	return ext4_xattr_set(inode, EXT4_XATTR_INDEX_ENCRYPTION,

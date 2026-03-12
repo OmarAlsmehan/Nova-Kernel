@@ -1897,7 +1897,6 @@ static int __init early_memblock(char *p)
 early_param("memblock", early_memblock);
 
 #ifdef CONFIG_MEMBLOCK_MEMSIZE
-
 #define NAME_SIZE	30
 struct memsize_rgn_struct {
 	phys_addr_t	base;
@@ -2278,7 +2277,6 @@ static int __init memblock_memsize_init(void)
 }
 
 __initcall(memblock_memsize_init);
-
 #endif /* MEMBLOCK_MEMSIZE */
 
 static void __init __free_pages_memory(unsigned long start, unsigned long end)
@@ -2303,7 +2301,6 @@ static unsigned long __init __free_memory_core(phys_addr_t start,
 	unsigned long start_pfn = PFN_UP(start);
 	unsigned long end_pfn = min_t(unsigned long,
 				      PFN_DOWN(end), max_low_pfn);
-
 #ifdef CONFIG_MEMBLOCK_MEMSIZE
 	unsigned long start_align_up = PFN_ALIGN(start);
 	unsigned long end_align_down = PFN_PHYS(end_pfn);
@@ -2317,6 +2314,7 @@ static unsigned long __init __free_memory_core(phys_addr_t start,
 			memblock_memsize_mod_kernel_size(end - end_align_down);
 	}
 #endif
+
 	if (start_pfn >= end_pfn)
 		return 0;
 

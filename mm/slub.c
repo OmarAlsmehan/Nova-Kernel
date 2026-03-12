@@ -599,6 +599,7 @@ static void set_track(struct kmem_cache *s, void *object,
 	if (is_kdp_kmem_cache(s))
 		return;
 #endif
+
 	if (addr) {
 #ifdef CONFIG_STACKTRACE
 		unsigned int nr_entries;
@@ -782,6 +783,7 @@ static void init_object(struct kmem_cache *s, void *object, u8 val)
 	if (is_kdp_kmem_cache(s))
 		return;
 #endif
+
 	if (s->flags & SLAB_RED_ZONE)
 		memset(p - s->red_left_pad, val, s->red_left_pad);
 
@@ -900,6 +902,7 @@ static int slab_pad_check(struct kmem_cache *s, struct page *page)
 	if (is_kdp_kmem_cache(s))
 		return 1;
 #endif
+
 	start = page_address(page);
 	length = page_size(page);
 	end = start + length;
@@ -995,6 +998,7 @@ static int check_slab(struct kmem_cache *s, struct page *page)
 	if (is_kdp_kmem_cache(s))
 		return 1;
 #endif
+
 	maxobj = order_objects(compound_order(page), s->size);
 	if (page->objects > maxobj) {
 		slab_err(s, page, "objects %u > max %u",
@@ -1028,6 +1032,7 @@ static int on_freelist(struct kmem_cache *s, struct page *page, void *search)
 	if (is_kdp_kmem_cache(s))
 		return 0;
 #endif
+
 	while (fp && nr <= page->objects) {
 		if (fp == search)
 			return 1;
@@ -1182,6 +1187,7 @@ static inline int alloc_consistency_checks(struct kmem_cache *s,
 	if (is_kdp_kmem_cache(s))
 		return 0;
 #endif
+
 	if (!check_slab(s, page))
 		return 0;
 
@@ -1274,6 +1280,7 @@ static noinline int free_debug_processing(
 	if (is_kdp_kmem_cache(s))
 		return 0;
 #endif
+
 	spin_lock_irqsave(&n->list_lock, flags);
 	slab_lock(page);
 
@@ -1413,6 +1420,7 @@ slab_flags_t kmem_cache_flags(unsigned int object_size,
 		 !strncmp(name, VFSMNT_JAR, strlen(VFSMNT_JAR))))
 		return flags;
 #endif
+
 	/* If slub_debug = 0, it folds into the if conditional. */
 	if (!slub_debug_slabs)
 		return flags | slub_debug;

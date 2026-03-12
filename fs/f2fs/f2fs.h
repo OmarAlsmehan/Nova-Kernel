@@ -45,12 +45,12 @@ extern int ignore_fs_panic;
 extern void (*ufs_debug_func)(void *);
 
 #define f2fs_bug_on(sbi, condition)	  __f2fs_bug_on(sbi, condition, true)
-#define f2fs_bug_on_endio(sbi, condition) __f2fs_bug_on(sbi, condition, false)	
+#define f2fs_bug_on_endio(sbi, condition) __f2fs_bug_on(sbi, condition, false)
 #define __f2fs_bug_on(sbi, condition, set_extra_blk)				\
 	do {									\
 		if (unlikely(condition)) {					\
 			if (ufs_debug_func)					\
-			ufs_debug_func(NULL);				\
+			ufs_debug_func(NULL);					\
 			if (is_sbi_flag_set(sbi, SBI_POR_DOING)) {		\
 				WARN_ON(1);					\
 				set_sbi_flag(sbi, SBI_NEED_FSCK);		\
@@ -1545,7 +1545,6 @@ struct f2fs_sec_blkops_dbg {
 };
 #endif
 
-
 #define F2FS_SUPPORT_CHECKPOINT_CMD_TIME_NS
 
 struct checkpoint_cmd {
@@ -2245,9 +2244,8 @@ static inline int inc_valid_block_count(struct f2fs_sb_info *sbi,
 	avail_user_block_count = sbi->user_block_count -
 					sbi->current_reserved_blocks;
 
-	if (!__allow_reserved_blocks(sbi, inode, true)) {
+	if (!__allow_reserved_blocks(sbi, inode, true))
 		avail_user_block_count -= F2FS_OPTION(sbi).root_reserved_blocks;
-	}
 
 	if (F2FS_IO_ALIGNED(sbi))
 		avail_user_block_count -= sbi->blocks_per_seg *
@@ -2496,9 +2494,8 @@ static inline int inc_valid_node_count(struct f2fs_sb_info *sbi,
 	valid_block_count = sbi->total_valid_block_count +
 					sbi->current_reserved_blocks + 1;
 
-	if (!__allow_reserved_blocks(sbi, inode, false)) {
+	if (!__allow_reserved_blocks(sbi, inode, false))
 		valid_block_count += F2FS_OPTION(sbi).root_reserved_blocks;
-	}
 
 	if (F2FS_IO_ALIGNED(sbi))
 		valid_block_count += sbi->blocks_per_seg *

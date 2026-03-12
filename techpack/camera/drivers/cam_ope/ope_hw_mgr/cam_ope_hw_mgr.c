@@ -3328,7 +3328,6 @@ static int cam_ope_mgr_prepare_hw_update(void *hw_priv,
 	set_bit(request_idx, ctx_data->bitmap);
 	cam_ope_mgr_put_cmd_buf(packet);
 	mutex_unlock(&ctx_data->ctx_mutex);
-
 	CAM_DBG(CAM_REQ, "Prepare Hw update Successful request_id: %d  ctx: %d",
 		packet->header.request_id, ctx_data->ctx_id);
 	return rc;

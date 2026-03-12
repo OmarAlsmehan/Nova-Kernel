@@ -32,7 +32,7 @@
 // SEC_PRODUCT_FEATURE_KNOX_SUPPORT_NPA {
 #ifdef CONFIG_KNOX_NCM
 #define PROCESS_NAME_LEN_NAP	128
-#define DOMAIN_NAME_LEN_NAP		255
+#define DOMAIN_NAME_LEN_NAP	255
 #endif
 // SEC_PRODUCT_FEATURE_KNOX_SUPPORT_NPA }
 
@@ -99,7 +99,7 @@ struct nf_conn_npa_vendor_data {
 	pid_t		knox_ppid;
 	char		interface_name[IFNAMSIZ];
 	atomic_t	startFlow;
-	u32			npa_timeout;
+	u32		npa_timeout;
 	atomic_t	intermediateFlow;
 };
 

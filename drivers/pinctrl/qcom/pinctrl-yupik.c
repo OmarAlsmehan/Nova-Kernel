@@ -1860,11 +1860,10 @@ static struct msm_pinctrl_soc_data yupik_pinctrl = {
 	.nwakeirq_map = ARRAY_SIZE(yupik_pdc_map),
 };
 
-#if 0 // remove code for disabling wakeup capable function 
+#if 0 // remove code for disabling wakeup capable function
 /* By default, all the gpios that are mpm wake capable are enabled.
  * The following list disables the gpios explicitly
  */
- 
 static const unsigned int config_mpm_wake_disable_gpios[] = { 127 };
 
 static void yupik_pinctrl_config_mpm_wake_disable_gpios(void)
@@ -1875,9 +1874,7 @@ static void yupik_pinctrl_config_mpm_wake_disable_gpios(void)
 	for (i = 0; i < n_gpios; i++)
 		msm_gpio_mpm_wake_set(config_mpm_wake_disable_gpios[i], false);
 }
-
-#else  // using DT format for various model 
-
+#else  // using DT format for various model
 static int yupik_pinctrl_no_wake_probe(struct platform_device *pdev)
 {
 	const __be32 *prop;

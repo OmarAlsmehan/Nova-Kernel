@@ -2515,7 +2515,7 @@ generic_file_read_iter(struct kiocb *iocb, struct iov_iter *iter)
 	}
 
 #ifdef CONFIG_FSCRYPT_SDP
-	//Check after writeback is completed.
+	// Check after writeback is completed.
 	if (fscrypt_sdp_file_not_readable(iocb->ki_filp)) {
 		retval = -EIO;
 		goto out;
@@ -2536,7 +2536,7 @@ EXPORT_SYMBOL(generic_file_read_iter);
 #define MMAP_LOTSAMISS  (100)
 
 #if CONFIG_MMAP_READAROUND_LIMIT == 0
-unsigned int mmap_readaround_limit = VM_READAHEAD_PAGES;			/* page */
+unsigned int mmap_readaround_limit = VM_READAHEAD_PAGES;		/* page */
 #else
 unsigned int mmap_readaround_limit = CONFIG_MMAP_READAROUND_LIMIT;	/* page */
 #endif

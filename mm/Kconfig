@@ -672,7 +672,6 @@ config KSWAPD_CPU
 	  Set kswapd cpu affinity by default. 0x3F means allowing CPU as 0 to 5.
 	  To disable this config, set this to 0.
 
-
 config MMAP_READAROUND_LIMIT
 	int "Limit mmap readaround upperbound"
 	default 0

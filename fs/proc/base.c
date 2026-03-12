@@ -3649,10 +3649,10 @@ static const struct pid_entry tgid_base_stuff[] = {
 	ONE("statm",      S_IRUGO, proc_pid_statm),
 	REG("maps",       S_IRUGO, proc_pid_maps_operations),
 #ifdef CONFIG_PAGE_BOOST
-	REG("filemap_list",       S_IRUGO, proc_pid_filemap_list_operations),
-	ONE("ioinfo",  S_IRUGO, proc_pid_ioinfo),
+	REG("filemap_list", S_IRUGO, proc_pid_filemap_list_operations),
+	ONE("ioinfo",     S_IRUGO, proc_pid_ioinfo),
 #ifdef CONFIG_PAGE_BOOST_RECORDING
-	REG("io_record_control",      S_IRUGO|S_IWUGO, proc_pid_io_record_operations),
+	REG("io_record_control", S_IRUGO|S_IWUGO, proc_pid_io_record_operations),
 #endif
 #endif
 #ifdef CONFIG_NUMA
@@ -3739,8 +3739,8 @@ static const struct pid_entry tgid_base_stuff[] = {
 	ONE("arch_status", S_IRUGO, proc_pid_arch_status),
 #endif
 #ifdef CONFIG_FIVE
-	DIR("integrity", S_IRUGO|S_IXUGO, proc_integrity_inode_operations,
-			proc_integrity_operations),
+	DIR("integrity",   S_IRUGO|S_IXUGO, proc_integrity_inode_operations,
+		proc_integrity_operations),
 #endif
 };
 

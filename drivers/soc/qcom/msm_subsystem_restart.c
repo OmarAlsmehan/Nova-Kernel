@@ -1154,14 +1154,14 @@ int subsystem_restart_dev(struct subsys_device *dev)
 			dev->restart_level = RESET_SOC;
 		}
 	}
-	
+
 	/* force modem silent ssr */
 	if (!strncmp(name, "modem", 5)) {
 		if (silent_ssr) {
 			dev->restart_level = RESET_SUBSYS_COUPLED;
 			silent_ssr = false;
 		}
-		qcom_smem_state_update_bits(dev->desc->state, 
+		qcom_smem_state_update_bits(dev->desc->state,
 			STOP_REASON_BIT | BIT(dev->desc->force_stop_bit), 0x0);
 	}
 

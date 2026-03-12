@@ -64,7 +64,7 @@
 
 #define MAKE_STRINGIZE(arg) #arg
 
-#define X_ENUMS                \
+#define X_ENUMS                    \
 	X(DEF_M_CORE_VER)          \
 	X(DEF_M_VER_HW)            \
 	X(DEF_M_VER_SW)            \
@@ -137,16 +137,16 @@
 	X(ADDR_CUSTOM_SENSOR_ID)
 
 typedef enum _ConfigNameInfoIdx {
-#define X(Enum)       Enum,
-    X_ENUMS
+#define X(Enum) Enum,
+	X_ENUMS
 #undef X
-	MAX_CONFIG_INFO_IDX
+	MAX_CONFIG_INFO_IDX,
 } eConfigNameInfoIdx;
 
 static const char* ConfigInfoStrs[] =
 {
 #define X(String) MAKE_STRINGIZE(String),
-    X_ENUMS
+	X_ENUMS
 #undef X
 };
 
@@ -156,18 +156,18 @@ typedef enum _DualTiltMode {
 	DUAL_TILT_REAR_UW,
 	DUAL_TILT_REAR_TELE,
 	DUAL_TILT_FRONT,
-	DUAL_TILT_TOF_REAR ,
+	DUAL_TILT_TOF_REAR,
 	DUAL_TILT_TOF_REAR2,
 	DUAL_TILT_TOF_REAR3,
 	DUAL_TILT_TOF_FRONT,
-	DUAL_TILT_MAX
+	DUAL_TILT_MAX,
 } eDualTiltMode;
 
-#define MaximumCustomStringLength		(25)	//	should have the same value in chivendortag.h, camxpropertydefs.h
+#define MaximumCustomStringLength               (25) //	should have the same value in chivendortag.h, camxpropertydefs.h
 
 typedef struct _cam_eeprom_configInfo_t {
-	uint32_t    isSet;
-	uint32_t    value;
+	uint32_t isSet;
+	uint32_t value;
 } ConfigInfo_t;
 
 typedef enum _MainOrSub {
@@ -215,11 +215,11 @@ typedef struct _cam_eeprom_module_ver_t {
 } ModuleVer_t;
 
 typedef struct _cam_eeprom_module_info_t {
-	ModuleVer_t         mVer;
-	uint32_t            type;
-	uint8_t             mapVer;
-	eMainSub            M_or_S;
-	char                typeStr[FROM_MODULE_FW_INFO_SIZE];
+	ModuleVer_t mVer;
+	uint32_t type;
+	uint8_t mapVer;
+	eMainSub M_or_S;
+	char typeStr[FROM_MODULE_FW_INFO_SIZE];
 } ModuleInfo_t;
 
 typedef enum _AfOffsetIdx {
@@ -233,12 +233,12 @@ typedef enum _AfOffsetIdx {
 	AF_CAL_M6_IDX,
 	AF_CAL_M7_IDX,
 	AF_CAL_M8_IDX,
-	AF_CAL_IDX_MAX
+	AF_CAL_IDX_MAX,
 } eAfOffsetIdx;
 
 typedef struct _cam_eeprom_af_idx_t {
 	eAfOffsetIdx idx;
-	uint32_t     offset;
+	uint32_t offset;
 } AfIdx_t;
 
 #if defined (CONFIG_SEC_M52XQ_PROJECT) || defined (CONFIG_SEC_GTS7FEWIFI_PROJECT) || defined(CONFIG_SEC_A73XQ_PROJECT) || defined(CONFIG_SEC_XCOVERPRO2_PROJECT) || defined(CONFIG_SEC_GTACT4PRO_PROJECT) || defined(CONFIG_SEC_GTACT4PROWIFI_PROJECT)
@@ -522,7 +522,6 @@ extern uint8_t front_tof_dual_cal[FRONT_TOF_DUAL_CAL_SIZE + 1];
 extern DualTilt_t front_tof_dual;
 #endif
 
-
 enum cam_eeprom_state {
 	CAM_EEPROM_INIT,
 	CAM_EEPROM_ACQUIRE,
@@ -684,10 +683,10 @@ struct cam_eeprom_ctrl_t {
 	uint32_t is_supported;
 };
 
-typedef enum{
+typedef enum {
 	EEPROM_FW_VER = 1,
 	PHONE_FW_VER,
-	LOAD_FW_VER
+	LOAD_FW_VER,
 } cam_eeprom_fw_version_idx;
 
 int32_t cam_eeprom_update_i2c_info(struct cam_eeprom_ctrl_t *e_ctrl,

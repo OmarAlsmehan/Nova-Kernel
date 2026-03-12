@@ -1234,7 +1234,7 @@ static ssize_t fuse_dev_do_read(struct fuse_dev *fud, struct file *file,
 			   fc->max_write))
 		return -EINVAL;
 
- 	/* @fs.sec -- 51ab84ba5e7a5c06d72ac60a9679ac69 -- */
+	/* @fs.sec -- 51ab84ba5e7a5c06d72ac60a9679ac69 -- */
 	if (!(current->flags & PF_MEMALLOC_NOFS))
 		memalloc_nofs_save();
 

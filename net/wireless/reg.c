@@ -3962,11 +3962,13 @@ void regulatory_propagate_dfs_state(struct wiphy *wiphy,
 #ifdef CONFIG_BATTERY_SAMSUNG
 extern unsigned int lpcharge;
 #endif
+
 static int __init regulatory_init_db(void)
 {
 	int err;
+
 #ifdef CONFIG_BATTERY_SAMSUNG
-	if(lpcharge) {
+	if (lpcharge) {
 		pr_info("%s: skip regulatory_init_db due to lpm mode.\n", __func__);
 		return 0;
 	}
@@ -4021,7 +4023,7 @@ late_initcall(regulatory_init_db);
 int __init regulatory_init(void)
 {
 #ifdef CONFIG_BATTERY_SAMSUNG
-	if(lpcharge) {
+	if (lpcharge) {
 		pr_info("%s: skip regulatory_init due to lpm mode.\n", __func__);
 		spin_lock_init(&reg_requests_lock);
 		spin_lock_init(&reg_pending_beacons_lock);

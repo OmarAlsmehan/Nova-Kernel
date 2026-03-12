@@ -278,6 +278,7 @@ static int propagate_one(struct mount *m)
 		if (IS_MNT_SHARED(m))
 			type |= CL_MAKE_SHARED;
 	}
+
 #ifdef CONFIG_KDP_NS
 	child = copy_tree(last_source, ((struct kdp_mount *)last_source)->mnt->mnt_root, type);
 #else

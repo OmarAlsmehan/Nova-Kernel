@@ -127,7 +127,7 @@ static int dsi_panel_gpio_request(struct dsi_panel *panel)
 			 * so make not to return error for binding.
 			 */
 			if (!strcmp(panel->name, "ss_dsi_panel_PBA_BOOTING_FHD") ||
-				!strcmp(panel->name, "ss_dsi_panel_PBA_BOOTING_FHD_DSI1")) {
+			    !strcmp(panel->name, "ss_dsi_panel_PBA_BOOTING_FHD_DSI1")) {
 				DSI_ERR("PBA booting, skip to parse vreg\n");
 				rc = 0;
 			}
@@ -260,7 +260,6 @@ static int dsi_panel_reset(struct dsi_panel *panel)
 	int rc = 0;
 	struct dsi_panel_reset_config *r_config = &panel->reset_config;
 	int i;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd = panel->panel_private;
 
@@ -269,6 +268,7 @@ static int dsi_panel_reset(struct dsi_panel *panel)
 		goto exit;
 	}
 #endif
+
 	if (gpio_is_valid(panel->reset_config.disp_en_gpio)) {
 		rc = gpio_direction_output(panel->reset_config.disp_en_gpio, 1);
 		if (rc) {
@@ -366,7 +366,7 @@ static int dsi_panel_reset_regulator(struct dsi_panel *panel, bool enable)
 		goto exit;
 	}
 
-	if (enable) { /* Enable RESET with sequence*/
+	if (enable) { /* Enable RESET with sequence */
 		pre_on_ms = vreg->pre_on_sleep;
 		post_on_ms = vreg->post_on_sleep;
 
@@ -523,7 +523,6 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
 #endif
 {
 	int rc = 0;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd = panel->panel_private;
 
@@ -562,7 +561,7 @@ static int dsi_panel_power_on(struct dsi_panel *panel)
 		rc = dsi_pwr_enable_regulator(&panel->power_info, true);
 		if (rc) {
 			DSI_ERR("[%s] failed to enable vregs, rc=%d\n",
-					panel->name, rc);
+				panel->name, rc);
 			goto exit;
 		}
 	}
@@ -635,7 +634,6 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 #endif
 {
 	int rc = 0;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd = panel->panel_private;
 
@@ -661,9 +659,9 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 		}
 	}
 
-    if (vdd->dtsi_data.samsung_dsi_off_reset_delay)
-        usleep_range(vdd->dtsi_data.samsung_dsi_off_reset_delay,
-                vdd->dtsi_data.samsung_dsi_off_reset_delay);
+	if (vdd->dtsi_data.samsung_dsi_off_reset_delay)
+		usleep_range(vdd->dtsi_data.samsung_dsi_off_reset_delay,
+			vdd->dtsi_data.samsung_dsi_off_reset_delay);
 
 	/* Reset regulator off when aot_reset_regulator enabled */
 	if (vdd->aot_reset_regulator || vdd->aot_reset_regulator_late) {
@@ -672,7 +670,7 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 			DSI_ERR("[%s] failed to off reset regulator, rc=%d\n",
 				panel->name, rc);
 		}
-	} else	/* AOT disable on factory binary. */
+	} else /* AOT disable on factory binary. */
 		if (!vdd->aot_enable || vdd->is_factory_mode)
 			if (gpio_is_valid(panel->reset_config.reset_gpio))
 				gpio_set_value(panel->reset_config.reset_gpio, 0);
@@ -706,7 +704,7 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 		rc = dsi_pwr_enable_regulator(&panel->power_info, false);
 		if (rc)
 			DSI_ERR("[%s] failed to enable vregs, rc=%d\n",
-					panel->name, rc);
+				panel->name, rc);
 	}
 
 	ss_panel_power_off_post(panel->panel_private);
@@ -737,7 +735,6 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 	struct dsi_display_mode *mode;
 #endif
 	const struct mipi_dsi_host_ops *ops = panel->host->ops;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd;
 	struct dsi_panel_cmd_set *set;
@@ -745,7 +742,7 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 	size_t tot_tx_len = 0;
 	int retry = 5;
 
-	/* Null check before use*/
+	/* Null check before use */
 	if (!panel->panel_private)
 		return -EINVAL;
 	vdd = panel->panel_private;
@@ -771,11 +768,11 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 	if (unlikely(vdd->exclusive_tx.enable &&
 			!set->exclusive_pass)) {
 		LCD_INFO(vdd, "[SDE] %s: wait.. cmd[%d]=%s\n", __func__,
-				type, ss_get_cmd_name(type));
+			type, ss_get_cmd_name(type));
 		wait_event(vdd->exclusive_tx.ex_tx_waitq,
-				!vdd->exclusive_tx.enable);
+			!vdd->exclusive_tx.enable);
 		LCD_INFO(vdd, "[SDE] %s: pass, cmd[%d]=%s\n", __func__,
-				type, ss_get_cmd_name(type));
+			type, ss_get_cmd_name(type));
 	}
 	mutex_lock(&vdd->cmd_lock);
 #else
@@ -866,7 +863,6 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 		while (retry-- >= 0) {
 #endif
-
 		len = ops->transfer(panel->host, &cmds->msg);
 		if (len < 0) {
 			rc = len;
@@ -878,14 +874,14 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 			goto error;
 		}
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-			else {
-				retry = 5;
-				break;
-			}
+		else {
+			retry = 5;
+			break;
+		}
 		}
 
 		if (retry < 0) {
-			if(!vdd->panel_dead)
+			if (!vdd->panel_dead)
 				SDE_DBG_DUMP("sde", "dsi0_ctrl", "dsi0_phy", "dsi1_ctrl",
 					"dsi1_phy", "vbif", "dbg_bus",
 					"vbif_dbg_bus", "panic");
@@ -2271,7 +2267,7 @@ int dsi_panel_get_cmd_pkt_count(const char *data, u32 length, u32 *cnt)
 		if (packet_length > length) {
 			DSI_ERR("format error\n");
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-			DSI_ERR("***** %d th mipi cmd line's count is wrong!!! *****\n", (count+1));
+			DSI_ERR("***** %d th mipi cmd line's count is wrong!!! *****\n", (count + 1));
 #endif
 			return -EINVAL;
 		}
@@ -2511,9 +2507,8 @@ error_free_mem:
 	cmd->cmds = NULL;
 error:
 	return rc;
-
 }
-#endif  /* #if defined(CONFIG_DISPLAY_SAMSUNG)*/
+#endif /* #if defined(CONFIG_DISPLAY_SAMSUNG) */
 
 static int dsi_panel_parse_cmd_sets(
 		struct dsi_display_mode_priv_info *priv_info,
@@ -2727,6 +2722,7 @@ static int dsi_panel_parse_jitter_config(
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 bool pba_regulator_control_ss;
 #endif
+
 static int dsi_panel_parse_power_cfg(struct dsi_panel *panel)
 {
 	int rc = 0;
@@ -2754,8 +2750,8 @@ static int dsi_panel_parse_power_cfg(struct dsi_panel *panel)
 	 * intead of ss_panel_attach_get().
 	 */
 	if ((!strcmp(panel->name, "ss_dsi_panel_PBA_BOOTING_FHD") ||
-		!strcmp(panel->name, "ss_dsi_panel_PBA_BOOTING_FHD_DSI1"))
-		&& !pba_regulator_control_ss) {
+	    !strcmp(panel->name, "ss_dsi_panel_PBA_BOOTING_FHD_DSI1"))
+	    && !pba_regulator_control_ss) {
 		LCD_INFO(vdd, "PBA booting, skip to parse vreg\n");
 		goto error;
 	}
@@ -4794,6 +4790,7 @@ int dsi_panel_get_mode(struct dsi_panel *panel,
 			mode->panel_mode = panel->panel_mode;
 		}
 	}
+
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	vdd = panel->panel_private;
 	vdd->num_of_intf = mode->priv_info->topology.num_intf;
@@ -4817,7 +4814,6 @@ int dsi_panel_get_host_cfg_for_mode(struct dsi_panel *panel,
 {
 	int rc = 0;
 	struct dsi_dyn_clk_caps *dyn_clk_caps = &panel->dyn_clk_caps;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd;
 #endif
@@ -4899,7 +4895,6 @@ int dsi_panel_update_pps(struct dsi_panel *panel)
 	int rc = 0;
 	struct dsi_panel_cmd_set *set = NULL;
 	struct dsi_display_mode_priv_info *priv_info = NULL;
-
 	// ksj TODO: sm8350 doesn't use qc pps.. apply with same concept...
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd = NULL;
@@ -4948,7 +4943,7 @@ int dsi_panel_update_pps(struct dsi_panel *panel)
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	vdd = panel->panel_private;
 	if (vdd->no_qcom_pps == true) {
-		for (rc=0; rc  < 9/*(set->cmds->msg->tx_len)*/; rc++) {
+		for (rc = 0; rc < 9/*(set->cmds->msg->tx_len)*/; rc++) {
 			DSI_INFO("Qcom PPS [%2x %2x %2x %2x %2x %2x %2x %2x %2x %2x]\n",
 				set->cmds->ss_txbuf[0+10*rc], set->cmds->ss_txbuf[1+10*rc],
 				set->cmds->ss_txbuf[2+10*rc], set->cmds->ss_txbuf[3+10*rc],
@@ -5122,14 +5117,14 @@ int wait_tcon_ready(struct dsi_panel *panel)
 		}
 		usleep_range(1000, 1010);
 	}
-	LCD_INFO(vdd, "ANAPASS DDI: -: tcon_rdy val: %d, wait_time: %d[cnt/ms]\n", gpio_get_value(vdd->dtsi_data.samsung_tcon_rdy_gpio), i+200);
+	LCD_INFO(vdd, "ANAPASS DDI: -: tcon_rdy val: %d, wait_time: %d[cnt/ms]\n", gpio_get_value(vdd->dtsi_data.samsung_tcon_rdy_gpio), i + 200);
 
 	if (vdd->dtsi_data.samsung_delay_after_tcon_rdy) {
 		LCD_INFO(vdd, "Reset after Tcon Ready (%d)\n", vdd->dtsi_data.samsung_delay_after_tcon_rdy);
 		if (vdd->dtsi_data.samsung_delay_after_tcon_rdy >= 100)
 			msleep(vdd->dtsi_data.samsung_delay_after_tcon_rdy);
 		else
-			usleep_range(1000*vdd->dtsi_data.samsung_delay_after_tcon_rdy, 1000*vdd->dtsi_data.samsung_delay_after_tcon_rdy);
+			usleep_range(1000*vdd->dtsi_data.samsung_delay_after_tcon_rdy, 1000 * vdd->dtsi_data.samsung_delay_after_tcon_rdy);
 	}
 
 	if (i == max_wait_cnt)
@@ -5189,7 +5184,7 @@ void force_sustain_lp11_for_sleep(void)
 
 	if (vdd && vdd->lp11_sleep_ms_time) {
 		usleep_range(vdd->lp11_sleep_ms_time * 1000,
-				vdd->lp11_sleep_ms_time * 1000);
+			vdd->lp11_sleep_ms_time * 1000);
 		LCD_DEBUG(vdd, "lp11_sleep_ms_time : %d ms\n",
 			vdd->lp11_sleep_ms_time);
 	}
@@ -5633,7 +5628,6 @@ int dsi_panel_post_switch(struct dsi_panel *panel)
 int dsi_panel_enable(struct dsi_panel *panel)
 {
 	int rc = 0;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd;
 #endif
@@ -5664,7 +5658,7 @@ int dsi_panel_enable(struct dsi_panel *panel)
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_OFF);
 		if (rc) {
 			LCD_ERR(vdd, "[%s] failed to send DSI_CMD_SET_OFF cmds, rc=%d\n",
-			   panel->name, rc);
+				panel->name, rc);
 		}
 		vdd->poc_driver.need_sleep_in = false;
 	}
@@ -5673,7 +5667,7 @@ int dsi_panel_enable(struct dsi_panel *panel)
 	vdd->sleep_out_time = ktime_get();
 	LCD_INFO(vdd, "tx on_cmd +\n");
 
-	/* skip cmds during splash booting : from 7225*/
+	/* skip cmds during splash booting : from 7225 */
 	if (vdd->skip_cmd_set_on_splash_enabled && vdd->samsung_splash_enabled) {
 		LCD_INFO(vdd, "skip send DSI_CMD_SET_ON during splash booting\n");
 		rc = 0;

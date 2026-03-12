@@ -1780,7 +1780,6 @@ static inline int task_integrity_apply(unsigned long clone_flags,
 {
 	return 0;
 }
-
 #endif
 
 static inline void rcu_copy_process(struct task_struct *p)

@@ -579,11 +579,11 @@ static int verity_verify_io(struct dm_verity_io *io)
 			}
 #ifdef SEC_HEX_DEBUG
 			if (verity_handle_err_hex_debug(v, DM_VERITY_BLOCK_TYPE_DATA,
-					cur_block, io, &start)) {
+					   cur_block, io, &start)) {
 				add_corrupted_blks();
 #else
 			if (verity_handle_err(v, DM_VERITY_BLOCK_TYPE_DATA,
-					cur_block)) {
+					   cur_block)) {
 #endif
 				return -EIO;
 			}
@@ -1300,7 +1300,6 @@ retry_dev2:
 	return 0;
 
 bad:
-
 #ifdef SEC_HEX_DEBUG
 	add_fec_off_cnt("bad");
 #endif

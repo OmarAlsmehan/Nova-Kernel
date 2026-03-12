@@ -143,6 +143,7 @@ void __put_cred(struct cred *cred)
 #ifdef CONFIG_KDP
 	int ret = 0;
 #endif
+
 	kdebug("__put_cred(%p{%d,%d})", cred,
 	       atomic_read(&cred->usage),
 	       read_cred_subscribers(cred));
@@ -162,7 +163,7 @@ void __put_cred(struct cred *cred)
 	cred->magic = CRED_MAGIC_DEAD;
 	cred->put_addr = __builtin_return_address(0);
 #endif
-	
+
 #ifdef CONFIG_KDP
 	if(cred == current->cred)
 		printk("[KDP] cred->security: 0x%lx\n", cred->security);
@@ -492,6 +493,7 @@ int commit_creds(struct cred *new)
 #ifdef CONFIG_KDP
 	int ret = 0;
 #endif
+
 	kdebug("commit_creds(%p{%d,%d})", new,
 	       atomic_read(&new->usage),
 	       read_cred_subscribers(new));
@@ -580,12 +582,14 @@ int commit_creds(struct cred *new)
 	    !gid_eq(new->sgid,  old->sgid) ||
 	    !gid_eq(new->fsgid, old->fsgid))
 		proc_id_connector(task, PROC_EVENT_GID);
+
 #ifdef CONFIG_KDP
 	if (kdp_enable) {
 		put_cred(new);
 		put_cred(new);
 	}
 #endif
+
 	/* release the old obj and subj refs both */
 	put_cred(old);
 	put_cred(old);
@@ -605,6 +609,7 @@ void abort_creds(struct cred *new)
 #ifdef CONFIG_KDP
 	int ret = 0;
 #endif
+
 	kdebug("abort_creds(%p{%d,%d})", new,
 	       atomic_read(&new->usage),
 	       read_cred_subscribers(new));
@@ -636,12 +641,14 @@ EXPORT_SYMBOL(abort_creds);
 const struct cred *override_creds(const struct cred *new)
 {
 	const struct cred *old = current->cred;
+
 	kdebug("override_creds(%p{%d,%d})", new,
 	       atomic_read(&new->usage),
 	       read_cred_subscribers(new));
 
 	validate_creds(old);
 	validate_creds(new);
+
 	/*
 	 * NOTE! This uses 'get_new_cred()' rather than 'get_cred()'.
 	 *

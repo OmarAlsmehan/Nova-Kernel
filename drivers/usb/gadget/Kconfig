@@ -459,11 +459,11 @@ config USB_CONFIGFS_F_FS
 	  mass storage) and other are implemented in user space.
 
 config F_CONN_GADGET_DEBUGFS
-      bool "Conn gadget debugfs"
-      depends on USB_CONFIGFS_F_CONN_GADGET
-      default n
-      help
-        SydeSync Debugging
+	bool "Conn gadget debugfs"
+	depends on USB_CONFIGFS_F_CONN_GADGET
+	default n
+	help
+	  SydeSync Debugging
 
 config USB_CONFIGFS_F_ACC
 	bool "Accessory gadget"
@@ -694,10 +694,11 @@ source "drivers/usb/gadget/legacy/Kconfig"
 
 config USB_DUN_SUPPORT
 	bool "DUN support function"
-        depends on USB_F_ACM
+	depends on USB_F_ACM
 	help
 	  Provides USB modem serial driver.
 	  This function makes connection to acm from data router.
 	  It uses misc register.
 	  Support fops : open, close, release, read, poll, llseek, ioctl
+
 endif # USB_GADGET

@@ -247,7 +247,6 @@ static int32_t cam_actuator_driver_i2c_probe(struct i2c_client *client,
 	a_ctrl->last_flush_req = 0;
 	a_ctrl->cam_act_state = CAM_ACTUATOR_INIT;
 
-
 #if defined(CONFIG_SAMSUNG_OIS_MCU_STM32) || defined(CONFIG_SAMSUNG_OIS_RUMBA_S4) || defined(CONFIG_SAMSUNG_ACTUATOR_PREVENT_SHAKING)
 	if (a_ctrl->soc_info.index < SEC_SENSOR_ID_MAX)
 		g_a_ctrls[a_ctrl->soc_info.index] = a_ctrl;

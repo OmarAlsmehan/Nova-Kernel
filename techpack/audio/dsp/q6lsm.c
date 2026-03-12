@@ -2130,7 +2130,6 @@ static int q6lsm_mmapcallback(struct apr_client_data *data, void *priv)
 		return 0;
 	}
 	
-
 	/*
 	The payload_size can be either 4 or 8 bytes.
 	It has to be verified whether the payload_size is

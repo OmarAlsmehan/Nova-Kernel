@@ -886,11 +886,11 @@ static void secdp_parse_misc(struct dp_parser *parser)
 	secdp_parse_phy_param(parser);
 
 	parser->cc_dir_inv = of_property_read_bool(dev->of_node,
-			"secdp,cc-dir-inv");
+		"secdp,cc-dir-inv");
 	DP_DEBUG("secdp,cc-dir-inv: %d\n", parser->cc_dir_inv);
 
 	parser->aux_sel_inv = of_property_read_bool(dev->of_node,
-			"secdp,aux-sel-inv");
+		"secdp,aux-sel-inv");
 	DP_DEBUG("secdp,aux-sel-inv: %d\n", parser->aux_sel_inv);
 
 	data = of_get_property(of_node, "secdp,redrv", &len);
@@ -914,11 +914,11 @@ static void secdp_parse_misc(struct dp_parser *parser)
 		secdp_dex_res_to_string(parser->dex_dft_res));
 
 	parser->prefer_support = of_property_read_bool(dev->of_node,
-			"secdp,prefer-res");
+		"secdp,prefer-res");
 	DP_DEBUG("secdp,prefer-res: %d\n", parser->prefer_support);
 
 	parser->mrr_fps_nolimit = of_property_read_bool(dev->of_node,
-			"secdp,mrr-fps-nolimit");
+		"secdp,mrr-fps-nolimit");
 	DP_DEBUG("secdp,mrr_fps_nolimit: %d\n", parser->mrr_fps_nolimit);
 }
 
@@ -1132,7 +1132,6 @@ error:
 	return -EINVAL;
 }
 
-
 static void secdp_parse_phy_param(struct dp_parser *parser)
 {
 	_secdp_parse_phy_old(parser);
@@ -1188,7 +1187,7 @@ static u8 const dp_swing_hbr_rbr[MAX_VOLTAGE_LEVELS][MAX_PRE_EMP_LEVELS] = {
 };
 
 static void secdp_set_default_phy_param(struct dp_parser *parser,
-			enum secdp_hw_ver_t hw, enum secdp_phy_param_t vxpx)
+		enum secdp_hw_ver_t hw, enum secdp_phy_param_t vxpx)
 {
 	int i, j;
 
@@ -1231,7 +1230,7 @@ static void secdp_set_default_phy_param(struct dp_parser *parser,
 
 #if defined(CONFIG_SEC_DISPLAYPORT_ENG)
 static u8 *_secdp_get_phy_param(enum secdp_hw_ver_t hw,
-			enum secdp_phy_param_t vxpx, int idx)
+		enum secdp_phy_param_t vxpx, int idx)
 {
 	struct dp_parser *parser = g_dp_parser;
 	u8 *val = NULL;
@@ -1285,14 +1284,14 @@ static u8 *_secdp_get_phy_param(enum secdp_hw_ver_t hw,
 }
 
 int secdp_parse_vxpx_show(enum secdp_hw_ver_t hw,
-			enum secdp_phy_param_t vxpx, char *buf)
+		enum secdp_phy_param_t vxpx, char *buf)
 {
 	u8 *val[MAX_VOLTAGE_LEVELS];
 	int i, rc = 0;
 
 	rc += scnprintf(buf + rc, PAGE_SIZE - rc, "\n%s | %s\n=====\n",
-				secdp_hw_to_string(hw),
-				secdp_phy_type_to_string(vxpx));
+		secdp_hw_to_string(hw),
+		secdp_phy_type_to_string(vxpx));
 
 	for (i = 0; i < MAX_VOLTAGE_LEVELS; i++) {
 		val[i] = _secdp_get_phy_param(hw, vxpx, i);
@@ -1300,8 +1299,8 @@ int secdp_parse_vxpx_show(enum secdp_hw_ver_t hw,
 			break;
 
 		rc += scnprintf(buf + rc, PAGE_SIZE - rc,
-				"%02x,%02x,%02x,%02x",
-				val[i][0], val[i][1], val[i][2], val[i][3]);
+			"%02x,%02x,%02x,%02x",
+			val[i][0], val[i][1], val[i][2], val[i][3]);
 
 		if (i < MAX_VOLTAGE_LEVELS - 1)
 			rc += scnprintf(buf + rc, PAGE_SIZE - rc, ",\n");
@@ -1313,13 +1312,13 @@ int secdp_parse_vxpx_show(enum secdp_hw_ver_t hw,
 }
 
 int secdp_parse_vxpx_store(enum secdp_hw_ver_t hw,
-			enum secdp_phy_param_t vxpx, char *buf)
+		enum secdp_phy_param_t vxpx, char *buf)
 {
 	struct dp_parser *parser = g_dp_parser;
-	u8   *val[MAX_VOLTAGE_LEVELS];
+	u8 *val[MAX_VOLTAGE_LEVELS];
 	char *tok;
-	u32  value;
-	int  i, j, rc = 0;
+	u32 value;
+	int i, j, rc = 0;
 
 	if (!strncmp(buf, "reset_all", strlen("reset_all"))) {
 		DP_DEBUG("[all] reset!\n");
@@ -1364,7 +1363,7 @@ end:
 
 int secdp_show_phy_param(char *buf)
 {
-	int  hw, rc = 0;
+	int hw, rc = 0;
 
 	for (hw = 0; hw < DP_HW_MAX; hw++) {
 		rc += secdp_parse_vxpx_show(hw, DP_PARAM_PX, buf + rc);
@@ -1750,7 +1749,7 @@ static u8 const ps5169_hbr3_eq1[MAX_PS5169_SWING_LEVELS][MAX_PS5169_EMP_LEVELS] 
 };
 
 static void secdp_set_default_ps5169_param(struct dp_parser *parser,
-			enum secdp_ps5169_eq_t eq, enum secdp_ps5169_link_rate_t link_rate)
+		enum secdp_ps5169_eq_t eq, enum secdp_ps5169_link_rate_t link_rate)
 {
 	int i, j;
 
@@ -1798,7 +1797,7 @@ static void secdp_set_default_ps5169_param(struct dp_parser *parser,
 
 #if defined(CONFIG_SEC_DISPLAYPORT_ENG)
 static u8 *_secdp_get_ps5169_param(enum secdp_ps5169_eq_t eq,
-			enum secdp_ps5169_link_rate_t link_rate, int idx)
+		enum secdp_ps5169_link_rate_t link_rate, int idx)
 {
 	struct dp_parser *parser = g_dp_parser;
 	u8 *val = NULL;
@@ -1857,8 +1856,8 @@ int secdp_parse_ps5169_show(enum secdp_ps5169_eq_t eq,
 	int i, rc = 0;
 
 	rc += scnprintf(buf + rc, PAGE_SIZE - rc, "\n%s | %s\n=====\n",
-				secdp_ps5169_eq_to_string(eq),
-				secdp_ps5169_rate_to_string(link_rate));
+		secdp_ps5169_eq_to_string(eq),
+		secdp_ps5169_rate_to_string(link_rate));
 
 	for (i = 0; i < MAX_PS5169_SWING_LEVELS; i++) {
 		val[i] = _secdp_get_ps5169_param(eq, link_rate, i);
@@ -1866,8 +1865,8 @@ int secdp_parse_ps5169_show(enum secdp_ps5169_eq_t eq,
 			break;
 
 		rc += scnprintf(buf + rc, PAGE_SIZE - rc,
-				"%02x,%02x,%02x,%02x",
-				val[i][0], val[i][1], val[i][2], val[i][3]);
+		"%02x,%02x,%02x,%02x",
+		val[i][0], val[i][1], val[i][2], val[i][3]);
 
 		if (i < MAX_PS5169_SWING_LEVELS - 1)
 			rc += scnprintf(buf + rc, PAGE_SIZE - rc, ",\n");
@@ -1882,10 +1881,10 @@ int secdp_parse_ps5169_store(enum secdp_ps5169_eq_t eq,
 		enum secdp_ps5169_link_rate_t link_rate, char *buf)
 {
 	struct dp_parser *parser = g_dp_parser;
-	u8   *val[MAX_PS5169_SWING_LEVELS];
+	u8 *val[MAX_PS5169_SWING_LEVELS];
 	char *tok;
-	u32  value;
-	int  i, j, rc = 0;
+	u32 value;
+	int i, j, rc = 0;
 
 	if (!strncmp(buf, "reset_all", strlen("reset_all"))) {
 		DP_DEBUG("[all] reset!\n");
@@ -1930,7 +1929,7 @@ end:
 
 int secdp_show_ps5169_param(char *buf)
 {
-	int  eq, rc = 0;
+	int eq, rc = 0;
 
 	for (eq = 0; eq < DP_PS5169_EQ_MAX; eq++) {
 		rc += secdp_parse_ps5169_show(eq, DP_PS5169_RATE_RBR, buf + rc);
@@ -1941,8 +1940,8 @@ int secdp_show_ps5169_param(char *buf)
 
 	return rc;
 }
-#endif/*CONFIG_SEC_DISPLAYPORT_ENG*/
-#endif/*CONFIG_COMBO_REDRIVER_PS5169*/
+#endif /* CONFIG_SEC_DISPLAYPORT_ENG */
+#endif /* CONFIG_COMBO_REDRIVER_PS5169 */
 
 static int dp_parser_parse(struct dp_parser *parser)
 {

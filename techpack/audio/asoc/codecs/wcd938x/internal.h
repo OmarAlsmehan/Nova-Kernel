@@ -145,7 +145,6 @@ struct wcd938x_pdata {
 #ifdef CONFIG_SND_SOC_IMPED_SENSING
 	struct wcd938x_gain_table imp_table[MAX_IMPEDANCE_TABLE];
 #endif
-
 };
 
 struct wcd_ctrl_platform_data {

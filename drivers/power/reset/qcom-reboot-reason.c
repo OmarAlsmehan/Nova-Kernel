@@ -111,7 +111,7 @@ static int qcom_reboot_reason_probe(struct platform_device *pdev)
 		pon_reason = nvmem_cell_read(pon_nvmem, &len);
 		if (*pon_reason == 0x40) {	// #define PON_PBS_SMPL_RSN 0x0640
 			pr_info("pon_reason get nvmem 0x%02x\n", *pon_reason);
-#ifndef CONFIG_SEC_FACTORY			
+#ifndef CONFIG_SEC_FACTORY
 			panic("SMPL Occurred");
 #endif
 		}

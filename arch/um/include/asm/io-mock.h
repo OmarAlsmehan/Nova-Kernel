@@ -40,8 +40,6 @@ DECLARE_FUNCTION_MOCK_VOID_RETURN(writeq,
 				  PARAMS(u64, const volatile void __iomem *));
 #endif /* CONFIG_64BIT */
 
-
-
 DECLARE_FUNCTION_MOCK(readb_relaxed,
 		      RETURNS(u8), PARAMS(const volatile void __iomem *));
 
@@ -69,6 +67,5 @@ DECLARE_FUNCTION_MOCK_VOID_RETURN(writel_relaxed,
 DECLARE_FUNCTION_MOCK_VOID_RETURN(writeq_relaxed,
 				  PARAMS(u64, const volatile void __iomem *));
 #endif /* CONFIG_64BIT */
-
 
 #endif /* _ASM_UM_IO_MOCK_H */

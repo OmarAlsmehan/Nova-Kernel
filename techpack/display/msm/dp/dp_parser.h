@@ -210,8 +210,8 @@ enum secdp_PS5169_voltage_type {
 	PHY_PS5169_SWING3,	/* 1.2 v, optional */
 	MAX_PS5169_SWING_LEVELS,
 };
-#endif/*CONFIG_COMBO_REDRIVER_PS5169*/
-#endif/*CONFIG_SEC_DISPLAYPORT*/
+#endif /* CONFIG_COMBO_REDRIVER_PS5169 */
+#endif /* CONFIG_SEC_DISPLAYPORT */
 
 /**
  * struct dp_parser - DP parser's data exposed to clients
@@ -289,8 +289,8 @@ struct dp_parser {
 	u8 ps5169_hbr2_eq1[MAX_PS5169_SWING_LEVELS][MAX_PS5169_EMP_LEVELS];
 	u8 ps5169_hbr3_eq0[MAX_PS5169_SWING_LEVELS][MAX_PS5169_EMP_LEVELS];
 	u8 ps5169_hbr3_eq1[MAX_PS5169_SWING_LEVELS][MAX_PS5169_EMP_LEVELS];
-#endif/*CONFIG_COMBO_REDRIVER_PS5169*/
-#endif/*CONFIG_SEC_DISPLAYPORT*/
+#endif /* CONFIG_COMBO_REDRIVER_PS5169 */
+#endif /* CONFIG_SEC_DISPLAYPORT */
 
 	int (*parse)(struct dp_parser *parser);
 	struct dp_io_data *(*get_io)(struct dp_parser *parser, char *name);

@@ -620,6 +620,7 @@ static void wcd_mbhc_adc_detect_plug_type(struct wcd_mbhc *mbhc)
 	u8 adc_en = 0;
 	int try_l = 0, try_r = 0;
 #endif
+
 	pr_debug("%s: enter\n", __func__);
 	WCD_MBHC_RSC_ASSERT_LOCKED(mbhc);
 
@@ -643,6 +644,7 @@ static void wcd_mbhc_adc_detect_plug_type(struct wcd_mbhc *mbhc)
 		pr_err("%s: Mic Bias is not enabled\n", __func__);
 		return;
 	}
+
 /* slow: Check L/R ADC value of each pin */
 #if defined(CONFIG_SND_SOC_WCD_MBHC_SLOW_DET)
 	/* Read legacy electircal detection and disable */
@@ -714,11 +716,11 @@ static void wcd_mbhc_adc_detect_plug_type(struct wcd_mbhc *mbhc)
 
 	/* enable MIC_CLAMP */
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_MIC_CLAMP_CTL, 2);
-#endif/* CONFIG_SND_SOC_WCD_MBHC_SLOW_DET */
+#endif /* CONFIG_SND_SOC_WCD_MBHC_SLOW_DET */
+
 	/* Re-initialize button press completion object */
 	reinit_completion(&mbhc->btn_press_compl);
 	wcd_schedule_hs_detect_plug(mbhc, &mbhc->correct_plug_swch);
-
 	pr_debug("%s: leave\n", __func__);
 }
 
@@ -750,7 +752,7 @@ static int wcd_mbhc_get_plug_from_adc(struct wcd_mbhc *mbhc, int adc_result)
 #ifdef CONFIG_SEC_FACTORY
 			plug_type = MBHC_PLUG_TYPE_HEADSET;
 #else
-		plug_type = MBHC_PLUG_TYPE_HIGH_HPH;
+			plug_type = MBHC_PLUG_TYPE_HIGH_HPH;
 #endif
 	else
 		plug_type = MBHC_PLUG_TYPE_HEADSET;
@@ -816,7 +818,7 @@ static void wcd_correct_swch_plug(struct work_struct *work)
 	 * else start the 3 sec loop
 	 */
 	if (plug_type == MBHC_PLUG_TYPE_HEADSET ||
-		plug_type == MBHC_PLUG_TYPE_HEADPHONE) {
+	    plug_type == MBHC_PLUG_TYPE_HEADPHONE) {
 		if (mbhc->mbhc_cfg->detect_extn_cable &&
 			wcd_swch_level_remove(mbhc)) {
 			pr_info("%s: Skipping to report plug\n", __func__);
@@ -970,7 +972,7 @@ correct_plug_type:
 #ifdef CONFIG_SEC_FACTORY
 				plug_type = MBHC_PLUG_TYPE_HEADSET;
 #else
-			plug_type = MBHC_PLUG_TYPE_HIGH_HPH;
+				plug_type = MBHC_PLUG_TYPE_HIGH_HPH;
 #endif
 			else
 				plug_type = MBHC_PLUG_TYPE_HEADSET;
@@ -979,7 +981,7 @@ correct_plug_type:
 			pr_debug("%s: cable might be headset: %d\n", __func__,
 				 plug_type);
 			if ((plug_type != MBHC_PLUG_TYPE_GND_MIC_SWAP) &&
-				mbhc->mbhc_cfg->mbhc_spl_headset){
+			    mbhc->mbhc_cfg->mbhc_spl_headset){
 				plug_type = wcd_mbhc_get_plug_from_adc(
 						mbhc, output_mv);
 				if (!spl_hs_reported &&

@@ -3511,13 +3511,13 @@ int adm_open_v2(int port_id, int path, int rate, int channel_mode, int topology,
 
 #ifdef CONFIG_SEC_SND_ADAPTATION
 	if ((topology == VPM_TX_SM_LVVEFQ_COPP_TOPOLOGY) ||
-		(topology == VPM_TX_DM_LVVEFQ_COPP_TOPOLOGY) ||
-		(topology == VPM_TX_SM_LVSAFQ_COPP_TOPOLOGY) ||
-		(topology == VPM_TX_DM_LVSAFQ_COPP_TOPOLOGY) ||
-		(topology == VOICE_TX_DIAMONDVOICE_FVSAM_SM) ||
-		(topology == VOICE_TX_DIAMONDVOICE_FVSAM_DM) ||
-		(topology == VOICE_TX_DIAMONDVOICE_FVSAM_QM) ||
-		(topology == VOICE_TX_DIAMONDVOICE_FRSAM_DM))
+	    (topology == VPM_TX_DM_LVVEFQ_COPP_TOPOLOGY) ||
+	    (topology == VPM_TX_SM_LVSAFQ_COPP_TOPOLOGY) ||
+	    (topology == VPM_TX_DM_LVSAFQ_COPP_TOPOLOGY) ||
+	    (topology == VOICE_TX_DIAMONDVOICE_FVSAM_SM) ||
+	    (topology == VOICE_TX_DIAMONDVOICE_FVSAM_DM) ||
+	    (topology == VOICE_TX_DIAMONDVOICE_FVSAM_QM) ||
+	    (topology == VOICE_TX_DIAMONDVOICE_FRSAM_DM))
 		rate = 16000;
 #endif /* CONFIG_SEC_SND_ADAPTATION */
 

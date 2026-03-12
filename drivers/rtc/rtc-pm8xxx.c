@@ -89,12 +89,12 @@ struct pm8xxx_rtc {
 	struct device *rtc_dev;
 	spinlock_t ctrl_reg_lock;
 #if IS_ENABLED(CONFIG_RTC_AUTO_PWRON)
-	struct rtc_wkalrm   sapa;
-	struct alarm        check_poll;
-	struct work_struct  check_func;
+	struct rtc_wkalrm sapa;
+	struct alarm check_poll;
+	struct work_struct check_func;
 	struct wakeup_source *ws;
-	int                 lpm_mode;
-	unsigned char       triggered;
+	int lpm_mode;
+	unsigned char triggered;
 #endif
 };
 
@@ -352,7 +352,7 @@ static int pm8xxx_rtc_alarm_irq_enable(struct device *dev, unsigned int enable)
 #if IS_ENABLED(CONFIG_RTC_AUTO_PWRON)
 	pr_info("[SAPA] %s: Alarm irq=%d\n", __func__, enable);
 #endif
-	
+
 	spin_lock_irqsave(&rtc_dd->ctrl_reg_lock, irq_flags);
 
 	rc = regmap_read(rtc_dd->regmap, regs->alarm_ctrl, &ctrl_reg);
@@ -539,7 +539,7 @@ static void sapa_init(struct pm8xxx_rtc *rtc_dd)
 
 	rtc_dd->lpm_mode = lpcharge;
 	rtc_dd->triggered = 0;
-	
+
 	if (rtc_dd->lpm_mode && rtc_dd->sapa.enabled) {
 		rtc_dd->ws = wakeup_source_register(rtc_dd->rtc_dev, "SAPA");
 
@@ -786,7 +786,7 @@ static int pm8xxx_rtc_probe(struct platform_device *pdev)
 #if IS_ENABLED(CONFIG_RTC_AUTO_PWRON)
 	sapa_load_alarm(rtc_dd, rtc_dd->regs->alarm_ctrl);
 #endif
-	
+
 	/* Register the RTC device */
 	rtc_dd->rtc = devm_rtc_device_register(&pdev->dev, "pm8xxx_rtc",
 					       &pm8xxx_rtc_ops, THIS_MODULE);
@@ -834,7 +834,7 @@ static void pm8xxx_rtc_shutdown(struct platform_device *pdev)
 		pr_err("%s: rtc driver data not found\n", __func__);
 		return;
 	}
-	
+
 	sapa_exit(rtc_dd);
 }
 #endif

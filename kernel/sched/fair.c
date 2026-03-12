@@ -12427,7 +12427,6 @@ __init void init_sched_fair_class(void)
 }
 
 #ifdef CONFIG_SEC_PERF_MANAGER
-
 unsigned long get_task_util(struct task_struct *p)
 {
 	return task_util_est(p);
@@ -12439,7 +12438,6 @@ unsigned long get_max_capacity(int cpu)
 	return capacity_orig_of(cpu);
 }
 EXPORT_SYMBOL_GPL(get_max_capacity);
-
 #endif /* CONFIG_SEC_PERF_MANAGER */
 
 /*

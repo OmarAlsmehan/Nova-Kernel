@@ -87,7 +87,7 @@ enum driver_modules_status current_driver_status = DRIVER_MODULES_UNINITIALIZED;
 char ver_info[512] = {0,};
 char softap_info[512] = {0,};
 int dump_in_progress = 0;
-#define MACLOADER_TIMEOUT                 10000
+#define MACLOADER_TIMEOUT 10000
 #endif /* CONFIG_SEC_SS_CNSS2_FEATURE_SYSFS */
 
 static void cnss_set_plat_priv(struct platform_device *plat_dev,
@@ -3113,8 +3113,6 @@ static struct kobj_attribute sec_memdumpinfo_sysfs_attribute =
 static struct kobj_attribute sec_dump_in_progress_attribute =
 	__ATTR(dump_in_progress, 0660, show_dump_in_progress,
 	       store_dump_in_progress);
-
-
 
 static struct attribute *sec_sysfs_attrs[] = {
 	&sec_mac_addr_attribute.attr,

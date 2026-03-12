@@ -7125,6 +7125,7 @@ static int cirrus_amp_2_speaker(struct snd_soc_dapm_widget *w,
 
 	return 0;
 }
+
 static int cirrus_amp_1_speaker(struct snd_soc_dapm_widget *w,
 			  struct snd_kcontrol *kcontrol, int event)
 {
@@ -7140,6 +7141,7 @@ static int cirrus_amp_1_speaker(struct snd_soc_dapm_widget *w,
 
 	return 0;
 }
+
 static int cirrus_amp_0_speaker(struct snd_soc_dapm_widget *w,
 			  struct snd_kcontrol *kcontrol, int event)
 {
@@ -7305,6 +7307,7 @@ static int lahaina_tdm_cirrus_init(struct snd_soc_pcm_runtime *rtd)
 	return 0;
 }
 #endif
+
 static int lahaina_mi2s_cirrus_init(struct snd_soc_pcm_runtime *rtd)
 {
 	struct snd_soc_dai **codec_dais = rtd->codec_dais;
@@ -8088,7 +8091,6 @@ static struct snd_soc_dai_link msm_common_misc_fe_dai_links[] = {
 		SND_SOC_DAILINK_REG(q6audio_adaptation),
 	},
 #endif /* CONFIG_SEC_SND_ADAPTATION */
-
 };
 
 static struct snd_soc_dai_link msm_common_be_dai_links[] = {
@@ -9614,12 +9616,14 @@ static int msm_rx_tx_codec_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic3");
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic4");
 	snd_soc_dapm_ignore_suspend(dapm, "Analog Mic5");
+
 #ifdef CONFIG_WSA_MACRO
 	snd_soc_dapm_ignore_suspend(dapm, "WSA_SPK1 OUT");
 	snd_soc_dapm_ignore_suspend(dapm, "WSA_SPK2 OUT");
 	snd_soc_dapm_ignore_suspend(dapm, "WSA AIF VI");
 	snd_soc_dapm_ignore_suspend(dapm, "VIINPUT_WSA");
 #endif /* CONFIG_WSA_MACRO */
+
 #if IS_ENABLED(CONFIG_SND_SOC_CIRRUS_AMP)
 	snd_soc_dapm_ignore_suspend(dapm, "AMP0 SPK");
 	snd_soc_dapm_ignore_suspend(dapm, "AMP1 SPK");

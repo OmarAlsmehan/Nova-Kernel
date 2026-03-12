@@ -170,13 +170,11 @@ obj-$(CONFIG_DISPLAY_BUILD)	+= msm_drm.o
 
 obj-$(CONFIG_DRM_FBDEV_EMULATION) += msm_fbdev.o
 
-
 msm_drm-$(CONFIG_DISPLAY_SAMSUNG) += samsung/PBA_BOOTING/ss_dsi_panel_PBA_BOOTING_fhd.o
 msm_drm-$(CONFIG_PANEL_SW83109_WM6676Z21_FHD) += samsung/SW83109_WM6676Z21/ss_dsi_panel_SW83109_WM6676Z21.o
 msm_drm-$(CONFIG_PANEL_SW83109_BF067XMM_A73_FHD) += samsung/SW83109_BF067XMM_A73/ss_dsi_panel_SW83109_BF067XMM_A73.o
 msm_drm-$(CONFIG_PANEL_A73_S6E3FC3_AMB667BV01_FHD) += samsung/A73_S6E3FC3_AMB667BV01/A73_S6E3FC3_AMB667BV01_panel.o
 msm_drm-$(CONFIG_PANEL_S6E3HAB_AMB667AN01_A73_FHD) += samsung/S6E3HAB_AMB667AN01_A73/ss_dsi_panel_S6E3HAB_AMB667AN01_A73.o
-
 
 msm_drm-$(CONFIG_DISPLAY_SAMSUNG) += samsung/ss_dsi_panel_sysfs.o \
 	samsung/ss_dsi_panel_debug.o \
@@ -193,20 +191,17 @@ msm_drm-$(CONFIG_DISPLAY_SAMSUNG) += samsung/ss_dsi_panel_sysfs.o \
 
 ifeq ($(CONFIG_SEC_KUNIT), y)
 ifeq ($(CONFIG_UML), y)
-
 # To report to Sherlock server, add GCOV_PROFILE_($target_file_name)
 GCOV_PROFILE_ss_dsi_panel_common.o := $(CONFIG_SEC_KUNIT)
 GCOV_PROFILE_ss_dsi_panel_debug.o := $(CONFIG_SEC_KUNIT)
 endif
 endif
 
-
 # LEGO
 subdir-ccflags-$(CONFIG_SEC_KUNIT) += \
 	-Wno-unused-variable \
 	-Wno-unused-function \
 	-Wno-format
-
 
 msm_drm-$(CONFIG_DISPLAY_SAMSUNG) += samsung/SELF_DISPLAY/self_display_6W3.o \
 	samsung/SELF_DISPLAY/self_display_FA7.o \
@@ -230,7 +225,6 @@ msm_drm-$(CONFIG_DISPLAY_SAMSUNG) += samsung/SELF_DISPLAY/self_display_6W3.o \
 	samsung/SELF_DISPLAY/self_display_A73_S6E3FC3_AMB667BV01.o \
 	samsung/SELF_DISPLAY/self_display_FC3.o \
 	samsung/SELF_DISPLAY/self_display_FAC_AMF670BS01.o
-
 
 msm_drm-$(CONFIG_DISPLAY_SAMSUNG) += samsung/MAFPC/ss_dsi_mafpc_FAB.o \
 	samsung/MAFPC/ss_dsi_mafpc_HAB.o \

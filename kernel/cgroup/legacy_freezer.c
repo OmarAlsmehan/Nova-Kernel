@@ -464,7 +464,7 @@ static int freezer_can_attach(struct cgroup_taskset *tset)
 	cgroup_taskset_for_each(task, css, tset) {
 		tcred = __task_cred(task);
 
-		//Only system process and root have the permission.
+		// Only system process and root have the permission.
 		if ((current != task) && !(cred->euid.val == 1000 || capable(CAP_SYS_ADMIN))) {
 			pr_err("Permission problem\n");
 			return -EACCES;
@@ -513,7 +513,7 @@ struct cgroup_subsys freezer_cgrp_subsys = {
 	.fork		= freezer_fork,
 	.legacy_cftypes	= files,
 #ifdef CONFIG_SAMSUNG_FREECESS
-	.can_attach   = freezer_can_attach,
-	.cancel_attach  = freezer_cancel_attach,
+	.can_attach	= freezer_can_attach,
+	.cancel_attach	= freezer_cancel_attach,
 #endif
 };

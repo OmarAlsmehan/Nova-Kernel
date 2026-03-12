@@ -1348,6 +1348,7 @@ void dsi_phy_store_str(struct msm_dsi_phy *phy, u32 *val)
 	if (phy->hw.ops.store_str)
 		phy->hw.ops.store_str(&phy->hw, val);
 }
+
 void dsi_phy_store_emphasis(struct msm_dsi_phy *phy, u32 *val)
 {
 	if (phy->hw.ops.store_emphasis)

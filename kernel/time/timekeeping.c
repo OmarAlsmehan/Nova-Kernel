@@ -1612,7 +1612,7 @@ static void __timekeeping_inject_sleeptime(struct timekeeper *tk,
 void sec_debug_print_sleep_time(void)
 {
 	pr_info("PM: Timekeeping suspended for %lld.%03lu seconds\n",
-			   (s64)sleep_duration.tv_sec, sleep_duration.tv_nsec / NSEC_PER_MSEC);	
+			   (s64)sleep_duration.tv_sec, sleep_duration.tv_nsec / NSEC_PER_MSEC);
 }
 EXPORT_SYMBOL_GPL(sec_debug_print_sleep_time);
 #endif

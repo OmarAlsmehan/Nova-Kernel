@@ -168,11 +168,11 @@ DEFINE_EVENT(ion_access_cmo_class, ion_end_cpu_access_notmapped,
 );
 
 DECLARE_EVENT_CLASS(ion_rbin,
-
 	TP_PROTO(const char *heap_name,
 		 void *buffer,
 		 unsigned long size,
 		 void *page),
+
 	TP_ARGS(heap_name, buffer, size, page),
 
 	TP_STRUCT__entry(
@@ -240,7 +240,6 @@ DEFINE_EVENT(ion_rbin, ion_rbin_partial_alloc_end,
 );
 
 DEFINE_EVENT(ion_rbin, ion_rbin_pool_alloc_start,
-
 	TP_PROTO(const char *heap_name, void *buffer, unsigned long size,
 		 void *page),
 
@@ -248,7 +247,6 @@ DEFINE_EVENT(ion_rbin, ion_rbin_pool_alloc_start,
 );
 
 DEFINE_EVENT(ion_rbin, ion_rbin_pool_alloc_end,
-
 	TP_PROTO(const char *heap_name, void *buffer, unsigned long size,
 		 void *page),
 

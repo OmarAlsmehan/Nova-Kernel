@@ -117,7 +117,7 @@ obj-$(CONFIG_QTI_HW_MEMLAT_LOG)	+= rimps_log.o
 obj-$(CONFIG_QCOM_QFPROM_SYS) += qfprom-sys.o
 ifeq ($(CONFIG_HDM),y)
 # Support Knox HDM feature
-  ccflags-y += -DHDM_SUPPORT
+ccflags-y += -DHDM_SUPPORT
 endif
 obj-$(CONFIG_RENAME_BLOCK_DEVICE) += rename_block_device.o
 obj-$(CONFIG_QCOM_ADSP_MANUAL_VOTE) += adsp_vote_qmi.o adsp_lpm_voting_v01.o

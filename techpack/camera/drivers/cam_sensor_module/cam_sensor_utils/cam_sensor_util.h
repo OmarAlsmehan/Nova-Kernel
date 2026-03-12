@@ -32,7 +32,7 @@
 #define QTIMER_MUL_FACTOR   10000
 #define QTIMER_DIV_FACTOR   192
 
-#define HI847_SENSOR_ID   0x00
+#define HI847_SENSOR_ID 0x00
 #define SENSOR_ID_HI1336 0x0000
 
 #define SENSOR_ID_S5KGW1 0xf971
@@ -70,7 +70,6 @@ static struct cam_sensor_i2c_reg_array gw1p_seamless_off[] = {
 #define SENSOR_ID_S5KGW3 0x7309
 #define SENSOR_ID_IMX682 0x0682
 
-
 #define INVALID_MIPI_INDEX -1
 #endif
 
@@ -79,7 +78,7 @@ static struct cam_sensor_i2c_reg_array gw1p_seamless_off[] = {
 #if defined(CONFIG_SENSOR_RETENTION)
 #define SENSOR_RETENTION_READ_RETRY_CNT 10
 #define RETENTION_SENSOR_ID 0x1AD3
-#define STREAM_ON_ADDR   0x100
+#define STREAM_ON_ADDR 0x100
 
 enum sensor_retention_mode {
 	RETENTION_INIT = 0,
@@ -143,6 +142,6 @@ bool cam_sensor_util_check_gpio_is_shared(struct cam_hw_soc_info *soc_info);
 
 #if defined(CONFIG_SEC_P3Q_PROJECT)
 int cam_sensor_util_force_power_down(struct cam_sensor_power_ctrl_t *ctrl,
-		struct cam_hw_soc_info *soc_info);
+	struct cam_hw_soc_info *soc_info);
 #endif
 #endif /* _CAM_SENSOR_UTIL_H_ */

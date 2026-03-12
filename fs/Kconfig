@@ -339,5 +339,4 @@ config SEC_DEBUG_FPUT_WATCHDOG_TIMEOUT
 	default 180
 	depends on SEC_DEBUG_FPUT_WATCHDOG
 
-
 endmenu

@@ -78,7 +78,7 @@ enum lsm_event {
 };
 
 #ifndef CONFIG_KDP_CRED
-#define security_integrity_current()  0
+#define security_integrity_current() 0
 #endif
 
 /*

@@ -102,7 +102,7 @@ struct qpnp_tri_led_chip {
 	struct device		*led_dev;
 	u8			lpm;	/* low power mode */
 	int			step;	/* partition step */
-	int			mode; /* led pattern */
+	int			mode; 	/* led pattern */
 #endif
 	int			num_leds;
 	u16			reg_base;

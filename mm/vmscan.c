@@ -2477,7 +2477,7 @@ int am_app_launch_notifier_register(struct notifier_block *nb)
 
 int am_app_launch_notifier_unregister(struct notifier_block *nb)
 {
-	return  atomic_notifier_chain_unregister(&am_app_launch_notifier, nb);
+	return atomic_notifier_chain_unregister(&am_app_launch_notifier, nb);
 }
 
 static ssize_t am_app_launch_show(struct kobject *kobj,
@@ -4229,6 +4229,7 @@ static void kswapd_try_to_sleep(pg_data_t *pgdat, int alloc_order, int reclaim_o
 	}
 	finish_wait(&pgdat->kswapd_wait, &wait);
 }
+
 #if CONFIG_KSWAPD_CPU
 static struct cpumask kswapd_cpumask;
 static void init_kswapd_cpumask(void)
@@ -4242,6 +4243,7 @@ static void init_kswapd_cpumask(void)
 	}
 }
 #endif
+
 /*
  * The background pageout daemon, started as a kernel thread
  * from the init process.
@@ -4263,7 +4265,7 @@ static int kswapd(void *p)
 	struct task_struct *tsk = current;
 #if CONFIG_KSWAPD_CPU
 	const struct cpumask *cpumask = &kswapd_cpumask;
-#else	
+#else
 	const struct cpumask *cpumask = cpumask_of_node(pgdat->node_id);
 #endif
 
@@ -4546,11 +4548,13 @@ static int kswapd_cpu_online(unsigned int cpu)
 	for_each_node_state(nid, N_MEMORY) {
 		pg_data_t *pgdat = NODE_DATA(nid);
 		const struct cpumask *mask;
+
 #if CONFIG_KSWAPD_CPU
 		mask = &kswapd_cpumask;
 #else
 		mask = cpumask_of_node(pgdat->node_id);
 #endif
+
 		if (cpumask_any_and(cpu_online_mask, mask) < nr_cpu_ids) {
 			/* One of our CPUs online: restore mask */
 			set_cpus_allowed_ptr(pgdat->kswapd, mask);

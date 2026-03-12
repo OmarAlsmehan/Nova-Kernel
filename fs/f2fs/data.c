@@ -1009,6 +1009,7 @@ next:
 	     !f2fs_crypt_mergeable_bio(io->bio, fio->page->mapping->host,
 				       fio->page->index, fio)))
 		__submit_merged_bio(io);
+
 #ifdef CONFIG_DDAR
 	/* DDAR support */
 	if (!fscrypt_dd_can_merge_bio(io->bio, fio->page->mapping)) {
@@ -1321,7 +1322,7 @@ struct page *f2fs_find_data_page(struct inode *inode, pgoff_t index)
 	if (page && PageUptodate(page))
 		return page;
 	f2fs_put_page(page, 0);
-	
+
 	if (unlikely(rwsem_is_locked(&sbi->cp_rwsem)))
 		for_write = true;
 
@@ -2559,6 +2560,7 @@ retry_encrypt:
 	if (fscrypt_dd_encrypted_inode(inode))
 		return 0;
 #endif
+
 	fio->encrypted_page = fscrypt_encrypt_pagecache_blocks(page,
 					PAGE_SIZE, 0, gfp_flags);
 	if (IS_ERR(fio->encrypted_page)) {

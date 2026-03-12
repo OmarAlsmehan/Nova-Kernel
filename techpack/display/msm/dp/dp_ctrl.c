@@ -622,7 +622,7 @@ static int dp_ctrl_link_train(struct dp_ctrl_private *ctrl)
 #if defined(CONFIG_SEC_DISPLAYPORT)
 	if (secdp_check_hmd_dev("PicoVR")) {
 		DP_INFO("pico REAL Plus!\n");
-		ctrl->link->phy_params.v_level = 2;	/*800mV*/
+		ctrl->link->phy_params.v_level = 2; /* 800mV */
 	}
 #endif
 
@@ -828,6 +828,7 @@ static int dp_ctrl_link_setup(struct dp_ctrl_private *ctrl, bool shallow)
 			break;
 		}
 #endif
+
 		DP_DEBUG("bw_code=%d, lane_count=%d\n",
 			link_params->bw_code, link_params->lane_count);
 
@@ -869,7 +870,7 @@ static int dp_ctrl_link_setup(struct dp_ctrl_private *ctrl, bool shallow)
 
 #if defined(CONFIG_SEC_DISPLAYPORT) && !defined(SECDP_AUDIO_CTS)
 		if ((ctrl->link->link_params.bw_code == DP_LINK_BW_1_62 && downgrade) ||
-			!secdp_get_cable_status()) {
+		    !secdp_get_cable_status()) {
 			rc = -EIO;
 			break;
 		}
@@ -1483,6 +1484,7 @@ static void dp_ctrl_stream_off(struct dp_ctrl *dp_ctrl, struct dp_panel *panel)
 #ifdef SECDP_OPTIMAL_LINK_RATE
 #define RES_1920X1080	2073600
 #define RES_2560X1440	3686400
+
 static bool ps176_high_refresh_rate_check(struct dp_panel *dp_panel)
 {
 	struct dp_panel_info *max_timing;

@@ -2375,7 +2375,6 @@ const struct file_operations proc_pid_numa_maps_operations = {
 
 #endif /* CONFIG_NUMA */
 
-
 #ifdef CONFIG_PAGE_BOOST
 /*
  * Currently, target_file_name is shared by all filemap_info nodes

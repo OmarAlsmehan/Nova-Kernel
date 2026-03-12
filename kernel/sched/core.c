@@ -3902,6 +3902,7 @@ void scheduler_tick(void)
 		clear_reserved(cpu);
 	rq_unlock(rq, &rf);
 #endif
+
 	trace_android_vh_scheduler_tick(rq);
 }
 

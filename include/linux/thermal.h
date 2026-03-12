@@ -22,8 +22,8 @@
 #include <linux/ipc_logging.h>
 extern void *thermal_ipc_log;
 #define THERMAL_IPC_LOG(msg, ...)						\
-	do {								\
-		if (thermal_ipc_log)					\
+	do {									\
+		if (thermal_ipc_log)						\
 			ipc_log_string(thermal_ipc_log, msg, ##__VA_ARGS__);	\
 	} while (0)
 #endif

@@ -64,7 +64,7 @@ struct pinconf_ops {
 					    unsigned long config);
 #if IS_ENABLED(CONFIG_SEC_PM)
 	void (*pin_config_sec_dbg_show) (struct pinctrl_dev *pctldev,
-						struct seq_file *s);	
+					 struct seq_file *s);
 #endif
 };
 

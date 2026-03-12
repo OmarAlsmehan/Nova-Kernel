@@ -1325,13 +1325,11 @@ static SOC_ENUM_SINGLE_DECL(cf_dec6_enum, BOLERO_CDC_TX6_TX_PATH_CFG0, 5,
 static SOC_ENUM_SINGLE_DECL(cf_dec7_enum, BOLERO_CDC_TX7_TX_PATH_CFG0, 5,
 							cf_text);
 
-static const struct soc_enum tx_hpf_mux_enum =
-							SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(cf_text), cf_text);
+static const struct soc_enum tx_hpf_mux_enum = SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(cf_text), cf_text);
 
 static int tx_macro_hpf_mode_put(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
-
 	unsigned int tx = 0;
 	int ret = 0;
 	char *wname = NULL;

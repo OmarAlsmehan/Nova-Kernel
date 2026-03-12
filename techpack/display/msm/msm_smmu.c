@@ -235,7 +235,6 @@ static int msm_smmu_map_dma_buf(struct msm_mmu *mmu, struct sg_table *sgt,
 	struct msm_smmu_client *client = msm_smmu_to_client(smmu);
 	unsigned long attrs = 0x0;
 	int ret;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	int retry_cnt;
 #endif
@@ -265,7 +264,7 @@ static int msm_smmu_map_dma_buf(struct msm_mmu *mmu, struct sg_table *sgt,
 
 					pr_err("dma map sg failed : retry (%d)\n", retry_cnt);
 					ret = dma_map_sg_attrs(client->dev, sgt->sgl, sgt->nents, dir,
-						attrs);
+							attrs);
 					if (!ret)
 						break;
 				}

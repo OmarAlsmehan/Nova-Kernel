@@ -1195,9 +1195,9 @@ static bool __need_flush_quota(struct f2fs_sb_info *sbi)
 
 /* @fs.sec -- 2ef667bb57e25110542e58d9cc8a0bb5 -- */
 #ifdef CONFIG_F2FS_SEC_BLOCK_OPERATIONS_DEBUG
-#define sec_dbg_inc_cnt(node, type)			\
-	do {						\
-		node.step = F2FS_SEC_DBG_##type; \
+#define sec_dbg_inc_cnt(node, type)				\
+	do {							\
+		node.step = F2FS_SEC_DBG_##type;		\
 		node.entry[F2FS_SEC_DBG_##type].nr_ops++;	\
 	} while (0)
 #define sec_dbg_add_time(node, type, start) \
@@ -1209,6 +1209,7 @@ static bool __need_flush_quota(struct f2fs_sb_info *sbi)
 #define sec_dbg_add_time(node, type, start) (0)
 #define sec_dbg_start_jiffies(val) (0)
 #endif
+
 /*
  * Freeze all the FS-operations for checkpoint.
  */
@@ -1224,9 +1225,9 @@ static int block_operations(struct f2fs_sb_info *sbi)
 #ifdef CONFIG_F2FS_SEC_BLOCK_OPERATIONS_DEBUG
 	struct f2fs_sec_blkops_dbg dbg_entry = {0, };
 	u64 s_jiffies, elapsed_time;
- 
+
 	dbg_entry.start_time = local_clock();
-#endif                                          	
+#endif
 
 	/*
 	 * Let's flush inline_data in dirty node pages.
@@ -1262,7 +1263,7 @@ retry_flush_dents:
 		f2fs_unlock_all(sbi);
 		err = f2fs_sync_dirty_inodes(sbi, DIR_INODE);
 		if (err)
- 			goto out;
+			goto out;
 		sec_dbg_add_time(dbg_entry, DENTS, s_jiffies);
 		cond_resched();
 		goto retry_flush_quotas;
@@ -1281,7 +1282,7 @@ retry_flush_dents:
 		f2fs_unlock_all(sbi);
 		err = f2fs_sync_inode_meta(sbi);
 		if (err)
- 			goto out;
+			goto out;
 		sec_dbg_add_time(dbg_entry, IMETA, s_jiffies);
 		cond_resched();
 		goto retry_flush_quotas;

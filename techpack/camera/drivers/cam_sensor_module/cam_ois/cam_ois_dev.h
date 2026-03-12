@@ -38,7 +38,7 @@
 #define MAX_BRIDGE_COUNT (2)
 #endif
 
-#define OIS_VER_SIZE  (8)
+#define OIS_VER_SIZE (8)
 #define NUM_AF_POSITION (4096)
 
 struct cam_ois_shift_table_t {
@@ -51,7 +51,7 @@ enum cam_ois_thread_msg_type {
 	CAM_OIS_THREAD_MSG_START,
 	CAM_OIS_THREAD_MSG_APPLY_SETTING,
 	CAM_OIS_THREAD_MSG_RESET,
-	CAM_OIS_THREAD_MSG_MAX
+	CAM_OIS_THREAD_MSG_MAX,
 };
 
 struct cam_ois_thread_msg_t {

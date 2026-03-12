@@ -352,9 +352,8 @@ int qcedev_check_and_map_buffer(void *handle,
 	return 0;
 
 unmap:
-	if (!found) {
+	if (!found)
 		qcedev_unmap_buffer(handle, mem_client, binfo);
-	}
 
 error:
 	kfree(binfo);

@@ -107,7 +107,6 @@ static const struct dp_panel_info fail_safe = {
 };
 
 #if defined(CONFIG_SEC_DISPLAYPORT)
-
 struct dp_panel *g_dp_panel;
 
 enum downstream_port_type {
@@ -1605,7 +1604,7 @@ skip_dpcd_read:
 			drm_dp_bw_code_to_link_rate(dpcd[DP_MAX_LINK_RATE]));
 	DP_DEBUG("link_rate=%d\n", link_info->rate);
 #ifdef SECDP_MAX_HBR2
-	if (link_info->rate > 540000) { /*DP_LINK_BW_5_4*/
+	if (link_info->rate > 540000) { /* DP_LINK_BW_5_4 */
 		DP_DEBUG("set it to 540000!\n");
 		link_info->rate = 540000;
 	}
@@ -1772,7 +1771,7 @@ static int dp_panel_set_dpcd(struct dp_panel *dp_panel, u8 *dpcd)
 
 #if defined(CONFIG_SEC_DISPLAYPORT)
 static int dp_panel_get_modes(struct dp_panel *dp_panel,
-	struct drm_connector *connector, struct dp_display_mode *mode);
+		struct drm_connector *connector, struct dp_display_mode *mode);
 static void dp_panel_convert_to_dp_mode(struct dp_panel *dp_panel,
 		const struct drm_display_mode *drm_mode,
 		struct dp_display_mode *dp_mode);
@@ -1819,11 +1818,11 @@ static void secdp_get_max_timing(struct dp_panel *dp_panel)
 		timing = &dp_mode.timing;
 
 		if (pinfo->pixel_clk_khz < timing->pixel_clk_khz) {
-			pinfo->h_active      = timing->h_active;
-			pinfo->v_active      = timing->v_active;
-			pinfo->refresh_rate  = timing->refresh_rate;
+			pinfo->h_active = timing->h_active;
+			pinfo->v_active = timing->v_active;
+			pinfo->refresh_rate = timing->refresh_rate;
 			pinfo->pixel_clk_khz = timing->pixel_clk_khz;
-			pinfo->bpp           = timing->bpp;
+			pinfo->bpp = timing->bpp;
 			DP_INFO("updated, %ux%u@%uhz, pclk:%u, bpp:%u\n",
 				pinfo->h_active, pinfo->v_active,
 				pinfo->refresh_rate, pinfo->pixel_clk_khz,
@@ -1977,6 +1976,7 @@ static char secdp_tbox[][MON_NAME_LEN] = {
 	"AGILENT ATR",
 	"UFG DP SINK",
 };
+
 #define SECDP_TBOX_MAX		32
 
 /** check if connected sink is testbox or not
@@ -2038,7 +2038,6 @@ static int dp_panel_read_sink_caps(struct dp_panel *dp_panel,
 		dp_panel->link_info.num_lanes) ||
 		((drm_dp_link_rate_to_bw_code(dp_panel->link_info.rate)) >
 		dp_panel->max_bw_code)) {
-
 #if !defined(CONFIG_SEC_DISPLAYPORT)
 		if ((rc == -ETIMEDOUT) || (rc == -ENODEV)) {
 			DP_ERR("DPCD read failed, return early\n");
@@ -2263,6 +2262,7 @@ static int dp_panel_get_modes(struct dp_panel *dp_panel,
 	}
 
 	panel = container_of(dp_panel, struct dp_panel_private, dp_panel);
+
 	if (dp_panel->video_test) {
 #if defined(CONFIG_SEC_DISPLAYPORT)
 		DP_INFO("video_test!");
@@ -2276,7 +2276,6 @@ static int dp_panel_get_modes(struct dp_panel *dp_panel,
 	/* fail-safe mode */
 	memcpy(&mode->timing, &fail_safe,
 		sizeof(fail_safe));
-
 #if defined(CONFIG_SEC_DISPLAYPORT)
 	DP_INFO("fail_safe!\n");
 #endif
@@ -3126,13 +3125,13 @@ static void dp_panel_resolution_info(struct dp_panel_private *panel)
 		pinfo->h_active, pinfo->v_active, pinfo->refresh_rate);
 #endif
 #if defined(CONFIG_SEC_DISPLAYPORT_BIGDATA)
-{
-	char buf[20] = {0, };
+	{
+		char buf[20] = {0, };
 
-	scnprintf(buf, 20, "%dx%d@%d",
-		pinfo->h_active, pinfo->v_active, pinfo->refresh_rate);
-	secdp_bigdata_save_item(BD_RESOLUTION, buf);
-}
+		scnprintf(buf, 20, "%dx%d@%d",
+			pinfo->h_active, pinfo->v_active, pinfo->refresh_rate);
+		secdp_bigdata_save_item(BD_RESOLUTION, buf);
+	}
 #endif
 }
 

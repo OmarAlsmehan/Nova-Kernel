@@ -4917,7 +4917,6 @@ outportlog:
 	cam_tfe_mgr_print_io_bufs(hw_mgr, *resource_type, packet,
 		ctx_found, ctx);
 
-
 }
 
 static int cam_tfe_mgr_cmd(void *hw_mgr_priv, void *cmd_args)

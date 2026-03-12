@@ -1853,11 +1853,13 @@ static int cam_fd_mgr_hw_prepare_update(void *hw_mgr_priv,
 	 * this will come as priv while hw_config
 	 */
 	prepare->priv = frame_req;
+
 	cam_fd_mgr_put_cpu_buf(prepare);
 	CAM_DBG(CAM_FD, "FramePrepare : Frame[%lld]", frame_req->request_id);
 
 	return 0;
-	put_cpu_buf:
+
+put_cpu_buf:
 	cam_fd_mgr_put_cpu_buf(prepare);
 error:
 	return rc;

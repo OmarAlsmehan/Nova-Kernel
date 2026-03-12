@@ -3922,8 +3922,7 @@ static int _sde_crtc_vblank_enable(
 		int ret;
 
 		ret = pm_runtime_get_sync(crtc->dev->dev);
-		if (ret < 0)
-		{
+		if (ret < 0) {
 #if defined(CONFIG_DISPLAY_SAMSUNG) // case 04436106
 			SS_XLOG_VSYNC(0x2222);
 #endif

@@ -708,7 +708,7 @@ static void pmic_gpio_sec_dbg_show(struct pinctrl_dev *pctldev,
 	for (i = 0; i < state->chip.ngpio; i++) {
 		pad = pctldev->desc->pins[i].drv_data;
 		val = pmic_gpio_read(state, pad, PMIC_GPIO_REG_EN_CTL);
-		
+
 		if (val < 0 || !(val >> PMIC_GPIO_REG_MASTER_EN_SHIFT)) {
 			if (IS_ERR_OR_NULL(s))
 				pr_info(" gpio%-2d: ---\n", i);

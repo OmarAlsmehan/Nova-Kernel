@@ -380,7 +380,7 @@ struct dsi_phy_hw {
 	struct dsi_phy_hw_ops ops;
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-	int display_index; //primary display or secondary dispaly.
+	int display_index; // primary display or secondary display.
 #endif
 };
 

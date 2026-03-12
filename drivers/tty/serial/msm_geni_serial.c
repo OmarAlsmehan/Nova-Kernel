@@ -2452,7 +2452,7 @@ static void msm_geni_serial_shutdown(struct uart_port *uport)
 						"%s: Error %d pinctrl_select_state\n", __func__, ret);
 		}
 
-		while(true) {
+		while (true) {
 			usage_count = atomic_read(&uport->dev->power.usage_count);
 			if (usage_count < 1)
 				break;
@@ -3467,13 +3467,13 @@ static int msm_geni_serial_probe(struct platform_device *pdev)
 	if (!is_console_enabled() && drv->cons) {
 		dev_err(&pdev->dev, "%s: Console is null.\n", id->compatible);
 #if defined(CONFIG_SERIAL_UART_SAMSUNG_USE)
-		if(!strcmp(dev_name(&pdev->dev),"994000.qcom,qup_uart"))
+		if (!strcmp(dev_name(&pdev->dev), "994000.qcom,qup_uart"))
 			unused_device = &pdev->dev;
 #endif
 		return -ENODEV;
 	}
 #if defined(CONFIG_SERIAL_UART_SAMSUNG_USE)
-	else if(is_console_enabled() && !strcmp(dev_name(&pdev->dev),"994000.qcom,qup_hsuart")) {
+	else if (is_console_enabled() && !strcmp(dev_name(&pdev->dev), "994000.qcom,qup_hsuart")) {
 		dev_err(&pdev->dev, "%s: HSUART is not used.\n", id->compatible);
 		unused_device = &pdev->dev;
 		return -ENODEV;
@@ -3626,13 +3626,13 @@ exit_geni_serial_probe:
 	IPC_LOG_MSG(dev_port->ipc_log_misc, "%s: ret:%d\n",
 		    __func__, ret);
 
-	if(ret)
+	if (ret)
 		return ret;
 
 #if defined(CONFIG_SERIAL_UART_SAMSUNG_USE)
-	if(!strcmp(dev_name(&pdev->dev),"994000.qcom,qup_uart") || !strcmp(dev_name(&pdev->dev),"994000.qcom,qup_hsuart")) {
-		if(unused_device) {
-			dev_info(&pdev->dev,"%s: probe success, destory [%s]\n",dev_name(&pdev->dev),dev_name(unused_device));
+	if (!strcmp(dev_name(&pdev->dev), "994000.qcom,qup_uart") || !strcmp(dev_name(&pdev->dev), "994000.qcom,qup_hsuart")) {
+		if (unused_device) {
+			dev_info(&pdev->dev, "%s: probe success, destory [%s]\n", dev_name(&pdev->dev), dev_name(unused_device));
 			of_platform_device_destroy(unused_device, NULL);
 			unused_device = NULL;
 		}
@@ -3844,8 +3844,7 @@ static int msm_geni_serial_sys_resume(struct device *dev)
 		uart_resume_port((struct uart_driver *)uport->private_data,
 									uport);
 		IPC_LOG_MSG(port->console_log, "%s\n", __func__);
-	}
-	else if (!uart_console(uport) && port->is_clk_aon && port->startup) {
+	} else if (!uart_console(uport) && port->is_clk_aon && port->startup) {
 		msm_geni_serial_power_on(uport, true);
 		msm_geni_serial_start_rx(uport);
 	}

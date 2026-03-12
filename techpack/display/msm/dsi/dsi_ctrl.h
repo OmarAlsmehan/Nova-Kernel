@@ -600,7 +600,7 @@ int dsi_ctrl_cmd_tx_trigger(struct dsi_ctrl *dsi_ctrl, u32 flags);
  * Return: error code.
  */
 int dsi_ctrl_update_host_engine_state_for_cont_splash(struct dsi_ctrl *dsi_ctrl,
-				enum dsi_engine_state state);
+						      enum dsi_engine_state state);
 #endif
 
 /**

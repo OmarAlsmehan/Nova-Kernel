@@ -403,7 +403,7 @@ static void dp_catalog_ctrl_update_vx_px_v420(struct dp_catalog_ctrl *ctrl,
 		value1 = val;
 	}
 #endif
-#endif/*CONFIG_SEC_DISPLAYPORT*/
+#endif /* CONFIG_SEC_DISPLAYPORT */
 
 	/* program default setting first */
 	io_data = catalog->io->dp_ln_tx0;

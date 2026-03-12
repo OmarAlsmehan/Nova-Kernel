@@ -183,6 +183,7 @@ static int __cam_icp_config_dev_in_ready(struct cam_context *ctx,
 
 	if (rc)
 		CAM_ERR(CAM_ICP, "Failed to prepare device");
+
 	cam_mem_put_cpu_buf((int32_t) cmd->packet_handle);
 	return rc;
 }

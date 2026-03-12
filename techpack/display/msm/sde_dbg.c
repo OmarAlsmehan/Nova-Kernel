@@ -125,7 +125,7 @@
 #undef DEFAULT_DBGBUS_VBIFRT
 #undef DEFAULT_DBGBUS_DSI
 
-#define DEFAULT_REGDUMP		SDE_DBG_DUMP_IN_LOG
+#define DEFAULT_REGDUMP SDE_DBG_DUMP_IN_LOG
 #define DEFAULT_DBGBUS_SDE SDE_DBG_DUMP_IN_LOG_LIMITED
 #define DEFAULT_DBGBUS_VBIFRT SDE_DBG_DUMP_IN_LOG_LIMITED
 #define DEFAULT_DBGBUS_DSI SDE_DBG_DUMP_IN_LOG
@@ -386,7 +386,7 @@ static struct sde_debug_bus_entry dbg_bus_sde[] = {
 	{ DBGBUS_PERIPH, DBGBUS_DSPP_STATUS, 0, 78, 0, 32 },
 	{ DBGBUS_AXI_INTF, DBGBUS_DSPP_STATUS, 0, 63, 0, 32 },
 
- 	/* ppb_0 */
+	/* ppb_0 */
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 31, 1, 0, 1, _sde_debug_bus_ppb0_dump },
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 33, 1, 0, 1, _sde_debug_bus_ppb0_dump },
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 35, 1, 0, 1, _sde_debug_bus_ppb0_dump },
@@ -404,8 +404,8 @@ static struct sde_debug_bus_entry dbg_bus_sde[] = {
 
 	/* crossbar */
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 0, 1, 0, 1, _sde_debug_bus_xbar_dump },
- 
- 	/* blend */
+
+	/* blend */
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 63, 1, 7, 1, _sde_debug_bus_lm_dump },
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 70, 1, 7, 1, _sde_debug_bus_lm_dump },
 	{ DBGBUS_DSPP, DBGBUS_DSPP_STATUS, 77, 1, 7, 1, _sde_debug_bus_lm_dump },
@@ -864,12 +864,12 @@ static void _sde_dbg_sde_clear_test_point(void __iomem *mem_base, u32 wr_addr)
 
 static void _sde_dbg_dump_vbif_err_info(void __iomem *mem_base)
 {
- 	u32 value, d0, d1;
- 	unsigned long reg, reg1, reg2;
+	u32 value, d0, d1;
+	unsigned long reg, reg1, reg2;
 	int i;
- 
- 	value = readl_relaxed(mem_base + MMSS_VBIF_CLKON);
- 	writel_relaxed(value | BIT(1), mem_base + MMSS_VBIF_CLKON);
+
+	value = readl_relaxed(mem_base + MMSS_VBIF_CLKON);
+	writel_relaxed(value | BIT(1), mem_base + MMSS_VBIF_CLKON);
 	wmb(); /* make sure that vbif core is on */
 
 	/*
@@ -1165,7 +1165,7 @@ static void _sde_dump_array(struct sde_dbg_reg_base *blk_arr[],
 	end = ktime_get();
 	dev_info(sde_dbg_base.dev,
 			"debug-bus logging time start_us:%llu, end_us:%llu , duration_us:%llu\n",
-			ktime_to_us(start), ktime_to_us(end), ktime_us_delta(end , start));
+			ktime_to_us(start), ktime_to_us(end), ktime_us_delta(end, start));
 
 	if (_sde_power_check(sde_dbg_base.dump_mode))
 		pm_runtime_put_sync(sde_dbg_base.dev);

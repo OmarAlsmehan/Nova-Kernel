@@ -673,7 +673,7 @@ void tracing_mark_write_helper(int type, const char *str);
 do {								\
 	char buf[TRACING_MARK_BUF_SIZE];			\
 	snprintf(buf, TRACING_MARK_BUF_SIZE, fmt, ##args);	\
-	tracing_mark_write_helper(type, buf);				\
+	tracing_mark_write_helper(type, buf);			\
 } while (0)
 #define tracing_mark_begin(fmt, args...)			\
 	__tracing_mark(TRACING_MARK_TYPE_BEGIN, fmt, ##args)

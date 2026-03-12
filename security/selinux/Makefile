@@ -4,6 +4,7 @@
 #
 # [ SEC_SELINUX_PORTING_COMMON
 ccflags-y := -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
+
 ifeq ($(TARGET_BUILD_VARIANT), eng)
 ifeq ($(SEC_BUILD_OPTION_PRODUCT_SHIP), false)
 ifeq ($(SEC_BUILD_OPTION_SELINUX_ENFORCE),true)
@@ -35,8 +36,6 @@ selinux-$(CONFIG_SECURITY_NETWORK_XFRM) += xfrm.o
 selinux-$(CONFIG_NETLABEL) += netlabel.o
 
 selinux-$(CONFIG_SECURITY_INFINIBAND) += ibpkey.o
-
-
 
 $(addprefix $(obj)/,$(selinux-y)): $(obj)/flask.h
 

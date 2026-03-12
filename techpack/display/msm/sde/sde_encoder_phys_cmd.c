@@ -247,14 +247,12 @@ static void sde_encoder_phys_cmd_te_rd_ptr_irq(void *arg, int irq_idx)
 	struct sde_encoder_phys_cmd_te_timestamp *te_timestamp;
 	unsigned long lock_flags;
 	struct drm_display_mode *mode;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct drm_connector *conn = phys_enc ? phys_enc->connector : NULL;
 	struct sde_connector *sde_conn;
 	struct dsi_display *disp;
 	struct samsung_display_driver_data *vdd = NULL;
 	enum ss_display_ndx ndx = COMMON_DISPLAY_NDX;
-
 	static ktime_t prev_t[MAX_DISPLAY_NDX];
 	ktime_t cur_t;
 	int t_delt;
@@ -312,11 +310,11 @@ static void sde_encoder_phys_cmd_te_rd_ptr_irq(void *arg, int irq_idx)
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	/* case 05295952: detect MDP clock underflow that causes line noise */
-	if (vdd && info[0].wr_ptr_line_count > (phys_enc->cached_mode.vdisplay/3) &&
+	if (vdd && info[0].wr_ptr_line_count > (phys_enc->cached_mode.vdisplay / 3) &&
 			info[0].wr_ptr_line_count < phys_enc->cached_mode.vdisplay) {
 		SS_XLOG(info[0].wr_ptr_line_count, ++vdd->cnt_mdp_clk_underflow);
 		SDE_ERROR("mdp clock underrun: wr: %d, cnt: %d\n",
-				info[0].wr_ptr_line_count, vdd->cnt_mdp_clk_underflow);
+			info[0].wr_ptr_line_count, vdd->cnt_mdp_clk_underflow);
 	}
 
 	if (vdd && vdd->vrr.support_te_mod && vdd->vrr.te_mod_on && vdd->vrr.te_mod_divider > 0) {
@@ -330,10 +328,11 @@ static void sde_encoder_phys_cmd_te_rd_ptr_irq(void *arg, int irq_idx)
 	if (phys_enc->parent_ops.handle_vblank_virt)
 		phys_enc->parent_ops.handle_vblank_virt(phys_enc->parent,
 			phys_enc);
+
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 skip_call_handle_vblank_virt:
 	if (ndx >= 0 && vdd && ndx < MAX_DISPLAY_NDX) {
-		if(ctl)
+		if (ctl)
 			SDE_DEBUG("sde_encoder_phys_cmd_te_rd_ptr_irq = [DISPLAY_%d]\n", ctl->idx);
 		cur_t = ktime_get();
 
@@ -355,6 +354,7 @@ skip_call_handle_vblank_virt:
 
 	}
 #endif
+
 	atomic_add_unless(&cmd_enc->pending_vblank_cnt, -1, 0);
 	wake_up_all(&cmd_enc->pending_vblank_wq);
 	SDE_ATRACE_END("rd_ptr_irq");
@@ -561,7 +561,6 @@ static int _sde_encoder_phys_cmd_handle_ppdone_timeout(
 	struct drm_connector *conn;
 	u32 pending_kickoff_cnt;
 	unsigned long lock_flags;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct sde_connector *sde_conn;
 	struct dsi_display *disp;

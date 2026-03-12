@@ -2998,7 +2998,7 @@ err0:
 }
 
 #if defined(CONFIG_USB_NOTIFY_PROC_LOG)
-static void update_usb_gadet_function(struct usb_function *f, struct dwc3 *dwc)
+static void update_usb_gadget_function(struct usb_function *f, struct dwc3 *dwc)
 {
 	if (!strcmp(f->name, "mtp")) {
 		dwc->usb_function_info |= GADGET_MTP;
@@ -3046,7 +3046,7 @@ static int copy_usb_mode(struct usb_function *f, char *usb_mode)
 
 	if (!strcmp(f->name, "Function FS Gadget"))
 		strncat(usb_mode, "ffs", length);
-	else 
+	else
 		strncat(usb_mode, f->name, length);
 
 	length += 1;
@@ -3071,7 +3071,7 @@ static void usb_mode_store(struct usb_gadget *gadget)
 	}
 	list_for_each_entry(c, &cdev->configs, list) {
 		list_for_each_entry(f, &c->functions, list) {
-			update_usb_gadet_function(f, dwc);
+			update_usb_gadget_function(f, dwc);
 			if (length + strlen(f->name) > sizeof(usb_mode)) {
 				pr_info("usb: %s : overflow usb mode buffer\n", __func__);
 				break;

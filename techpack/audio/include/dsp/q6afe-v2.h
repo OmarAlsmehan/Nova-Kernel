@@ -75,6 +75,7 @@
 #define AFE_TDM_RX_GET_GROUP_IDX(b) ((PORT_ID_TO_INTF_IDX(b)) * 2)
 #define AFE_TDM_TX_GET_GROUP_IDX(b) ((PORT_ID_TO_INTF_IDX(b)) * 2 + 1)
 #define MAX_PORTS_PER_INTF 8
+
 #if defined(CONFIG_SND_SOC_TFA9878)
 /*Module ID*/
 #define AFE_MODULE_ID_TFADSP          0x1000B910

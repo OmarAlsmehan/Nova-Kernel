@@ -66,7 +66,6 @@
 #include <linux/sec_debug.h>
 #endif
 
-
 #ifndef ARCH_SHF_SMALL
 #define ARCH_SHF_SMALL 0
 #endif

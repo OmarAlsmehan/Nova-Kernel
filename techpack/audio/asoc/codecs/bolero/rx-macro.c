@@ -411,6 +411,7 @@ enum {
 #ifdef CONFIG_SND_SOC_IMPED_SENSING
 static int wcd_impedance_offset;
 #endif
+
 /*
  * @dev: rx macro device pointer
  * @comp_enabled: compander enable mixer value set

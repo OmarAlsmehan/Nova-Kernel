@@ -982,7 +982,6 @@ int ipc_log_context_destroy(void *ctxt)
 }
 EXPORT_SYMBOL(ipc_log_context_destroy);
 
-
 #define LOG_CTX_PAGE_CNT 150
 static void *log_ctx;
 #define MAX_LINE_SIZE 512
@@ -1003,7 +1002,6 @@ EXPORT_SYMBOL_GPL(net_log);
 
 static int __init net_ipc_log_init(void)
 {
-
 	if (!log_ctx)
 		log_ctx = ipc_log_context_create(LOG_CTX_PAGE_CNT,
 							"net_log", 0);
@@ -1026,7 +1024,7 @@ static void __exit net_ipc_log_exit(void)
 static int __init ipc_logging_init(void)
 {
 	check_and_create_debugfs();
-	
+
 	net_ipc_log_init();
 
 	register_minidump((u64)&ipc_log_context_list, sizeof(struct list_head),

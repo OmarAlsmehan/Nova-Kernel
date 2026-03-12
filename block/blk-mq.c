@@ -150,6 +150,7 @@ static bool blk_mq_check_inflight_rw(struct blk_mq_hw_ctx *hctx,
 
 	if (rq->part == mi->part)
 		mi->inflight[rq_data_dir(rq)]++;
+
 	return true;
 }
 

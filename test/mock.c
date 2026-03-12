@@ -52,9 +52,8 @@ static bool mock_is_expectation_satisfied(struct mock_expectation *expectation)
 		expectation->times_called <= expectation->max_calls_expected);
 }
 
-static void mock_write_expectation_unsatisfied_message(
-	struct mock_expectation *expectation,
-	struct test_stream *stream)
+static void mock_write_expectation_unsatisfied_message(struct mock_expectation *expectation,
+						       struct test_stream *stream)
 {
 	stream->add(stream,
 		    "%s:%d - Expectation was not called the specified number of times:\n\t",
@@ -392,10 +391,10 @@ int mock_in_sequence(struct test *test, struct mock_expectation *first, ...)
 
 	va_start(args, first);
 
-        RetireOnSaturation(first);
+	RetireOnSaturation(first);
 
 	while ((curr = va_arg(args, struct mock_expectation*))) {
-                RetireOnSaturation(curr);
+		RetireOnSaturation(curr);
 		entry = test_kzalloc(test, sizeof(*entry), GFP_KERNEL);
 		if (!entry) {
 			va_end(args);
@@ -409,14 +408,13 @@ int mock_in_sequence(struct test *test, struct mock_expectation *first, ...)
 	return 0;
 }
 
-static inline bool does_mock_expectation_match_call(
-	struct mock_expectation *expectation,
-	struct test_stream *stream,
-	const void **params,
-	int len)
+static inline bool does_mock_expectation_match_call(struct mock_expectation *expectation,
+						    struct test_stream *stream,
+						    const void **params,
+						    int len)
 {
 	return mock_match_params(expectation->matcher, stream, params, len) &&
-	       mock_are_prereqs_satisfied(expectation, stream);
+		mock_are_prereqs_satisfied(expectation, stream);
 }
 
 static struct mock_expectation *mock_apply_expectations(

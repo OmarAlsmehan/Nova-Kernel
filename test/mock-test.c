@@ -423,7 +423,6 @@ static void mock_test_validate_clears_expectations(struct test *test)
 	mock_validate_expectations(mock);
 }
 
-
 static void mock_stub(int a) { }
 
 /* Common references for InSequence tests */
@@ -590,24 +589,24 @@ static void mock_test_in_sequence_retire_on_saturation(struct test *test)
 	struct mock_param_matcher *c_matchers[] = { int_eq(trgt, 3) };
 
 	struct mock_expectation *c = mock_add_matcher(mock, "c", mock_stub,
-                c_matchers, param_len);
+		c_matchers, param_len);
 	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+		b_matchers, param_len);
 	struct mock_expectation *a_1 = mock_add_matcher(mock, "a", mock_stub,
-                a_matchers, param_len);
-        struct mock_expectation *a_2 = mock_add_matcher(mock, "a", mock_stub,
-                a_matchers, param_len);
+		a_matchers, param_len);
+	struct mock_expectation *a_2 = mock_add_matcher(mock, "a", mock_stub,
+		a_matchers, param_len);
 
 	InSequence(test, a_1, b, a_2, c);
 
 	Never(EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
 
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
 	mock->do_expect(mock, "c", mock_stub, param_type, c_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 static void mock_test_atleast(struct test *test)
@@ -620,21 +619,21 @@ static void mock_test_atleast(struct test *test)
 	struct mock_param_matcher *a_matchers[] = { int_eq(trgt, 1) };
 	struct mock_param_matcher *b_matchers[] = { int_eq(trgt, 2) };
 
-        struct mock_expectation *a = mock_add_matcher(mock, "a", mock_stub,
-                a_matchers, param_len);
+	struct mock_expectation *a = mock_add_matcher(mock, "a", mock_stub,
+		a_matchers, param_len);
 	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+		b_matchers, param_len);
 
-        AtLeast(2, a);
-        AtLeast(1, b);
+	AtLeast(2, a);
+	AtLeast(1, b);
 	Never(EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
 
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 static void mock_test_atleast_fail(struct test *test)
@@ -646,15 +645,15 @@ static void mock_test_atleast_fail(struct test *test)
 
 	struct mock_param_matcher *b_matchers[] = { int_eq(trgt, 2) };
 
-        struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
+		b_matchers, param_len);
 
-        AtLeast(2, b);
-        EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test)));
+	AtLeast(2, b);
+	EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test)));
 
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 static void mock_test_atmost(struct test *test)
@@ -668,23 +667,23 @@ static void mock_test_atmost(struct test *test)
 	struct mock_param_matcher *b_matchers[] = { int_eq(trgt, 2) };
 	struct mock_param_matcher *c_matchers[] = { int_eq(trgt, 3) };
 
-        struct mock_expectation *a = mock_add_matcher(mock, "a", mock_stub,
-                a_matchers, param_len);
-        struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+	struct mock_expectation *a = mock_add_matcher(mock, "a", mock_stub,
+		a_matchers, param_len);
+	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
+		b_matchers, param_len);
 	struct mock_expectation *c = mock_add_matcher(mock, "c", mock_stub,
-                c_matchers, param_len);
+		c_matchers, param_len);
 
-        AtMost(2, a);
-        AtMost(1, b);
-        AtMost(2, c);
+	AtMost(2, a);
+	AtMost(1, b);
+	AtMost(2, c);
 	Never(EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
 
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
-        mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
+	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
 	mock->do_expect(mock, "c", mock_stub, param_type, c_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 static void mock_test_atmost_fail(struct test *test)
@@ -696,17 +695,17 @@ static void mock_test_atmost_fail(struct test *test)
 
 	struct mock_param_matcher *b_matchers[] = { int_eq(trgt, 2) };
 
-        struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
+		b_matchers, param_len);
 
-        AtMost(2, b);
-        EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test)));
+	AtMost(2, b);
+	EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test)));
 
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
-        mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
+	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 static void mock_test_between(struct test *test)
@@ -718,17 +717,17 @@ static void mock_test_between(struct test *test)
 
 	struct mock_param_matcher *b_matchers[] = { int_eq(trgt, 2) };
 
-        struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
+		b_matchers, param_len);
 
-        Between(2, 4, b);
-        Never(EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
+	Between(2, 4, b);
+	Never(EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
 
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
-        mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
+	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 static void mock_test_between_fail(struct test *test)
@@ -741,21 +740,21 @@ static void mock_test_between_fail(struct test *test)
 	struct mock_param_matcher *a_matchers[] = { int_eq(trgt, 1) };
 	struct mock_param_matcher *b_matchers[] = { int_eq(trgt, 2) };
 
-        struct mock_expectation *a = mock_add_matcher(mock, "a", mock_stub,
-                a_matchers, param_len);
-        struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
-                b_matchers, param_len);
+	struct mock_expectation *a = mock_add_matcher(mock, "a", mock_stub,
+		a_matchers, param_len);
+	struct mock_expectation *b = mock_add_matcher(mock, "b", mock_stub,
+		b_matchers, param_len);
 
-        Between(2, 3, a);
-        Between(1, 2, b);
-        Times(2, EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
+	Between(2, 3, a);
+	Between(1, 2, b);
+	Times(2, EXPECT_CALL(fail(mock_get_ctrl(mock_test), any(test))));
 
 	mock->do_expect(mock, "a", mock_stub, param_type, a_params, param_len);
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
-        mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
+	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 	mock->do_expect(mock, "b", mock_stub, param_type, b_params, param_len);
 
-        mock_validate_expectations(mock);
+	mock_validate_expectations(mock);
 }
 
 void *do_mocked_fail(struct mock_action *this, const void **params, int len)
@@ -833,7 +832,6 @@ static void mock_test_and_matcher_accept(struct test *test)
 	ASSERT_NOT_ERR_OR_NULL(test, ret);
 	EXPECT_EQ(test, 1, expectation->times_called);
 }
-
 
 static void mock_test_and_matcher_reject_left(struct test *test)
 {
@@ -935,7 +933,6 @@ static void mock_test_or_matcher_reject(struct test *test)
 	EXPECT_EQ(test, 0, expectation->times_called);
 }
 
-
 static void mock_test_or_matcher_accept_left(struct test *test)
 {
 	struct mock_test_context *ctx = test->priv;
@@ -1035,7 +1032,6 @@ static void mock_test_not_matcher_reject(struct test *test)
 	EXPECT_FALSE(test, ret);
 	EXPECT_EQ(test, 0, expectation->times_called);
 }
-
 
 static void mock_test_not_matcher_accept(struct test *test)
 {

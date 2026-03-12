@@ -5107,7 +5107,6 @@ struct sde_mdss_cfg *sde_hw_catalog_init(struct drm_device *dev)
 	}
 done:
 #endif
-
 	rc = sde_perf_parse_dt(np, sde_cfg);
 	if (rc)
 		goto end;

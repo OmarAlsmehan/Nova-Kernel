@@ -180,12 +180,12 @@ static struct usb_endpoint_descriptor acc_superspeed_in_desc = {
 };
 
 static struct usb_ss_ep_comp_descriptor acc_superspeed_in_comp_desc = {
-	.bLength =		sizeof(acc_superspeed_in_comp_desc),
-	.bDescriptorType =	USB_DT_SS_ENDPOINT_COMP,
+	.bLength                = sizeof(acc_superspeed_in_comp_desc),
+	.bDescriptorType        = USB_DT_SS_ENDPOINT_COMP,
 
 	/* the following 2 values can be tweaked if necessary */
-	.bMaxBurst =		4,
-	/* .bmAttributes =	0, */
+	.bMaxBurst =         4,
+	/* .bmAttributes =      0, */
 };
 
 static struct usb_endpoint_descriptor acc_superspeed_out_desc = {
@@ -1468,7 +1468,7 @@ static struct configfs_item_operations acc_item_ops = {
 	.release        = acc_attr_release,
 };
 
- /* configfs attributes for usb_acc_restrict */
+/* configfs attributes for usb_acc_restrict */
 static ssize_t usb_acc_restrict_show(struct config_item *item, char *page)
 {
 	struct acc_dev *dev = get_acc_dev();
@@ -1483,7 +1483,7 @@ static ssize_t usb_acc_restrict_show(struct config_item *item, char *page)
 }
 
 static ssize_t usb_acc_restrict_store(struct config_item *item,
-				 const char *page, size_t len)
+		const char *page, size_t len)
 {
 	struct acc_dev *dev = get_acc_dev();
 	bool val = false;
@@ -1518,7 +1518,7 @@ static struct configfs_attribute *acc_attrs[] = {
 
 static struct config_item_type acc_func_type = {
 	.ct_item_ops    = &acc_item_ops,
-	.ct_attrs		= acc_attrs,
+	.ct_attrs       = acc_attrs,
 	.ct_owner       = THIS_MODULE,
 };
 

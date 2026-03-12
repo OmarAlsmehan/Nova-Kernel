@@ -1726,7 +1726,6 @@ static int __cam_req_mgr_process_req(struct cam_req_mgr_core_link *link,
 		return -EPERM;
 	}
 	spin_unlock_bh(&link->link_state_spin_lock);
-	
 
 	mutex_lock(&session->lock);
 	/*
@@ -3156,8 +3155,7 @@ static int cam_req_mgr_cb_add_req(struct cam_req_mgr_add_request *add_req)
 		return -EINVAL;
 	}
 
-	link =cam_get_link_priv(add_req->link_hdl);
-
+	link = cam_get_link_priv(add_req->link_hdl);
 	if (!link) {
 		CAM_DBG(CAM_CRM, "link ptr NULL %x", add_req->link_hdl);
 		return -EINVAL;
@@ -3341,8 +3339,7 @@ static int cam_req_mgr_cb_notify_timer(
 		goto end;
 	}
 
-	link = (struct cam_req_mgr_core_link *)
-		cam_get_device_priv(timer_data->link_hdl);
+	link = cam_get_link_priv(timer_data->link_hdl);
 	if (!link) {
 		CAM_DBG(CAM_CRM, "link ptr NULL %x", timer_data->link_hdl);
 		rc = -EINVAL;
@@ -3396,8 +3393,7 @@ static int cam_req_mgr_cb_notify_stop(
 		goto end;
 	}
 
-	link = (struct cam_req_mgr_core_link *)
-		cam_get_device_priv(stop_info->link_hdl);
+	link = cam_get_link_priv(stop_info->link_hdl);
 	if (!link) {
 		CAM_DBG(CAM_CRM, "link ptr NULL %x", stop_info->link_hdl);
 		rc = -EINVAL;
@@ -3936,8 +3932,7 @@ int cam_req_mgr_link(struct cam_req_mgr_ver_info *link_info)
 	mutex_lock(&g_crm_core_dev->crm_lock);
 
 	/* session hdl's priv data is cam session struct */
-	cam_session =
-		cam_get_session_priv(link_info->u.link_info_v1.session_hdl);
+	cam_session = cam_get_session_priv(link_info->u.link_info_v1.session_hdl);
 	if (!cam_session) {
 		CAM_DBG(CAM_CRM, "NULL pointer");
 		mutex_unlock(&g_crm_core_dev->crm_lock);
@@ -3958,7 +3953,7 @@ int cam_req_mgr_link(struct cam_req_mgr_ver_info *link_info)
 	root_dev.priv = (void *)link;
 	root_dev.dev_id = CAM_CRM;
 	mutex_lock(&link->lock);
-	/* Create unique dev handle for link */
+	/* Create unique handle for link */
 	link->link_hdl = cam_create_link_hdl(&root_dev);
 	if (link->link_hdl < 0) {
 		CAM_ERR(CAM_CRM,
@@ -4046,9 +4041,7 @@ int cam_req_mgr_link_v2(struct cam_req_mgr_ver_info *link_info)
 	mutex_lock(&g_crm_core_dev->crm_lock);
 
 	/* session hdl's priv data is cam session struct */
-	cam_session =
-		cam_get_session_priv(link_info->u.link_info_v2.session_hdl);
-
+	cam_session = cam_get_session_priv(link_info->u.link_info_v2.session_hdl);
 	if (!cam_session) {
 		CAM_DBG(CAM_CRM, "NULL pointer");
 		mutex_unlock(&g_crm_core_dev->crm_lock);
@@ -4070,7 +4063,7 @@ int cam_req_mgr_link_v2(struct cam_req_mgr_ver_info *link_info)
 	root_dev.dev_id = CAM_CRM;
 
 	mutex_lock(&link->lock);
-	/* Create unique dev handle for link */
+	/* Create unique handle for link */
 	link->link_hdl = cam_create_link_hdl(&root_dev);
 	if (link->link_hdl < 0) {
 		CAM_ERR(CAM_CRM,
@@ -4298,7 +4291,7 @@ int cam_req_mgr_sync_config(
 			goto done;
 		}
 
-		link[i] = cam_get_device_priv(sync_info->link_hdls[i]);
+		link[i] = cam_get_link_priv(sync_info->link_hdls[i]);
 		if (!link[i]) {
 			CAM_ERR(CAM_CRM, "link%d NULL pointer", i);
 			rc = -EINVAL;
@@ -4373,6 +4366,7 @@ int cam_req_mgr_flush_requests(
 	}
 
 	mutex_lock(&g_crm_core_dev->crm_lock);
+
 	/* session hdl's priv data is cam session struct */
 	session = cam_get_session_priv(flush_info->session_hdl);
 	if (!session) {

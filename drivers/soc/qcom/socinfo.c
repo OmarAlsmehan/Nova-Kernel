@@ -15,6 +15,7 @@
 #include <linux/types.h>
 #include <soc/qcom/socinfo.h>
 #include <linux/bug.h>
+
 /*
  * SoC version type with major number in the upper 16 bits and minor
  * number in the lower 16 bits.
@@ -284,7 +285,6 @@ static uint32_t socinfo_get_accessory_chip(void)
 		: 0;
 }
 
-
 unsigned int __read_mostly is_debug_level_low = 0;
 static int __init sec_debug_level(char *val) __attribute__((unused));
 static int __init sec_debug_level(char *val)
@@ -294,7 +294,6 @@ static int __init sec_debug_level(char *val)
 	return 1;
 }
 __setup("androidboot.debug_level=", sec_debug_level);
-
 
 static ssize_t
 msm_get_crash(struct device *dev,

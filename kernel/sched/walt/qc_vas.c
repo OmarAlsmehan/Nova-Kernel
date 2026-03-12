@@ -170,6 +170,7 @@ void walt_check_for_rotation(struct rq *src_rq)
 		dst_rq->active_balance = 1;
 		src_rq->active_balance = 1;
 	}
+
 	double_rq_unlock(src_rq, dst_rq);
 
 	if (wr)

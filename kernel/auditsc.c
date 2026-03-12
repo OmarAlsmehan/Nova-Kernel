@@ -1502,7 +1502,7 @@ static void audit_log_exit(void)
 	struct audit_names *n;
 
 	context->personality = current->personality;
-	
+
 // [ SEC_SELINUX_PORTING_COMMON
 	if (context->major != __NR_setsockopt) {
 // ] SEC_SELINUX_PORTING_COMMON
@@ -1620,7 +1620,7 @@ static void audit_log_exit(void)
 	}
 
 	audit_log_proctitle();
-	
+
 // [ SEC_SELINUX_PORTING_COMMON
 	} // End of context->major != __NR_setsockopt
 // ] SEC_SELINUX_PORTING_COMMON

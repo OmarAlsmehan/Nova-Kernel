@@ -773,7 +773,7 @@ static int sock_set_dns_pid(struct sock *sk, char __user *optval, int optlen)
 		ret = -EFAULT;
 		if (copy_from_user(&dns_pid, optval, sizeof(dns_pid)))
 			goto out;
-		
+
 		if (SOCK_NPA_VENDOR_DATA_GET(sk)) {
 			memcpy(&SOCK_NPA_VENDOR_DATA_GET(sk)->knox_dns_pid, &dns_pid, sizeof(SOCK_NPA_VENDOR_DATA_GET(sk)->knox_dns_pid));
 			if(check_ncm_flag()) {

@@ -866,7 +866,7 @@ static int usb_audio_probe(struct usb_interface *intf,
 	usb_set_intfdata(intf, chip);
 	intf->needs_remote_wakeup = 1;
 	usb_enable_autosuspend(chip->dev);
-	device_set_wakeup_enable(&dev->dev,1);
+	device_set_wakeup_enable(&dev->dev, 1);
 	atomic_dec(&chip->active);
 	mutex_unlock(&register_mutex);
 	return 0;

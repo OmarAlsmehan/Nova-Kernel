@@ -907,7 +907,7 @@ config LEDS_S2MU106_FLASH
 	depends on (MFD_S2MU106) && I2C
 	help
 	  If you say yes here you will get support for
-          the LEDS_S2MU106_FLASH led chip.
+	  the LEDS_S2MU106_FLASH led chip.
 
 config SEC_SVCLED
 	bool "LED support for SEC_SVCLED"

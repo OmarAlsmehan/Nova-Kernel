@@ -1137,11 +1137,12 @@ static int cluster_configure(struct lpm_cluster *cluster, int idx,
 		 * system suspend. This debug information is useful to know
 		 * which resources are enabled and preventing system level
 		 * LPMs (XO and Vmin).
-
+		 */
+		/*
 		 * [SS Power] moved to lpm_suspend_prepare
 		 * if (!from_idle) {
-		 *	clock_debug_print_enabled();
-		 *	regulator_debug_print_enabled();
+		 * 	clock_debug_print_enabled();
+		 * 	regulator_debug_print_enabled();
 		 * }
 		 */
 
@@ -1768,7 +1769,7 @@ static int lpm_suspend_prepare(void)
 		msm_gpio_print_enabled();
 		sec_gpio_debug_print();
 	}
-#endif /* CONFIG_SEC_PM	 */
+#endif /* CONFIG_SEC_PM	*/
 
 	lpm_stats_suspend_enter();
 

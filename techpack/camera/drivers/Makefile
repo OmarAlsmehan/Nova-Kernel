@@ -247,7 +247,8 @@ camera-y += cam_sensor_module/cam_sensor/cam_sensor_thread.o
 endif
 
 ifneq (,$(filter $(CONFIG_SAMSUNG_OIS_MCU_STM32),y m))
-camera-y += cam_sensor_module/cam_ois/cam_ois_mcu_stm32g.o \
+camera-y += \
+	cam_sensor_module/cam_ois/cam_ois_mcu_stm32g.o \
 	cam_sensor_module/cam_ois/cam_ois_thread.o
 endif
 

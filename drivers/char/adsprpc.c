@@ -295,7 +295,7 @@ struct ss_fastrpc_ioctl_debug {
 	ktime_t ioctl_time[FAST_RPC_DEBUG_MAX];
 	unsigned int ioctl_cmd[FAST_RPC_DEBUG_MAX];
 
-	int ioctl_index; 
+	int ioctl_index;
 };
 #endif
 
@@ -690,8 +690,8 @@ struct fastrpc_file {
 	enum fastrpc_process_create_state dsp_process_state;
 
 #if defined(SS_FASTRPC_DEBUG)
- 	struct ss_fastrpc_ioctl_debug ss_fastrpc_dbg;
- 	bool ss_kernel_debug_print_only;
+	struct ss_fastrpc_ioctl_debug ss_fastrpc_dbg;
+	bool ss_kernel_debug_print_only;
 #endif
 };
 
@@ -5546,7 +5546,7 @@ static ssize_t fastrpc_debugfs_read(struct file *filp, char __user *buffer,
 	char title[] = "=========================";
 
 #if defined(SS_FASTRPC_DEBUG)
- 	int ss_index = 0;
+	int ss_index = 0;
 
 	fileinfo = vzalloc(DEBUGFS_SIZE);
 #else
@@ -5711,7 +5711,7 @@ static ssize_t fastrpc_debugfs_read(struct file *filp, char __user *buffer,
 
 #if defined(SS_FASTRPC_DEBUG)
 		/* To check file is alive */
- 		if (fl->file_close >= FASTRPC_PROCESS_EXIT_START) {
+		if (fl->file_close >= FASTRPC_PROCESS_EXIT_START) {
 			FASTRPC_ERR("fl file_close\n");
 			ret = -ENOMEM;
 			spin_unlock(&fl->hlock);
@@ -5789,7 +5789,7 @@ static ssize_t fastrpc_debugfs_read(struct file *filp, char __user *buffer,
 	if (len > DEBUGFS_SIZE)
 		len = DEBUGFS_SIZE;
 	ret = simple_read_from_buffer(buffer, count, position, fileinfo, len);
-    
+
 #if defined(SS_FASTRPC_DEBUG)
 ss_bail:
 	if (!IS_ERR_OR_NULL(fl) && fl->ss_kernel_debug_print_only) {
@@ -5884,13 +5884,13 @@ void ss_fastrpc_debug_release(struct fastrpc_file *fl)
 						ss_fastrpc_debug_fl(fl);
 
 #if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
-   						/* power off & reset is SIGTERM */                       
-  						if (tsk->exit_code != SIGKILL && tsk->exit_code != SIGTERM)
- 							panic("fastrpc has mapped mem on release");
+						/* power off & reset is SIGTERM */
+						if (tsk->exit_code != SIGKILL && tsk->exit_code != SIGTERM)
+							panic("fastrpc has mapped mem on release");
 #endif
- 					} else {
+					} else {
 						FASTRPC_ERR("fl release has mapped mem tgid : %d pd : %d\n", fl->tgid, fl->pd);
-  					}
+					}
 
 				}
 				return;
@@ -6674,12 +6674,12 @@ static long fastrpc_device_ioctl(struct file *file, unsigned int ioctl_num,
  bail:
 
 #if defined(SS_FASTRPC_DEBUG)
- 	if (!IS_ERR_OR_NULL(fl) && (fl->cid == CDSP_DOMAIN_ID)) { 
+	if (!IS_ERR_OR_NULL(fl) && (fl->cid == CDSP_DOMAIN_ID)) {
 		if (!(err == 0 || err == -ESHUTDOWN || err == -ENOTTY || err == -ERESTARTSYS)) {
- 			FASTRPC_ERR("fl IOCTL FAIL cmd %d error %d 0x%x\n", (ioctl_num >> _IOC_NRSHIFT) & 0xFF, err, err);
+			FASTRPC_ERR("fl IOCTL FAIL cmd %d error %d 0x%x\n", (ioctl_num >> _IOC_NRSHIFT) & 0xFF, err, err);
 			ss_fastrpc_debug_fl(fl);
 		}
- 	}
+	}
 #endif
 
 	return err;

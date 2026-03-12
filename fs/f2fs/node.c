@@ -571,7 +571,6 @@ retry:
 		goto retry;
 	}
 
-
 	i = f2fs_lookup_journal_in_cursum(journal, NAT_JOURNAL, nid, 0);
 	if (i >= 0) {
 		ne = nat_in_journal(journal, i);
@@ -1425,6 +1424,7 @@ static void f2fs_print_lower_node(struct f2fs_sb_info *sbi, struct page *page)
 		print_block_data(sbi->sb, page->index, page_address(page), 0, F2FS_BLKSIZE);
 	}
 }
+
 static struct page *__get_node_page(struct f2fs_sb_info *sbi, pgoff_t nid,
 					struct page *parent, int start)
 {
@@ -2410,7 +2410,6 @@ static int scan_nat_page(struct f2fs_sb_info *sbi,
 				page_address(nat_page), 0, F2FS_BLKSIZE);
 			return -EINVAL;
 		}
-
 
 		if (blk_addr == NULL_ADDR) {
 			add_free_nid(sbi, start_nid, true, true);

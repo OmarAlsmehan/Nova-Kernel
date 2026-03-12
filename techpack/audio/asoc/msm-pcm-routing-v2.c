@@ -39735,7 +39735,7 @@ static const struct snd_soc_dapm_route intercon_tdm[] = {
 	{"QUAT_TDM_RX_0_Voice Mixer", "VoiceMMode1", "VOICEMMODE1_DL"},
 	{"QUAT_TDM_RX_0_Voice Mixer", "VoiceMMode2", "VOICEMMODE2_DL"},
 	{"QUAT_TDM_RX_0", NULL, "QUAT_TDM_RX_0_Voice Mixer"},
-		
+
 	{"QUIN_TDM_RX_0_Voice Mixer", "Voip", "VOIP_DL"},
 	{"QUIN_TDM_RX_0_Voice Mixer", "VoiceMMode1", "VOICEMMODE1_DL"},
 	{"QUIN_TDM_RX_0_Voice Mixer", "VoiceMMode2", "VOICEMMODE2_DL"},

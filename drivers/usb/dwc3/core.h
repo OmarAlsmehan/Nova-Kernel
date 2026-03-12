@@ -1417,7 +1417,7 @@ struct dwc3 {
 	unsigned int		vbus_active:1;
 	/* Indicate if software connect was issued by the usb_gadget_driver */
 	unsigned int		softconnect:1;
-	bool usb_bootcomplete;
+	bool			usb_bootcomplete;
 	/*
 	 * If true, PM suspend/freeze allowed irrespective of host runtimePM
 	 * state. In PM suspend/resume case, core will stay powered and
@@ -1440,14 +1440,14 @@ struct dwc3 {
 	struct work_struct	set_vbus_current_work;
 	int			vbus_current; /* 0 : 100mA, 1 : 500mA, 2: 900mA */
 #endif
-	struct delayed_work usb_event_work;
-	ktime_t rst_time_before;
-	ktime_t rst_time_first;
-	int rst_err_cnt;
-	bool rst_err_noti;
-	bool event_state;
-	bool acc_dev_status;
-	int usb_function_info;
+	struct			delayed_work usb_event_work;
+	ktime_t			rst_time_before;
+	ktime_t			rst_time_first;
+	int			rst_err_cnt;
+	bool			rst_err_noti;
+	bool			event_state;
+	bool			acc_dev_status;
+	int			usb_function_info;
 };
 
 #define GADGET_MTP	0x01

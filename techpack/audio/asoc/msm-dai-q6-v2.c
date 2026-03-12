@@ -4380,7 +4380,7 @@ static const struct snd_kcontrol_new afe_enc_config_controls[] = {
 		       msm_dai_q6_afe_slimbus_dynamic_bitrate_put),
 	{
 		.access = (SNDRV_CTL_ELEM_ACCESS_READWRITE |
-			SNDRV_CTL_ELEM_ACCESS_INACTIVE),
+			   SNDRV_CTL_ELEM_ACCESS_INACTIVE),
 		.iface = SNDRV_CTL_ELEM_IFACE_PCM,
 		.name = "SBM Delay",
 		.info = msm_dai_q6_afe_sbm_info,
@@ -4738,7 +4738,7 @@ static const struct snd_kcontrol_new afe_ttp_config_controls[] = {
 static const struct snd_kcontrol_new sec_mi2s_afe_enc_config_controls[] = {
 	{
 		.access = (SNDRV_CTL_ELEM_ACCESS_READWRITE |
-			SNDRV_CTL_ELEM_ACCESS_INACTIVE),
+			   SNDRV_CTL_ELEM_ACCESS_INACTIVE),
 		.iface = SNDRV_CTL_ELEM_IFACE_PCM,
 		.name = "SEC_MI2S_RX Encoder Config",
 		.info = msm_dai_q6_afe_enc_cfg_info,
@@ -4746,23 +4746,23 @@ static const struct snd_kcontrol_new sec_mi2s_afe_enc_config_controls[] = {
 		.put = msm_dai_q6_afe_enc_cfg_put,
 	},
 	SOC_ENUM_EXT("SEC_MI2S_RX AFE Input Channels", afe_chs_enum[0],
-			msm_dai_q6_afe_input_channel_get,
-			msm_dai_q6_afe_input_channel_put),
+		     msm_dai_q6_afe_input_channel_get,
+		     msm_dai_q6_afe_input_channel_put),
 	SOC_ENUM_EXT("SEC_MI2S_RX AFE Input Bit Format", afe_bit_format_enum[0],
-			msm_dai_q6_afe_input_bit_format_get,
-			msm_dai_q6_afe_input_bit_format_put),
+		     msm_dai_q6_afe_input_bit_format_get,
+		     msm_dai_q6_afe_input_bit_format_put),
 	SOC_SINGLE_EXT("SEC_MI2S_RX AFE Dynamic Bitrate", 0, 0, UINT_MAX, 0,
-			msm_dai_q6_afe_dynamic_bitrate_get,
-			msm_dai_q6_afe_dynamic_bitrate_put),
+		       msm_dai_q6_afe_dynamic_bitrate_get,
+		       msm_dai_q6_afe_dynamic_bitrate_put),
 	SOC_SINGLE_EXT("SEC_MI2S_RX AFE Peer Mtu", 0, 0, UINT_MAX, 0,
-			msm_dai_q6_afe_mtu_get,
-			msm_dai_q6_afe_mtu_put),
+		       msm_dai_q6_afe_mtu_get,
+		       msm_dai_q6_afe_mtu_put),
 	SOC_SINGLE_EXT("SEC_MI2S_RX AFE A2dp Suspend", 0, 0, UINT_MAX, 0,
-			msm_dai_q6_afe_a2dp_suspend_get,
-			msm_dai_q6_afe_a2dp_suspend_put),
+		       msm_dai_q6_afe_a2dp_suspend_get,
+		       msm_dai_q6_afe_a2dp_suspend_put),
 	{
 		.access = (SNDRV_CTL_ELEM_ACCESS_READWRITE |
-			SNDRV_CTL_ELEM_ACCESS_INACTIVE),
+			   SNDRV_CTL_ELEM_ACCESS_INACTIVE),
 		.iface = SNDRV_CTL_ELEM_IFACE_PCM,
 		.name = "SEC_MI2S_RX SBM Delay",
 		.info = msm_dai_q6_afe_sbm_info,

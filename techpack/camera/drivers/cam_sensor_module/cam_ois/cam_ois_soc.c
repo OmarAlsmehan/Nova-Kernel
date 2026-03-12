@@ -25,7 +25,7 @@ static int cam_ois_get_dt_data(struct cam_ois_ctrl_t *o_ctrl)
 	struct cam_ois_soc_private     *soc_private =
 		(struct cam_ois_soc_private *)o_ctrl->soc_info.soc_private;
 	struct cam_sensor_power_ctrl_t *power_info = &soc_private->power_info;
-	struct device_node			   *of_node = NULL;
+	struct device_node             *of_node = NULL;
 
 	of_node = soc_info->dev->of_node;
 
@@ -82,7 +82,7 @@ static int cam_ois_get_dt_data(struct cam_ois_ctrl_t *o_ctrl)
 		power_info->gpio_num_info->gpio_num[SENSOR_CUSTOM_GPIO1];
 
 	rc = of_property_read_u32_array(of_node, "pole-values",
-		o_ctrl->poles, sizeof(o_ctrl->poles)/sizeof(o_ctrl->poles[0]));
+		o_ctrl->poles, sizeof(o_ctrl->poles) / sizeof(o_ctrl->poles[0]));
 	if (rc) {
 		CAM_ERR(CAM_OIS, "No pole value found, rc=%d", rc);
 	}

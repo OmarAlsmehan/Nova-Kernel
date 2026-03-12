@@ -1,7 +1,3 @@
-dtbo-y += a73xq_eur_open_w00_r02.dtbo # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-a73xq_eur_open_w00_r02.dtbo-base := ../../../vendor/qcom/yupik.dtb # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-dtbo-y += a73xq_eur_open_w00_r00.dtbo # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-a73xq_eur_open_w00_r00.dtbo-base := ../../../vendor/qcom/yupik.dtb # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 # SPDX-License-Identifier: GPL-2.0
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
@@ -17,6 +13,14 @@ endef
 
 # YUPIK BASE DTB
 SEC_YUPIK_BASE_DTB := ../../../vendor/qcom/yupik.dtb
+
+# A73XQ EUR
+SEC_A73XQ_EUR_DTBO := \
+		a73xq_eur_open_w00_r00.dtbo \
+		a73xq_eur_open_w00_r02.dtbo
+
+$(eval $(call sec_dtbo_build, \
+		$(SEC_A73XQ_EUR_DTBO),$(CONFIG_MACH_A73XQ_EUR_OPEN),$(SEC_YUPIK_BASE_DTB)))
 
 always          := $(dtb-y)
 subdir-y        := $(dts-dirs)

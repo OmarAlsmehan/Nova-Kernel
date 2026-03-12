@@ -816,6 +816,7 @@ int inet_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
 #ifdef CONFIG_NET_ANALYTICS
 	int err;
 #endif
+
 	if (unlikely(inet_send_prepare(sk)))
 		return -EAGAIN;
 
@@ -827,7 +828,7 @@ int inet_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
 #else
 	return INDIRECT_CALL_2(sk->sk_prot->sendmsg, tcp_sendmsg, udp_sendmsg,
 			       sk, msg, size);
-#endif 
+#endif
 }
 EXPORT_SYMBOL(inet_sendmsg);
 

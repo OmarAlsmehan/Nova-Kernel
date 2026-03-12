@@ -56,8 +56,7 @@ struct caminfo_element caminfos[] = {
 	{ "cam,dual_open",      "DUALOPEN", { "N", "Y" }                },
 };
 
-int cam_sensor_get_dt_camera_info(
-	struct cam_sensor_ctrl_t *s_ctrl,
+int cam_sensor_get_dt_camera_info(struct cam_sensor_ctrl_t *s_ctrl,
 	struct device_node *of_node)
 {
 	int rc = 0, i = 0, idx = 0, offset = 0, cnt = 0;

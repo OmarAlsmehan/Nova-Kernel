@@ -12,7 +12,6 @@
 #include <linux/memblock.h>
 #endif
 
-
 struct dma_coherent_mem {
 	void		*virt_base;
 	dma_addr_t	device_base;
@@ -449,7 +448,7 @@ static int __init modem_removed_dma_setup(struct reserved_mem *remem)
 	if (reserve_mem_region & RESERVE_MEM_LEVEL1_MASK) {
 		pr_info("%s: memory reserved: paddr=%pa, t_size=%ld MiB\n",
 				__func__, &remem->base, (unsigned long)remem->size / SZ_1M);
-	} else if(reserve_mem_region & RESERVE_MEM_LEVEL2_MASK) {
+	} else if (reserve_mem_region & RESERVE_MEM_LEVEL2_MASK) {
 		memblock_add(remem->base + RESERVE_MEM_FREE_BASE, RESERVE_MEM_FREE_SIZE);
 		remem->size = RESERVE_MEM_LEVEL2_SIZE;
 		pr_info("%s: memory add to memblock: paddr=%pa + 0x%x, t_size=%ld MiB\n",

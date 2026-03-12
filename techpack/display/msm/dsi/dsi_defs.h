@@ -365,7 +365,6 @@ struct dsi_cmd_desc {
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	u8 *ss_txbuf;
 #endif
-
 };
 
 /**
@@ -384,7 +383,7 @@ struct dsi_panel_cmd_set {
 	struct dsi_cmd_desc *cmds;
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-#define SUPPORT_PANEL_REVISION	20
+#define SUPPORT_PANEL_REVISION 20
 	int ss_cmd_type;
 	int read_startoffset;
 	char *name;
@@ -452,6 +451,7 @@ struct dsi_mode_info {
 	struct msm_display_vdc_info *vdc;
 	struct msm_ratio pclk_scale;
 	struct msm_roi_caps roi_caps;
+
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	/* Identify VRR HS by drm_mode's name.
 	 * drm_mode's name is defined by dsi_mode->timing.sot_hs_mode parsed

@@ -195,10 +195,10 @@ int32_t cam_sensor_handle_random_write(
 {
 	struct i2c_settings_list  *i2c_list;
 	int32_t rc = 0, cnt, payload_count;
-	
+
 	payload_count = cam_cmd_i2c_random_wr->header.count;
 	i2c_list = cam_sensor_get_i2c_ptr(i2c_reg_settings,
-		payload_count);
+						payload_count);
 	if (i2c_list == NULL ||
 		i2c_list->i2c_settings.reg_setting == NULL) {
 		CAM_ERR(CAM_SENSOR, "Failed in allocating i2c_list");
@@ -207,15 +207,14 @@ int32_t cam_sensor_handle_random_write(
 
 	*cmd_length_in_bytes = (sizeof(struct i2c_rdwr_header) +
 		sizeof(struct i2c_random_wr_payload) *
-		(payload_count));
+		payload_count);
 	i2c_list->op_code = CAM_SENSOR_I2C_WRITE_RANDOM;
 	i2c_list->i2c_settings.addr_type =
 		cam_cmd_i2c_random_wr->header.addr_type;
 	i2c_list->i2c_settings.data_type =
 		cam_cmd_i2c_random_wr->header.data_type;
 
-	for (cnt = 0; cnt < (payload_count);
-		cnt++) {
+	for (cnt = 0; cnt < payload_count; cnt++) {
 		i2c_list->i2c_settings.reg_setting[cnt].reg_addr =
 			cam_cmd_i2c_random_wr->random_wr_payload[cnt].reg_addr;
 		i2c_list->i2c_settings.reg_setting[cnt].reg_data =
@@ -236,10 +235,10 @@ static int32_t cam_sensor_handle_continuous_write(
 {
 	struct i2c_settings_list *i2c_list;
 	int32_t rc = 0, cnt, payload_count;
-	
+
 	payload_count = cam_cmd_i2c_continuous_wr->header.count;
 	i2c_list = cam_sensor_get_i2c_ptr(i2c_reg_settings,
-		payload_count);
+						payload_count);
 	if (i2c_list == NULL ||
 		i2c_list->i2c_settings.reg_setting == NULL) {
 		CAM_ERR(CAM_SENSOR, "Failed in allocating i2c_list");
@@ -266,7 +265,7 @@ static int32_t cam_sensor_handle_continuous_write(
 	i2c_list->i2c_settings.size =
 		cam_cmd_i2c_continuous_wr->header.count;
 
-	for (cnt = 0; cnt < payload_count;cnt++) {
+	for (cnt = 0; cnt < payload_count; cnt++) {
 		i2c_list->i2c_settings.reg_setting[cnt].reg_addr =
 			cam_cmd_i2c_continuous_wr->reg_addr;
 		i2c_list->i2c_settings.reg_setting[cnt].reg_data =
@@ -830,7 +829,7 @@ int cam_sensor_i2c_command_parser(
 		cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 	}
 	return rc;
-	
+
 end:
 	cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 	return rc;
@@ -1927,7 +1926,7 @@ int cam_sensor_util_init_gpio_pin_tbl(
 		rc = 0;
 	}
 
-    rc = of_property_read_u32(of_node, "gpio-custom4", &val);
+	rc = of_property_read_u32(of_node, "gpio-custom4", &val);
 	if (rc != -EINVAL) {
 		if (rc < 0) {
 			CAM_ERR(CAM_SENSOR,
@@ -2137,16 +2136,15 @@ int cam_sensor_core_power_up(struct cam_sensor_power_ctrl_t *ctrl,
 		}
 
 #if defined(CONFIG_SEC_R9Q_PROJECT)
-		if ((power_setting->seq_type == SENSOR_VIO || power_setting->seq_type == SENSOR_CUSTOM_REG1)
-			&& (NULL  != strstr(soc_info->dev_name, "eeprom"))) {
+		if ((power_setting->seq_type == SENSOR_VIO || power_setting->seq_type == SENSOR_CUSTOM_REG1) &&
+		    (NULL != strstr(soc_info->dev_name, "eeprom"))) {
 			msleep(20);
 		}
 #endif
 
 #if defined(CONFIG_SEC_GTS7FEWIFI_PROJECT) || defined(CONFIG_SEC_A73XQ_PROJECT)
-		/* This change for is done for TabS7+ Lite Factory timing issue*/
-		if (power_setting->seq_type == SENSOR_VIO)
-		{
+		/* This change for is done for TabS7+ Lite Factory timing issue */
+		if (power_setting->seq_type == SENSOR_VIO) {
 			usleep_range(20000, 25000);
 		}
 #endif
@@ -2538,10 +2536,10 @@ int cam_sensor_util_power_down(struct cam_sensor_power_ctrl_t *ctrl,
 		case SENSOR_CUSTOM_REG1:
 		case SENSOR_CUSTOM_REG2:
 #ifdef NEVER
-				if (pd->seq_val == INVALID_VREG) {
+			if (pd->seq_val == INVALID_VREG) {
 				CAM_INFO(CAM_SENSOR, "Camera power pd->seq_val = %d", pd->seq_val);
 				break;
- 				}
+			}
 #endif
 			ps = msm_camera_get_power_settings(
 				ctrl, pd->seq_type,
@@ -2552,8 +2550,7 @@ int cam_sensor_util_power_down(struct cam_sensor_power_ctrl_t *ctrl,
 					if (pd->config_val > 0) {
 						CAM_INFO(CAM_SENSOR, "[RET_DBG] skip disable regulator, set sensor power %s, %ld",
 							soc_info->rgltr_name[ps->seq_val], pd->config_val);
-						if (soc_info->rgltr[ps->seq_val] != NULL)
-						{
+						if (soc_info->rgltr[ps->seq_val] != NULL) {
 							ret = regulator_set_voltage(
 								soc_info->rgltr[ps->seq_val], pd->config_val, soc_info->rgltr_max_volt[ps->seq_val]);
 							if (ret) {

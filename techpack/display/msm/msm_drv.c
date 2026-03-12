@@ -103,7 +103,7 @@ EXPORT_SYMBOL(msm_drm_unregister_notifier_client);
 int __msm_drm_notifier_call_chain(unsigned long event, void *data)
 {
 	return blocking_notifier_call_chain(&msm_drm_notifier_list,
-					event, data);
+		event, data);
 }
 #endif
 
@@ -666,7 +666,7 @@ static int msm_drm_display_thread_create(struct sched_param param,
 		priv->event_thread[i].crtc_id = priv->crtcs[i]->base.id;
 		kthread_init_worker(&priv->event_thread[i].worker);
 		priv->event_thread[i].dev = ddev;
-#if IS_ENABLED(CONFIG_QGKI)		
+#if IS_ENABLED(CONFIG_QGKI)
 		priv->event_thread[i].thread =
 			kthread_run(kthread_worker_fn,
 				&priv->event_thread[i].worker,
@@ -678,7 +678,7 @@ static int msm_drm_display_thread_create(struct sched_param param,
 				"crtc_event:%d", priv->event_thread[i].crtc_id);
 		kthread_bind(priv->event_thread[i].thread, 2);
 		wake_up_process(priv->event_thread[i].thread);
-#endif	
+#endif
 		/**
 		 * event thread should also run at same priority as disp_thread
 		 * because it is handling frame_done events. A lower priority

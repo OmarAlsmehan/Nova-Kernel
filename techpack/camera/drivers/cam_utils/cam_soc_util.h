@@ -486,7 +486,6 @@ int cam_soc_util_clk_enable(struct clk *clk, const char *clk_name,
  *
  * @soc_info:           Device soc information
  * @clk_level:          Clock level number to set
- * @do_not_set_src_clk: If true, set clock rates except the src clk
  *
  * @return:             Success or failure
  */
@@ -676,10 +675,6 @@ int cam_soc_util_clk_enable_default(struct cam_hw_soc_info *soc_info,
 
 int cam_soc_util_get_clk_level(struct cam_hw_soc_info *soc_info,
 	int64_t clk_rate, int clk_idx, int32_t *clk_lvl);
-
-unsigned long cam_soc_util_get_clk_rate_applied(
-	struct cam_hw_soc_info *soc_info, int32_t index, bool is_src,
-	enum cam_vote_level clk_level);
 
 /* Callback to get reg space data for specific HW */
 typedef int (*cam_soc_util_regspace_data_cb)(uint32_t reg_base_type,

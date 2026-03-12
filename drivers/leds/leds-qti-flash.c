@@ -383,7 +383,7 @@ static int qti_flash_led_strobe(struct qti_flash_led *led,
 	} else {
 		for (i = 0; i < led->max_channels; i++)
 			if ((led->chan_en_map & BIT(i)) &&
-				(mask & BIT(i)) && !(value & BIT(i)))
+			    (mask & BIT(i)) && !(value & BIT(i)))
 				led->chan_en_map &= ~(BIT(i));
 
 		rc = qti_flash_led_masked_write(led, FLASH_EN_LED_CTRL,
@@ -1877,7 +1877,7 @@ ssize_t qti_flash_store(const char *buf)
 		pr_err("g_qti_flash_led is null \n");
 		return -ENODEV;
 	}
-	
+
 	rc = kstrtou64(buf, 0, &store_value);
 	pr_debug("store_value=%d\n", store_value);
 	if (rc < 0) {
@@ -1902,9 +1902,8 @@ ssize_t qti_flash_store(const char *buf)
 			qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 			break;
 		}
-		
 	}
-	
+
 	if (store_value == 0) { /* 0: Torch or Flash OFF */
 		curr = 0;
 		for (i = 0; i < led->num_fnodes; i++) {
@@ -1912,16 +1911,14 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
-	} else if (store_value == 100 || store_value == 200) { /* 100 : Torch ON ; 200 : Flash ON*/		
+	} else if (store_value == 100 || store_value == 200) { /* 100 : Torch ON ; 200 : Flash ON*/
 		curr = 300;
 		for (i = 0; i < led->num_fnodes; i++) {
 			if(!strcmp("led:torch_0", led->fnode[i].fdev.led_cdev.name)) {
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
 
 		for (i = 0; i < led->num_snodes; i++) {
@@ -1929,16 +1926,14 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 				break;
 			}
-			
 		}
-	} else if (store_value == 1 || store_value == 1001) { /* 1001 : Torch ON */		
+	} else if (store_value == 1 || store_value == 1001) { /* 1001 : Torch ON */
 		curr = 50;
 		for (i = 0; i < led->num_fnodes; i++) {
 			if(!strcmp("led:torch_0", led->fnode[i].fdev.led_cdev.name)) {
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
 
 		for (i = 0; i < led->num_snodes; i++) {
@@ -1946,16 +1941,14 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 				break;
 			}
-			
 		}
-	} else if (store_value == 1002) { /* 1002 : Torch ON */		
+	} else if (store_value == 1002) { /* 1002 : Torch ON */
 		curr = 75;
 		for (i = 0; i < led->num_fnodes; i++) {
 			if(!strcmp("led:torch_0", led->fnode[i].fdev.led_cdev.name)) {
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
 
 		for (i = 0; i < led->num_snodes; i++) {
@@ -1963,16 +1956,14 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 				break;
 			}
-			
 		}
-	} else if (store_value == 1004) { /* 100 : Torch ON */		
+	} else if (store_value == 1004) { /* 100 : Torch ON */
 		curr = 112;
 		for (i = 0; i < led->num_fnodes; i++) {
 			if(!strcmp("led:torch_0", led->fnode[i].fdev.led_cdev.name)) {
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
 
 		for (i = 0; i < led->num_snodes; i++) {
@@ -1980,16 +1971,14 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 				break;
 			}
-			
 		}
-	} else if (store_value == 1006) { /* 100 : Torch ON */		
+	} else if (store_value == 1006) { /* 100 : Torch ON */
 		curr = 300;
 		for (i = 0; i < led->num_fnodes; i++) {
 			if(!strcmp("led:torch_0", led->fnode[i].fdev.led_cdev.name)) {
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
 
 		for (i = 0; i < led->num_snodes; i++) {
@@ -1997,16 +1986,14 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 				break;
 			}
-			
 		}
-	} else if (store_value == 1009) { /* 100 : Torch ON */		
+	} else if (store_value == 1009) { /* 100 : Torch ON */
 		curr = 380;
 		for (i = 0; i < led->num_fnodes; i++) {
 			if(!strcmp("led:torch_0", led->fnode[i].fdev.led_cdev.name)) {
 				qti_flash_led_brightness_set(&led->fnode[i].fdev.led_cdev, curr);
 				break;
 			}
-			
 		}
 
 		for (i = 0; i < led->num_snodes; i++) {
@@ -2014,7 +2001,6 @@ ssize_t qti_flash_store(const char *buf)
 				qti_flash_led_switch_brightness_set(&led->snode[i].cdev, curr);
 				break;
 			}
-			
 		}
 	}
 	pr_debug("qti_flash_store X \n");

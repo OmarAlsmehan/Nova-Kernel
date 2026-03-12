@@ -605,7 +605,7 @@ void msm_gp_get_all(struct gpio_chip *chip, u32 pin_no, struct gpiomux_setting *
 	if (set->is_out)
 		set->val = !!(io_reg & BIT(g->out_bit));
 	else
-		set->val = !!(io_reg & BIT(g->in_bit));	
+		set->val = !!(io_reg & BIT(g->in_bit));
 }
 EXPORT_SYMBOL(msm_gp_get_all);
 #endif

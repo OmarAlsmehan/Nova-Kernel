@@ -88,6 +88,7 @@ int cam_mem_get_io_buf(int32_t buf_handle, int32_t mmu_handle,
  */
 int cam_mem_get_cpu_buf(int32_t buf_handle, uintptr_t *vaddr_ptr,
 	size_t *len);
+
 /**
  * @brief: This indicates end of CPU access
  *

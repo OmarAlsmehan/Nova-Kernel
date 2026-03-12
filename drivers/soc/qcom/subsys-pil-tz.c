@@ -1565,9 +1565,9 @@ load_from_pil:
 		rc = PTR_ERR(d->subsys);
 		goto err_subsys;
 	}
-	
+
 	/* NOTE: copy smem_state here for reset reason gpio */
-	if (!strncmp(d->subsys_desc.name, "modem", 5)) 
+	if (!strncmp(d->subsys_desc.name, "modem", 5))
 		d->subsys_desc.state = d->state;
 
 	rc = subsys_setup_irqs(pdev);

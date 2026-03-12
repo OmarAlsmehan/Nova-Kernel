@@ -114,7 +114,6 @@ static void ufs_set_sec_unique_number(struct ufs_hba *hba, u8 *desc_buf);
 static void ufs_get_health_desc(struct ufs_hba *hba);
 
 #if IS_ENABLED(CONFIG_SEC_UFS_WB_FEATURE)
-
 static void ufs_sec_wb_init_sysfs(struct ufs_hba *hba);
 
 #define set_wb_state(wb, s) \
@@ -417,7 +416,7 @@ static bool ufs_sec_parse_wb_info(struct ufs_qcom_host *host)
 	wb_info->lp_down_threshold_rqs = 30;
 	wb_info->lp_on_delay = msecs_to_jiffies(200);
 	wb_info->lp_off_delay = msecs_to_jiffies(0);
-        
+
 	return true;
 }
 
@@ -2475,8 +2474,8 @@ static void ufs_set_sec_features(struct ufs_hba *hba)
 		goto out;
 	}
 
-	ufs_set_sec_unique_number(hba, desc_buf); 
-	ufs_get_health_desc(hba); 
+	ufs_set_sec_unique_number(hba, desc_buf);
+	ufs_get_health_desc(hba);
 
 #if IS_ENABLED(CONFIG_SEC_UFS_WB_FEATURE)
 	ufs_sec_wb_probe(hba, desc_buf);
@@ -4362,6 +4361,7 @@ static const struct attribute_group ufs_qcom_sysfs_group = {
 	.name = "qcom",
 	.attrs = ufs_qcom_sysfs_attrs,
 };
+
 /* sec special features */
 static void ufs_set_sec_unique_number(struct ufs_hba *hba, u8 *desc_buf)
 {
@@ -4430,7 +4430,7 @@ static void ufs_get_health_desc(struct ufs_hba *hba)
 		goto out;
 	}
 
-	/* getting Life Time at Device Health DESC*/
+	/* getting Life Time at Device Health DESC */
 	ufs_vdi.lifetime = desc_buf[HEALTH_DESC_PARAM_LIFE_TIME_EST_A];
 
 	dev_info(hba->dev, "LT: 0x%02x\n", (desc_buf[3] << 4) | desc_buf[4]);
@@ -4665,7 +4665,6 @@ static struct attribute *sec_ufs_info_attributes[] = {
 static struct attribute_group sec_ufs_info_attribute_group = {
 	.attrs	= sec_ufs_info_attributes,
 };
-
 
 void ufs_sec_create_sysfs(struct ufs_hba *hba)
 {

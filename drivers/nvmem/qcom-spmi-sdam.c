@@ -109,7 +109,7 @@ static int sdam_probe(struct platform_device *pdev)
 	unsigned int val = 0;
 	int rc;
 	unsigned int BOOT1_OFF_REASON = 0, BOOT1_FAULT_REASON1 = 0;
-	
+
 	sdam = devm_kzalloc(&pdev->dev, sizeof(*sdam), GFP_KERNEL);
 	if (!sdam)
 		return -ENOMEM;
@@ -136,7 +136,7 @@ static int sdam_probe(struct platform_device *pdev)
 		pr_err("Failed to read SDAM_SIZE rc=%d\n", rc);
 		return -EINVAL;
 	}
-	
+
 	if (sdam->base == 0x7200)
 	{
 		rc = regmap_read(sdam->regmap, sdam->base + 0x6D, &BOOT1_OFF_REASON);
@@ -151,7 +151,7 @@ static int sdam_probe(struct platform_device *pdev)
 			pr_err("Failed to read SDAM 0x726E");
 			return -EINVAL;
 		}
-		
+
 		if ((BOOT1_FAULT_REASON1 == 0x01 || BOOT1_FAULT_REASON1 == 0x04) && (BOOT1_OFF_REASON == 0x40)) //Only TRUE when BOOT1_OFF_REASON == 0x40 (i.e. POFF is FAULT_SEQ due to GP_FAULT0, 2. SDAM will be updated every PON cycle)
 		{
 			pr_err("PMIC FAULT occured->fault reason: %d , off_reason: %d\n", BOOT1_FAULT_REASON1, BOOT1_OFF_REASON);

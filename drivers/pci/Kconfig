@@ -218,4 +218,5 @@ config SEC_PCIE_KEEP_LINKBW
 	depends on PCI_MSM
 	depends on SEC_PCIE
 	bool "SEC_PCIE_KEEP_LINKBW feature"
+
 endif

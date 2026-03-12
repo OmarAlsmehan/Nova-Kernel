@@ -1325,7 +1325,7 @@ static int fscrypt_sdp_d_delete(const struct dentry *dentry)
 }
 
 static const struct dentry_operations sdp_dentry_ops = {
-	.d_delete	= fscrypt_sdp_d_delete,
+	.d_delete = fscrypt_sdp_d_delete,
 };
 #endif
 
@@ -1407,7 +1407,7 @@ static const struct dentry_operations generic_ci_dentry_ops = {
 	.d_hash = generic_ci_d_hash,
 	.d_compare = generic_ci_d_compare,
 #ifdef CONFIG_FSCRYPT_SDP
-	.d_delete	= fscrypt_sdp_d_delete,
+	.d_delete = fscrypt_sdp_d_delete,
 #endif
 };
 #endif
@@ -1416,7 +1416,7 @@ static const struct dentry_operations generic_ci_dentry_ops = {
 static const struct dentry_operations generic_encrypted_dentry_ops = {
 	.d_revalidate = fscrypt_d_revalidate,
 #ifdef CONFIG_FSCRYPT_SDP
-	.d_delete	= fscrypt_sdp_d_delete,
+	.d_delete = fscrypt_sdp_d_delete,
 #endif
 };
 #endif
@@ -1427,7 +1427,7 @@ static const struct dentry_operations generic_encrypted_ci_dentry_ops = {
 	.d_compare = generic_ci_d_compare,
 	.d_revalidate = fscrypt_d_revalidate,
 #ifdef CONFIG_FSCRYPT_SDP
-	.d_delete	= fscrypt_sdp_d_delete,
+	.d_delete = fscrypt_sdp_d_delete,
 #endif
 };
 #endif

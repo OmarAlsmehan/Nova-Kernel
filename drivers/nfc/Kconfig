@@ -22,12 +22,12 @@ config SEC_NFC
 	  kernel.
 
 config NFC_PVDD_LATE_ENABLE
-        bool "PVDD late enable"
-        default n
-        help
-          If lpcharge value is not usable,
-          then PVDD is enabled lately by init.nfc.samsung.rc on late-init.
-          And this should be enabled from S os projects.
+	bool "PVDD late enable"
+	default n
+	help
+	  If lpcharge value is not usable,
+	  then PVDD is enabled lately by init.nfc.samsung.rc on late-init.
+	  And this should be enabled from S os projects.
 
 config ESE_P3_LSI
 	bool "eSE driver"
@@ -63,13 +63,13 @@ config ESE_USE_REGULATOR
 	  Say Y here to compile support for eSE driver into the kernel.
 
 config MAKE_NODE_USING_PLATFORM_DEVICE
-        bool "eSE platform driver"
-        default n
-        help
-          Using eSE platform driver.
-          Sometimes eSE node is created after permission setting
-          cause of SPI driver dependency.
-          So, use platform driver to make node first.
+	bool "eSE platform driver"
+	default n
+	help
+	  Using eSE platform driver.
+	  Sometimes eSE node is created after permission setting
+	  cause of SPI driver dependency.
+	  So, use platform driver to make node first.
 
 config ESE_FACTORY_ONLY
 	bool "eSE driver factory"
@@ -91,10 +91,10 @@ config ESE_SECURE
 	  to communication
 
 config ESE_USE_TZ_API
-        bool "use tz api"
-        default n
-        help
-          Enable when using TZ API.
+	bool "use tz api"
+	default n
+	help
+	  Enable when using TZ API.
 
 config SEC_NFC_LOGGER
 	bool "NFC logger"
@@ -124,14 +124,14 @@ config SEC_NFC_DUPLICATED_IRQ_WQ_QC
 	  as wakeup capable.
 
 config SEC_NFC_WAKELOCK_METHOD
-        int "nfc wakelock method"
-        default 0
-        help
-          Different functions must be used depending on the kernel version
-          for wakelock initialization.
-          0 - auto selection
-          1 - wakeup_source_init
-          2 - wakeup_source_register
+	int "nfc wakelock method"
+	default 0
+	help
+	  Different functions must be used depending on the kernel version
+	  for wakelock initialization.
+	  0 - auto selection
+	  1 - wakeup_source_init
+	  2 - wakeup_source_register
 
 config NFC_PN547
 	bool "NXP PN547 NFC Controller Driver"
@@ -195,62 +195,62 @@ config NFC_PN547_LDO_CONTROL
 	  kernel.
 
 config SEC_NFC_LOGGER
-        bool "NFC logger"
-        default n
-        help
-          Enable NFC log.
-          NFC log will be recorded at proc folder.
-          but will not included at dumpstate log.
-          so need to copy this file to log folder.
+	bool "NFC logger"
+	default n
+	help
+	  Enable NFC log.
+	  NFC log will be recorded at proc folder.
+	  but will not included at dumpstate log.
+	  so need to copy this file to log folder.
 
 config SEC_NFC_LOGGER_ADD_ACPM_LOG
-        bool "NFC logger: add acpm log"
-        default n
-        depends on SEC_NFC_LOGGER
-        help
-          add acpm log.
-          this feature is for particualr AP.
-          rtc reg addr is needed to compare time
+	bool "NFC logger: add acpm log"
+	default n
+	depends on SEC_NFC_LOGGER
+	help
+	  add acpm log.
+	  this feature is for particualr AP.
+	  rtc reg addr is needed to compare time
 
 config SEC_NFC_LOGGER_RTC_REG_ADDR
-        hex "NFC logger: add acpm log"
-        default 0x0
-        depends on SEC_NFC_LOGGER_ADD_ACPM_LOG
-        help
-          RTC time is to compare between acpm and kernel.
-          address value is hex.
+	hex "NFC logger: add acpm log"
+	default 0x0
+	depends on SEC_NFC_LOGGER_ADD_ACPM_LOG
+	help
+	  RTC time is to compare between acpm and kernel.
+	  address value is hex.
 
 config NFC_QTI_I2C
-        tristate "QTI NCI based NFC I2C Driver for SNxxx"
-        depends on I2C
-        help
-          This enables the NFC driver for SNxxx based devices.
-          This is for I2C connected version. NCI protocol logic
-          resides in the usermode and it has no other NFC dependencies.
+	tristate "QTI NCI based NFC I2C Driver for SNxxx"
+	depends on I2C
+	help
+	  This enables the NFC driver for SNxxx based devices.
+	  This is for I2C connected version. NCI protocol logic
+	  resides in the usermode and it has no other NFC dependencies.
 
-          If unsure, say N.
+	  If unsure, say N.
 
 config SEC_NFC_COMPAT_IOCTL
-        bool "NFC compat ioctl"
-        default n
-        help
-          Enable NFC compat ioctl.
+	bool "NFC compat ioctl"
+	default n
+	help
+	  Enable NFC compat ioctl.
 
 config SEC_STAR
-        tristate "LSI star platform"
-        default n
-        help
-          LSI star platform
-          This driver provides support for LSI star platform.
+	tristate "LSI star platform"
+	default n
+	help
+	  LSI star platform
+	  This driver provides support for LSI star platform.
 
 config STAR_MEMORY_LEAK
-        bool "memory leak test in sec-star"
-        help
-          memory leak test in sec-star.
-          All allocated memory are listed in array.
+	bool "memory leak test in sec-star"
+	help
+	  memory leak test in sec-star.
+	  All allocated memory are listed in array.
 
 config STAR_K250A
-        bool "S.LSI k250a driver"
-        help
-          S.LSI k250a driver except ISO7816 protocol layer
-          This driver provides support for S.LSI k250a product.
+	bool "S.LSI k250a driver"
+	help
+	  S.LSI k250a driver except ISO7816 protocol layer
+	  This driver provides support for S.LSI k250a product.

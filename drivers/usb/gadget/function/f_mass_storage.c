@@ -713,6 +713,7 @@ static int sleep_thread(struct fsg_common *common, bool can_freeze,
 					BUF_STATE_EMPTY);
 	return rc ? -EINTR : 0;
 }
+
 #ifdef _SUPPORT_MAC_
 static void _lba_to_msf(u8 *buf, int lba)
 {
@@ -3785,6 +3786,7 @@ static const struct config_item_type fsg_func_type = {
 
 #if defined(CONFIG_USB_CONFIGFS_UEVENT) && defined(CONFIG_USB_ANDROID_SAMSUNG_COMPOSITE)
 extern struct device *create_function_device(char *name);
+
 static ssize_t mass_storage_inquiry_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
@@ -3949,6 +3951,7 @@ static int create_mass_storage_device(struct usb_function_instance *fi)
 	return 0;
 }
 #endif
+
 static void fsg_free_inst(struct usb_function_instance *fi)
 {
 	struct fsg_opts *opts;

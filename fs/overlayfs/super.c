@@ -1095,7 +1095,6 @@ static int ovl_get_upper(struct super_block *sb, struct ovl_fs *ofs,
 #else
 	upper_mnt->mnt_flags &= ~(MNT_NOATIME | MNT_NODIRATIME | MNT_RELATIME);
 #endif
-
 	ofs->upper_mnt = upper_mnt;
 
 	if (ovl_inuse_trylock(ofs->upper_mnt->mnt_root)) {

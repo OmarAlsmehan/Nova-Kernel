@@ -3509,6 +3509,7 @@ static inline long __zone_watermark_unusable_free(struct zone *z,
 {
 	const bool alloc_harder = (alloc_flags & (ALLOC_HARDER|ALLOC_OOM));
 	long unusable_free = (1 << order) - 1;
+
 	/*
 	 * If the caller does not have rights to ALLOC_HARDER then subtract
 	 * the high-atomic reserves. This will over-estimate the size of the
@@ -3516,11 +3517,13 @@ static inline long __zone_watermark_unusable_free(struct zone *z,
 	 */
 	if (likely(!alloc_harder))
 		unusable_free += z->nr_reserved_highatomic;
+
 #ifdef CONFIG_CMA
 	/* If allocation can't use CMA areas don't use free CMA pages */
 	if (!(alloc_flags & ALLOC_CMA))
 		unusable_free += zone_page_state(z, NR_FREE_CMA_PAGES);
 #endif
+
 	return unusable_free;
 }
 
@@ -3556,7 +3559,6 @@ bool __zone_watermark_ok(struct zone *z, unsigned int order, unsigned long mark,
 		else
 			min -= min / 4;
 	}
-
 
 	/*
 	 * Check watermarks for an order-0 allocation request. If these

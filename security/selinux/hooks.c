@@ -138,9 +138,8 @@ static int __init enforcing_setup(char *str)
 		selinux_enforcing_boot = enforcing ? 1 : 0;
 		selinux_enforcing = enforcing ? 1 : 0;
 #endif
-	
+// ] SEC_SELINUX_PORTING_COMMON
 	}
-	// ] SEC_SELINUX_PORTING_COMMON
 	return 1;
 }
 __setup("enforcing=", enforcing_setup);
@@ -153,14 +152,13 @@ int selinux_enabled __lsm_ro_after_init = 1;
 static int __init selinux_enabled_setup(char *str)
 {
 	unsigned long enabled;
-	if (!kstrtoul(str, 0, &enabled))
-		{
+	if (!kstrtoul(str, 0, &enabled)) {
 // [ SEC_SELINUX_PORTING_COMMON
 #ifdef CONFIG_ALWAYS_ENFORCE
 		selinux_enabled = 1;
 #else
 		selinux_enabled = enabled ? 1 : 0;
-	#endif
+#endif
 // ] SEC_SELINUX_PORTING_COMMON
 		}
 	return 1;
@@ -791,7 +789,7 @@ static int selinux_set_mnt_opts(struct super_block *sb,
 	if (!strcmp(sb->s_type->name, "debugfs") ||
 	    !strcmp(sb->s_type->name, "tracefs") ||
 // [ SEC_SELINUX_PORTING_COMMON
-		!strcmp(sb->s_type->name, "configfs") ||
+	    !strcmp(sb->s_type->name, "configfs") ||
 // ] SEC_SELINUX_PORTING_COMMON
 	    !strcmp(sb->s_type->name, "binder") ||
 	    !strcmp(sb->s_type->name, "bpf") ||
@@ -2791,18 +2789,20 @@ static int selinux_sb_kern_mount(struct super_block *sb)
 	const struct cred *cred = current_cred();
 	struct common_audit_data ad;
 	// [ SEC_SELINUX_PORTING_COMMON
-    int rc;
-	if((strcmp(sb->s_type->name,"sdcardfs")) == 0)
+	int rc;
+
+	if ((strcmp(sb->s_type->name,"sdcardfs")) == 0)
 		mutex_lock(&selinux_sdcardfs_lock);
 
 	ad.type = LSM_AUDIT_DATA_DENTRY;
 	ad.u.dentry = sb->s_root;
-		rc = superblock_has_perm(cred, sb, FILESYSTEM__MOUNT, &ad);
 
-	if((strcmp(sb->s_type->name,"sdcardfs")) == 0)
+	rc = superblock_has_perm(cred, sb, FILESYSTEM__MOUNT, &ad);
+
+	if ((strcmp(sb->s_type->name,"sdcardfs")) == 0)
 		mutex_unlock(&selinux_sdcardfs_lock);
 	// ] SEC_SELINUX_PORTING_COMMON
-	
+
 	return rc;
 }
 
@@ -3220,8 +3220,6 @@ static int selinux_inode_setxattr(struct dentry *dentry, const char *name,
 		return dentry_has_perm(current_cred(), dentry, FILE__SETATTR);
 	}
 
-
-
 	sbsec = inode->i_sb->s_security;
 	if (!(sbsec->flags & SBLABEL_MNT))
 		return -EOPNOTSUPP;
@@ -3304,8 +3302,8 @@ static void selinux_inode_post_setxattr(struct dentry *dentry, const char *name,
 		/* Not an attribute we recognize, so nothing to do. */
 		return;
 	}
-	
-	if (!ss_initialized) {
+
+	if (!ss_initialized) { // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		/* If we haven't even been initialized, then we can't validate
 		 * against a policy, so leave the label as invalid. It may
 		 * resolve to a valid label on the next revalidation try if
@@ -7251,7 +7249,6 @@ static struct security_hook_list selinux_hooks[] __lsm_ro_after_init = {
 
 static __init int selinux_init(void)
 {
-	
 	pr_info("SELinux:  Initializing.\n");
 
 	memset(&selinux_state, 0, sizeof(selinux_state));
@@ -7280,9 +7277,10 @@ static __init int selinux_init(void)
 
 	if (avc_add_callback(selinux_lsm_notifier_avc_callback, AVC_CALLBACK_RESET))
 		panic("SELinux: Unable to register AVC LSM notifier callback\n");
+
 // [ SEC_SELINUX_PORTING_COMMON
 #ifdef CONFIG_ALWAYS_ENFORCE
-		selinux_enforcing_boot = 1;
+	selinux_enforcing_boot = 1;
 #endif
 // ] SEC_SELINUX_PORTING_COMMON
 
@@ -7385,7 +7383,7 @@ static int __init selinux_nf_ip_init(void)
 	int err;
 // [ SEC_SELINUX_PORTING_COMMON
 #ifdef CONFIG_ALWAYS_ENFORCE
-		selinux_enabled = 1;
+	selinux_enabled = 1;
 #endif
 // ] SEC_SELINUX_PORTING_COMMON
 
@@ -7422,7 +7420,7 @@ static void selinux_nf_ip_exit(void)
 #ifdef CONFIG_SECURITY_SELINUX_DISABLE
 int selinux_disable(struct selinux_state *state)
 {
-	if (ss_initialized) {     // SEC_SELINUX_PORTING_COMMON Change to use RKP
+	if (ss_initialized) { // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		/* Not permitted after initial policy load. */
 		return -EINVAL;
 	}
@@ -7452,4 +7450,3 @@ int selinux_disable(struct selinux_state *state)
 	return 0;
 }
 #endif
-

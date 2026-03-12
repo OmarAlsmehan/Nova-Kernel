@@ -250,6 +250,7 @@ static struct mount *alloc_vfsmnt(const char *name)
 		if (err)
 			goto out_free_cache;
 #endif
+
 		if (name) {
 			mnt->mnt_devname = kstrdup_const(name, GFP_KERNEL);
 			if (!mnt->mnt_devname)
@@ -1966,6 +1967,7 @@ int ksys_umount(char __user *name, int flags)
 #ifdef CONFIG_PAGE_BOOST_RECORDING
 	forced_init_record();
 #endif
+
 	if (!(flags & UMOUNT_NOFOLLOW))
 		lookup_flags |= LOOKUP_FOLLOW;
 
@@ -2172,6 +2174,7 @@ void drop_collected_mounts(struct vfsmount *mnt)
 static bool has_locked_children(struct mount *mnt, struct dentry *dentry)
 {
 	struct mount *child;
+
 	list_for_each_entry(child, &mnt->mnt_mounts, mnt_child) {
 		if (!is_subdir(child->mnt_mountpoint, dentry))
 			continue;
@@ -2906,6 +2909,7 @@ static int do_reconfigure_mnt(struct path *path, unsigned int mnt_flags)
 
 	if (!check_mnt(mnt))
 		return -EINVAL;
+
 #ifdef CONFIG_KDP_NS
 	if (path->dentry != ((struct kdp_mount *)mnt)->mnt->mnt_root)
 #else
@@ -3230,7 +3234,7 @@ static int do_new_mount_fc(struct fs_context *fc, struct path *mountpoint,
 		if (error)
 			return error;
 	}
-#endif	
+#endif
 	return error;
 }
 
@@ -4377,6 +4381,7 @@ static bool mnt_already_visible(struct mnt_namespace *ns,
 	list_for_each_entry(mnt, &ns->list, mnt_list) {
 		struct mount *child;
 		int mnt_flags;
+
 #ifdef CONFIG_KDP_NS
 		if (((struct kdp_mount *)mnt)->mnt->mnt_sb->s_type != sb->s_type)
 			continue;
@@ -4410,6 +4415,7 @@ static bool mnt_already_visible(struct mnt_namespace *ns,
 		if (sb_rdonly(mnt->mnt.mnt_sb))
 			mnt_flags |= MNT_LOCK_READONLY;
 #endif
+
 		/* Verify the mount flags are equal to or more permissive
 		 * than the proposed new mount.
 		 */

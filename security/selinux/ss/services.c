@@ -768,7 +768,7 @@ static int security_compute_validatetrans(struct selinux_state *state,
 	int rc = 0;
 
 
-	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		return 0;
 
 	read_lock(&state->ss->policy_rwlock);
@@ -1031,7 +1031,7 @@ void security_compute_xperms_decision(struct selinux_state *state,
 	memset(xpermd->dontaudit->p, 0, sizeof(xpermd->dontaudit->p));
 
 	read_lock(&state->ss->policy_rwlock);
-	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		goto allow;
 
 	policydb = &state->ss->policydb;
@@ -1116,7 +1116,7 @@ void security_compute_av(struct selinux_state *state,
 	read_lock(&state->ss->policy_rwlock);
 	avd_init(state, avd);
 	xperms->len = 0;
-	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		goto allow;
 
 	policydb = &state->ss->policydb;
@@ -1170,7 +1170,7 @@ void security_compute_av_user(struct selinux_state *state,
 
 	read_lock(&state->ss->policy_rwlock);
 	avd_init(state, avd);
-	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		goto allow;
 
 	policydb = &state->ss->policydb;
@@ -1222,9 +1222,9 @@ static int context_struct_to_string(struct policydb *p,
 				    char **scontext, u32 *scontext_len)
 {
 	char *scontextp;
-// [ SEC_SELINUX_PORTING_COMMON 
+// [ SEC_SELINUX_PORTING_COMMON
 	gfp_t kmalloc_flag = GFP_ATOMIC;
-// ] SEC_SELINUX_PORTING_COMMON 
+// ] SEC_SELINUX_PORTING_COMMON
 
 	if (scontext)
 		*scontext = NULL;
@@ -1250,11 +1250,11 @@ static int context_struct_to_string(struct policydb *p,
 		return 0;
 
 	/* Allocate space for the context; caller must free this space. */
-// [ SEC_SELINUX_PORTING_COMMON 
+// [ SEC_SELINUX_PORTING_COMMON
 	if (!in_interrupt() && !in_atomic())
 		kmalloc_flag = GFP_KERNEL;
 	scontextp = kmalloc(*scontext_len, kmalloc_flag);
-// ] SEC_SELINUX_PORTING_COMMON 	
+// ] SEC_SELINUX_PORTING_COMMON
 	if (!scontextp)
 		return -ENOMEM;
 	*scontext = scontextp;
@@ -1535,7 +1535,7 @@ static int security_context_to_sid_core(struct selinux_state *state,
 	if (!scontext2)
 		return -ENOMEM;
 
-	if (!ss_initialized) { // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) { // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		int i;
 
 		for (i = 1; i < SECINITSID_NUM; i++) {
@@ -1672,7 +1672,7 @@ out:
 #ifdef CONFIG_ALWAYS_ENFORCE
 	selinux_enforcing = 1;
 #endif
-	if (!selinux_enforcing) // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!selinux_enforcing) // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		return 0;
 // ] SEC_SELINUX_PORTING_COMMON
 	return -EACCES;
@@ -1971,7 +1971,7 @@ static inline int convert_context_handle_invalid_context(
 	char *s;
 	u32 len;
 
-	// [ SEC_SELINUX_PORTING_COMMON 
+	// [ SEC_SELINUX_PORTING_COMMON
 #ifdef CONFIG_ALWAYS_ENFORCE
 	selinux_enforcing = 1;
 #endif
@@ -2195,7 +2195,7 @@ int security_load_policy(struct selinux_state *state, void *data, size_t len)
 		goto out;
 	}
 
-	if (!ss_initialized) { // SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) { // SEC_SELINUX_PORTING_COMMON Change to use RKP
 		rc = policydb_read(policydb, fp);
 		if (rc) {
 			kfree(newsidtab);
@@ -2904,7 +2904,7 @@ int security_get_bools(struct selinux_state *state,
 	struct policydb *policydb;
 	int i, rc;
 
-	if (!ss_initialized) {// SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) {// SEC_SELINUX_PORTING_COMMON Change to use RKP
 		*len = 0;
 		*names = NULL;
 		*values = NULL;
@@ -3083,7 +3083,7 @@ int security_sid_mls_copy(struct selinux_state *state,
 	int rc;
 
 	rc = 0;
-	if (!ss_initialized || !policydb->mls_enabled) {// SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized || !policydb->mls_enabled) {// SEC_SELINUX_PORTING_COMMON Change to use RKP
 		*new_sid = sid;
 		goto out;
 	}
@@ -3250,7 +3250,7 @@ int security_get_classes(struct selinux_state *state,
 	struct policydb *policydb = &state->ss->policydb;
 	int rc;
 
-	if (!ss_initialized) {// SEC_SELINUX_PORTING_COMMON Change to use RKP 
+	if (!ss_initialized) {// SEC_SELINUX_PORTING_COMMON Change to use RKP
 		*nclasses = 0;
 		*classes = NULL;
 		return 0;

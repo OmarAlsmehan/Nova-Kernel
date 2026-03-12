@@ -648,7 +648,7 @@ int sde_plane_wait_input_fence(struct drm_plane *plane, uint32_t wait_ms)
 				}
 #if 0
 				/* msm-sde: DEBUG force panic when fence timeout (Case 04926910)
-				- to debug ANR w/ fence timeout 
+				- to debug ANR w/ fence timeout
 				*/
 				{
 					struct kgsl_device *device = kgsl_get_device(0);

@@ -1037,8 +1037,6 @@ static int _sde_format_populate_addrs_ubwc(
 		layout->plane_addr[3] = 0;
 	}
 done:
-
-
 #if defined(CONFIG_DISPLAY_SAMSUNG) && defined(CONFIG_SEC_DEBUG)
 	if (sec_debug_is_enabled()) {
 		ss_image_logging_update(base_addr,

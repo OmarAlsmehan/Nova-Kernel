@@ -302,9 +302,9 @@ enum constraint {
 	QOS_MAX,
 };
 
-/*unique number*/
+/* unique number */
 #define UFS_UN_20_DIGITS 20
-#define UFS_UN_MAX_DIGITS 21 //current max digit + 1
+#define UFS_UN_MAX_DIGITS 21 // current max digit + 1
 
 #define SERIAL_NUM_SIZE 7
 

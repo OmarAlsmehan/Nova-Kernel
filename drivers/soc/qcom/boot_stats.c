@@ -391,6 +391,7 @@ unsigned int __deprecated get_boot_stat_time(void)
 {
 	return readl_relaxed(mpm_counter_base);
 }
+
 unsigned int get_boot_stat_freq(void)
 {
 	return mpm_counter_freq;

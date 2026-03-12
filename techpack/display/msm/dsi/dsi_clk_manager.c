@@ -650,7 +650,7 @@ static int dsi_display_link_clk_enable(struct dsi_link_clks *clks,
 	}
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-	if ((l_type & DSI_LINK_LP_CLK) && (ctrl_count==1))
+	if ((l_type & DSI_LINK_LP_CLK) && (ctrl_count == 1))
 		tcon_prepare();
 #endif
 

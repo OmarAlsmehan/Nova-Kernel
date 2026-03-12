@@ -170,6 +170,7 @@ int _sde_edid_update_modes(struct drm_connector *connector,
 
 #ifdef CONFIG_SEC_DISPLAYPORT
 char *secdp_vic_to_string(int vic);
+
 extern int forced_resolution;
 #endif
 

@@ -406,7 +406,6 @@ static int qcom_dload_probe(struct platform_device *pdev)
 	store_kaslr_offset();
 	check_pci_edl(pdev->dev.of_node);
 
-
 #if IS_ENABLED(CONFIG_SEC_DEBUG)
 	enable_dump = true;
 	msm_enable_dump_mode(enable_dump);

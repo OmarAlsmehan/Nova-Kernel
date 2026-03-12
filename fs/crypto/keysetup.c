@@ -344,6 +344,7 @@ static int fscrypt_setup_v2_file_key(struct fscrypt_info *ci,
 		return 0;
 	}
 #endif
+
 	if (mk->mk_secret.is_hw_wrapped &&
 	    !(ci->ci_policy.v2.flags & (FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 |
 					FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32))) {
@@ -591,6 +592,7 @@ int fscrypt_get_encryption_info(struct inode *inode)
 		res = fscrypt_context_size(dummy_ctx);
 		memcpy(&ctx, dummy_ctx, res);
 	}
+
 #ifdef CONFIG_FSCRYPT_SDP
 	switch (ctx.version) {
 	case FSCRYPT_CONTEXT_V1: {
@@ -692,10 +694,12 @@ int fscrypt_get_encryption_info(struct inode *inode)
 		}
 		crypt_info = NULL;
 	}
+
 #ifdef CONFIG_FSCRYPT_SDP
-	if (crypt_info == NULL) //Call only when i_crypt_info is loaded initially
+	if (crypt_info == NULL) // Call only when i_crypt_info is loaded initially
 		fscrypt_sdp_finalize_tasks(inode);
 #endif
+
 #ifdef CONFIG_DDAR
 	if (crypt_info == NULL) {
 		if (inode->i_crypt_info && inode->i_crypt_info->ci_dd_info) {
@@ -703,6 +707,7 @@ int fscrypt_get_encryption_info(struct inode *inode)
 		}
 	}
 #endif
+
 	res = 0;
 out:
 	if (master_key) {

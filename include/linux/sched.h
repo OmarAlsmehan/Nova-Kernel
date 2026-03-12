@@ -1457,8 +1457,8 @@ struct task_struct {
 #endif
 
 #ifdef CONFIG_SEC_PERF_MANAGER
-	int drawing_flag;
-	int drawing_mig_boost;
+	int				drawing_flag;
+	int				drawing_mig_boost;
 #endif
 
 #ifdef CONFIG_GCC_PLUGIN_STACKLEAK

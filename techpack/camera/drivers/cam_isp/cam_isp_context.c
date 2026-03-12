@@ -3517,9 +3517,10 @@ hw_dump:
 		CAM_ERR(CAM_ISP, "Dump event fail %lld",
 			req->request_id);
 		goto end;
- 	}
+	}
 	if (dump_only_event_record)
 		goto end;
+
 	rc = __cam_isp_ctx_dump_req_info(ctx, req, cpu_addr,
 		buf_len, &dump_info->offset);
 	if (rc) {
@@ -4771,6 +4772,7 @@ static int __cam_isp_ctx_config_dev_in_top_state(
 	if (ctx_isp->offline_context && atomic_read(&ctx_isp->rxd_epoch)) {
 		__cam_isp_ctx_schedule_apply_req_offline(ctx_isp);
 	}
+
 	cam_mem_put_cpu_buf((int32_t) cmd->packet_handle);
 	return rc;
 

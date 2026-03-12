@@ -483,7 +483,7 @@ struct icnss_priv {
 
 #ifdef CONFIG_SEC_SS_CNSS_FEATURE_SYSFS
 	struct kobject *wifi_kobj;
-    struct completion macloader_done;
+	struct completion macloader_done;
 #endif /* CONFIG_SEC_SS_CNSS_FEATURE_SYSFS */
 };
 

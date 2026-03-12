@@ -2156,7 +2156,7 @@ static ssize_t tun_chr_write_iter(struct kiocb *iocb, struct iov_iter *from)
 
 // SEC_PRODUCT_FEATURE_KNOX_SUPPORT_VPN {
 #ifdef CONFIG_KNOX_NCM
-static int get_meta_param_values(struct sk_buff *skb, 
+static int get_meta_param_values(struct sk_buff *skb,
 				 struct knox_meta_param *metalocal) {
 
 	struct skb_shared_info *knox_shinfo = NULL;
@@ -2175,7 +2175,7 @@ static int get_meta_param_values(struct sk_buff *skb,
 		pr_err("KNOX: knox_shinfo value is null");
 #endif
 		return 1;
-	}	
+	}
 
 	if (knox_shinfo->android_vendor_data1[2] >= META_MARK_BASE_LOWER && knox_shinfo->android_vendor_data1[2] <= META_MARK_BASE_UPPER) {
 		metalocal->uid = (uid_t)knox_shinfo->android_vendor_data1[0];
@@ -2276,7 +2276,7 @@ static ssize_t tun_put_user(struct tun_struct *tun,
 #endif
 	} else {
 
-		if (tun->flags & TUN_META_HDR) {	
+		if (tun->flags & TUN_META_HDR) {
 #ifdef TUN_DEBUG
 			pr_err("KNOX: Appending uid: %d and pid: %d", metalocal.uid,
 			       metalocal.pid);

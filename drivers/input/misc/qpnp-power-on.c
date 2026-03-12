@@ -2135,7 +2135,7 @@ static int qpnp_wake_enabled(const char *val, const struct kernel_param *kp)
 	struct qpnp_pon *pon = pon_hlos_dev;
 	int ret = 0;
 	int old_val = wake_enabled;
-	
+
 	struct qpnp_pon_config *cfg;
 
 	ret = param_set_bool(val, kp);
@@ -2217,7 +2217,7 @@ int sec_set_resin_wk_int(int en)
 		return 0;
 
 	if (!en)
-		disable_irq_wake(cfg->state_irq);		
+		disable_irq_wake(cfg->state_irq);
 	else
 		enable_irq_wake(cfg->state_irq);
 

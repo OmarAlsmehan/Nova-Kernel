@@ -1736,6 +1736,7 @@ static inline void genetlink_exit(void) {}
 
 #if IS_ENABLED(CONFIG_SEC_PM)
 #define BUF_SIZE	SZ_1K
+
 static void __ref cdev_print(struct work_struct *work)
 {
 	struct thermal_cooling_device *cdev;

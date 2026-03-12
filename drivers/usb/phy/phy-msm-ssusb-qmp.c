@@ -162,10 +162,10 @@ struct msm_ssphy_qmp {
 	enum qmp_phy_type	phy_type;
 #if IS_ENABLED(CONFIG_USB_PHY_TUNING_QCOM)
 	struct mutex		phy_tune_lock;
-	u32					tune_addr;
-	int					tune_buf_cnt;
-	int					tune_buf[TUNE_BUF_COUNT][2];
-	bool				ssphy_tune_init_done;
+	u32			tune_addr;
+	int			tune_buf_cnt;
+	int			tune_buf[TUNE_BUF_COUNT][2];
+	bool			ssphy_tune_init_done;
 #endif
 };
 

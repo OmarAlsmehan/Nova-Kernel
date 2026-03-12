@@ -148,6 +148,7 @@ irqreturn_t __handle_irq_event_percpu(struct irq_desc *desc, unsigned int *flags
 
 	for_each_action_of_desc(desc, action) {
 		irqreturn_t res;
+
 #if defined(CONFIG_SEC_DEBUG_SCHED_LOG)
 #if defined(CONFIG_SEC_DEBUG_SCHED_LOG_IRQ_V2)
 		sec_debug_irq_sched_log(irq, desc, action, IRQ_ENTRY_V2);

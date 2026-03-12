@@ -430,7 +430,7 @@ static struct binder_buffer *binder_alloc_new_buf_locked(
 	size = max(size, sizeof(void *));
 #ifdef CONFIG_SAMSUNG_FREECESS
 	if (is_async && (alloc->free_async_space < 3 * size
- 		|| alloc->free_async_space < alloc->buffer_size/4)) {
+		|| alloc->free_async_space < alloc->buffer_size/4)) {
 		struct task_struct *p;
 
 		rcu_read_lock();

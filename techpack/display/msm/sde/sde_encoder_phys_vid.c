@@ -1206,7 +1206,6 @@ static void sde_encoder_phys_vid_disable(struct sde_encoder_phys *phys_enc)
 
 	sde_encoder_helper_phys_disable(phys_enc, NULL);
 exit:
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	if (!sde_encoder_phys_vid_is_master(phys_enc)) {
 		phys_enc->hw_intf->ops.enable_timing(phys_enc->hw_intf, 0);

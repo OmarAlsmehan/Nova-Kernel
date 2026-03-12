@@ -327,7 +327,6 @@ int sde_smmu_map_dma_buf(struct dma_buf *dma_buf,
 	int rc;
 	struct sde_smmu_client *sde_smmu = sde_smmu_get_cb(domain);
 	unsigned long attrs = 0;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	int retry_cnt;
 #endif

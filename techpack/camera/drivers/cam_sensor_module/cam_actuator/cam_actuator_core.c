@@ -173,7 +173,7 @@ int32_t cam_actuator_i2c_write(struct cam_actuator_ctrl_t *a_ctrl, uint32_t reg_
 	struct cam_sensor_i2c_reg_setting reg_setting;
 	struct cam_sensor_i2c_reg_array reg_arr;
 	int rc = 0;
-	
+
 	memset(&reg_setting, 0, sizeof(reg_setting));
 	memset(&reg_arr, 0, sizeof(reg_arr));
 
@@ -192,12 +192,12 @@ int32_t cam_actuator_i2c_write(struct cam_actuator_ctrl_t *a_ctrl, uint32_t reg_
 	rc = camera_io_dev_write(&a_ctrl->io_master_info, &reg_setting);
 
 	 CAM_ERR(CAM_ACTUATOR,
-	  "[KYH]Write Type - CAM_SENSOR_I2C_WRITE_RANDOM I2C Register Address - 0x%x Register Data - 0x%x",
-	 reg_addr,reg_data);
+		"[KYH]Write Type - CAM_SENSOR_I2C_WRITE_RANDOM I2C Register Address - 0x%x Register Data - 0x%x",
+		reg_addr,reg_data);
 
 
 	if (rc < 0) {
- 		CAM_ERR(CAM_ACTUATOR, "Failed to random write I2C settings for reg:0x%x data:0x%x err:%d", reg_addr, reg_data, rc);
+		CAM_ERR(CAM_ACTUATOR, "Failed to random write I2C settings for reg:0x%x data:0x%x err:%d", reg_addr, reg_data, rc);
 	}
 
 	return rc;
@@ -240,13 +240,11 @@ void cam_actuator_busywait(struct cam_actuator_ctrl_t *a_ctrl)
 	   CAM_INFO(CAM_ACTUATOR, "Idle");
 }
 
-int32_t cam_actuator_check_pwr(
-		struct cam_hw_soc_info *soc_info)
+int32_t cam_actuator_check_pwr(struct cam_hw_soc_info *soc_info)
 {
 	int val = 0, i = 0;
 	uint8_t size = 0;
-	struct cam_soc_gpio_data *gpio_conf =
-			soc_info->gpio_data;
+	struct cam_soc_gpio_data *gpio_conf = soc_info->gpio_data;
 	struct gpio *gpio_tbl = NULL;
 
 	if (!gpio_conf) {
@@ -272,10 +270,10 @@ int32_t cam_actuator_check_pwr(
 		val = gpio_get_value_cansleep(gpio_tbl[i].gpio);
 		CAM_ERR(CAM_SENSOR, "gpio[%d]= %d:%s dir: %ld value: %d",
 			i, gpio_tbl[i].gpio, gpio_tbl[i].label, gpio_tbl[i].flags, val);
-		if(val==0)
+		if (val == 0)
 			return -EINVAL;
 	}
-	
+
 	return 0;
 }
 
@@ -290,10 +288,10 @@ int32_t cam_actuator_do_soft_landing(struct cam_actuator_ctrl_t *a_ctrl)
 
 	// Check if IC is off
 	rc = cam_actuator_check_pwr(&a_ctrl->soc_info);
-	if (rc < 0)  {
+	if (rc < 0) {
 		CAM_ERR(CAM_ACTUATOR, "Sensor powered off first - actuator slave will not be read now :%d", rc);
 		return 0;
-	}		
+	}
 	cam_actuator_busywait(a_ctrl);
 	rc = cam_actuator_i2c_read(a_ctrl, 0x02, &reg_data, CAMERA_SENSOR_I2C_TYPE_BYTE, CAMERA_SENSOR_I2C_TYPE_BYTE);
 	if (rc < 0) {
@@ -325,8 +323,8 @@ int32_t cam_actuator_do_soft_landing(struct cam_actuator_ctrl_t *a_ctrl)
 
 	CAM_INFO(CAM_ACTUATOR, "current position:%d ", position);
 
-	/*Max position is 1023, keep half of max. lens position*/
-	if( position > 512 ) {
+	/* Max position is 1023, keep half of max. lens position */
+	if (position > 512) {
 		position = 512;
 
 		rc = cam_actuator_i2c_write(a_ctrl, 0x03, position - 1, CAMERA_SENSOR_I2C_TYPE_WORD);
@@ -338,12 +336,11 @@ int32_t cam_actuator_do_soft_landing(struct cam_actuator_ctrl_t *a_ctrl)
 		cam_actuator_busywait(a_ctrl);
 		CAM_INFO(CAM_ACTUATOR, "current position is set to :%d ", position);
 	}
-	rc = cam_actuator_i2c_write(a_ctrl, 0x0A,  ((position >> 1) - 1), CAMERA_SENSOR_I2C_TYPE_BYTE);
+	rc = cam_actuator_i2c_write(a_ctrl, 0x0A, ((position >> 1) - 1), CAMERA_SENSOR_I2C_TYPE_BYTE);
 	if (rc < 0) {
 		CAM_ERR(CAM_ACTUATOR, "preset register - i2c write fail err:%d", rc);
 		return 0;
 	}
-	
 
 	CAM_INFO(CAM_ACTUATOR, "preset initial position:%d ", position);
 
@@ -423,8 +420,6 @@ static int32_t cam_actuator_i2c_modes_util(
 	if (i2c_list->op_code == CAM_SENSOR_I2C_WRITE_RANDOM) {
 		rc = camera_io_dev_write(io_master_info,
 			&(i2c_list->i2c_settings));
-
-
 		if (rc < 0) {
 			CAM_ERR(CAM_ACTUATOR,
 				"Failed to random write I2C settings: %d",
@@ -436,8 +431,6 @@ static int32_t cam_actuator_i2c_modes_util(
 			io_master_info,
 			&(i2c_list->i2c_settings),
 			0);
-			
-	
 		if (rc < 0) {
 			CAM_ERR(CAM_ACTUATOR,
 				"Failed to seq write I2C settings: %d",
@@ -449,7 +442,6 @@ static int32_t cam_actuator_i2c_modes_util(
 			io_master_info,
 			&(i2c_list->i2c_settings),
 			1);
-		
 		if (rc < 0) {
 			CAM_ERR(CAM_ACTUATOR,
 				"Failed to burst write I2C settings: %d",
@@ -473,7 +465,6 @@ static int32_t cam_actuator_i2c_modes_util(
 				return rc;
 			}
 		}
-		
 	}
 
 	return rc;
@@ -599,9 +590,9 @@ int32_t cam_actuator_apply_settings(struct cam_actuator_ctrl_t *a_ctrl,
 
 #if defined(CONFIG_SAMSUNG_OIS_MCU_STM32)
 		if ((!a_ctrl->use_mcu) &&
-            ((a_ctrl->soc_info.index == SEC_WIDE_SENSOR) ||
-			(a_ctrl->soc_info.index == SEC_TELE_SENSOR) ||
-			(a_ctrl->soc_info.index == SEC_TELE2_SENSOR))) {
+		    ((a_ctrl->soc_info.index == SEC_WIDE_SENSOR) ||
+		    (a_ctrl->soc_info.index == SEC_TELE_SENSOR) ||
+		    (a_ctrl->soc_info.index == SEC_TELE2_SENSOR))) {
 			size = i2c_list->i2c_settings.size;
 			for (i = 0; i < size; i++) {
 				if (i2c_list->i2c_settings.reg_setting[i].reg_addr == 0x00) {
@@ -725,7 +716,6 @@ static int cam_actuator_update_req_mgr(
 	add_req.link_hdl = a_ctrl->bridge_intf.link_hdl;
 	add_req.req_id = csl_packet->header.request_id;
 	add_req.dev_hdl = a_ctrl->bridge_intf.device_hdl;
-
 
 	if (a_ctrl->bridge_intf.crm_cb &&
 		a_ctrl->bridge_intf.crm_cb->add_req) {
@@ -1555,23 +1545,22 @@ int16_t cam_actuator_move_for_ois_read_hall_cal_test(struct cam_actuator_ctrl_t 
 
 	return rc;
 }
-
 #endif
 
 #if defined(CONFIG_SAMSUNG_ACTUATOR_PREVENT_SHAKING)
-struct cam_sensor_i2c_reg_array wide_init_1[] =  {
+struct cam_sensor_i2c_reg_array wide_init_1[] = {
 	{ 0x02,	0x40,	0,	0},
 };
 
-struct cam_sensor_i2c_reg_array wide_init_2[] =  {
+struct cam_sensor_i2c_reg_array wide_init_2[] = {
 	{ 0x02,	0x8000,	0,	0},
 };
 
-struct cam_sensor_i2c_reg_array wide_init_3[] =  {
+struct cam_sensor_i2c_reg_array wide_init_3[] = {
 	{ 0x02,	0x00,	0,	0},
 };
 
-struct cam_sensor_i2c_reg_setting wide_init_setting[] =  {
+struct cam_sensor_i2c_reg_setting wide_init_setting[] = {
 	{	wide_init_1,
 		ARRAY_SIZE(wide_init_1),
 		CAMERA_SENSOR_I2C_TYPE_BYTE,
@@ -1593,15 +1582,15 @@ struct cam_sensor_i2c_reg_setting wide_init_setting[] =  {
 };
 
 #if defined(CONFIG_SAMSUNG_OIS_MCU_STM32)
-struct cam_sensor_i2c_reg_array tele_init_1[] =  {
+struct cam_sensor_i2c_reg_array tele_init_1[] = {
 	{ 0x0060,	0x00,	0,	0},
 };
 
-struct cam_sensor_i2c_reg_array tele_init_2[] =  {
+struct cam_sensor_i2c_reg_array tele_init_2[] = {
 	{ 0x0044,	0x8000,	0,	0},
 };
 
-struct cam_sensor_i2c_reg_setting tele_init_setting[] =  {
+struct cam_sensor_i2c_reg_setting tele_init_setting[] = {
 	{	tele_init_1,
 		ARRAY_SIZE(tele_init_1),
 		CAMERA_SENSOR_I2C_TYPE_WORD,

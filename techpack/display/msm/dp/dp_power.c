@@ -26,8 +26,7 @@
 #define DP_LINK_BW_HBR		0x0a
 #define DP_LINK_BW_HBR2		0x14    /* 1.2 */
 #define DP_LINK_BW_HBR3		0x1e    /* 1.4 */
-
-#endif/*CONFIG_SEC_DISPLAYPORT*/
+#endif /* CONFIG_SEC_DISPLAYPORT */
 
 #define DP_CLIENT_NAME_SIZE	20
 
@@ -58,11 +57,11 @@ struct dp_power_private {
 #if defined(CONFIG_SEC_DISPLAYPORT)
 struct dp_power_private *g_secdp_power;
 
-#define DP_ENUM_STR(x)	#x
+#define DP_ENUM_STR(x) #x
 
 enum redriver_switch_t {
 	REDRIVER_SWITCH_UNKNOWN = -1,
-	REDRIVER_SWITCH_RESET   =  0,
+	REDRIVER_SWITCH_RESET = 0,
 	REDRIVER_SWITCH_CROSS,
 	REDRIVER_SWITCH_THROU,
 };
@@ -135,9 +134,9 @@ static int secdp_aux_pullup_vreg_enable(bool on)
 		goto exit;
 	}
 
-#define QUSB2PHY_3P3_VOL_MIN		3072000 /* uV */
-#define QUSB2PHY_3P3_VOL_MAX		3072000 /* uV */
-#define QUSB2PHY_3P3_HPM_LOAD		30000	/* uA */
+#define QUSB2PHY_3P3_VOL_MIN 3072000 /* uV */
+#define QUSB2PHY_3P3_VOL_MAX 3072000 /* uV */
+#define QUSB2PHY_3P3_HPM_LOAD 30000 /* uA */
 
 	if (on) {
 		if (power->aux_pullup_on) {
@@ -152,7 +151,7 @@ static int secdp_aux_pullup_vreg_enable(bool on)
 		}
 
 		rc = regulator_set_voltage(aux_pu_vreg, QUSB2PHY_3P3_VOL_MIN,
-					QUSB2PHY_3P3_VOL_MAX);
+				QUSB2PHY_3P3_VOL_MAX);
 		if (rc) {
 			DP_ERR("Unable to set voltage for vdda33: %d\n", rc);
 			goto put_vdda33_lpm;
@@ -167,7 +166,6 @@ static int secdp_aux_pullup_vreg_enable(bool on)
 		DP_INFO("[AUX_PU] on success\n");
 		power->aux_pullup_on = true;
 	} else {
-
 		rc = regulator_disable(aux_pu_vreg);
 		if (rc)
 			DP_ERR("Unable to disable vdda33: %d\n", rc);
@@ -752,7 +750,7 @@ static void secdp_ps5169_notify_linkinfo(u32 bw_code, u8 v_level, u8 p_level)
 	}
 
 	DP_DEBUG("bw:0x%x, v:%d, p:%d, eq0:0x%x, eq1:0x%x\n",
-				bw_code, v_level, p_level, eq0, eq1);
+		bw_code, v_level, p_level, eq0, eq1);
 	ps5169_notify_dplink(eq0, eq1);
 exit:
 	return;
@@ -836,8 +834,8 @@ void secdp_power_set_gpio(bool flip)
 
 	parser = power->parser;
 
-//	DP_DEBUG("flip:%d, aux_inv:%d, redrv:%d\n",
-//		flip, parser->aux_sel_inv, parser->use_redrv);
+	//DP_DEBUG("flip:%d, aux_inv:%d, redrv:%d\n",
+	//	flip, parser->aux_sel_inv, parser->use_redrv);
 
 	if (parser->aux_sel_inv)
 		sel_val = true;
@@ -979,8 +977,7 @@ enum dp_hpd_plug_orientation secdp_get_plug_orientation(void)
 
 	for (i = 0; i < mp->num_gpio; i++) {
 		if (gpio_is_valid(config->gpio)) {
-			if (dp_power_find_gpio(config->gpio_name,
-					"usbplug-cc")) {
+			if (dp_power_find_gpio(config->gpio_name, "usbplug-cc")) {
 				dir = gpio_get_value(config->gpio);
 				if (parser->cc_dir_inv)
 					dir = !dir;
@@ -988,14 +985,14 @@ enum dp_hpd_plug_orientation secdp_get_plug_orientation(void)
 					!dir ? "CC1" : "CC2");
 				if (dir == 0)
 					return ORIENTATION_CC1;
-				else /* if (dir == 1) */
+				else /*if (dir == 1)*/
 					return ORIENTATION_CC2;
 			}
 		}
 		config++;
 	}
 
-	/*cannot be here*/
+	/* cannot be here */
 	return ORIENTATION_NONE;
 }
 
@@ -1103,6 +1100,7 @@ static int dp_power_client_init(struct dp_power *dp_power,
 		goto error_client;
 	}
 #endif
+
 	return 0;
 
 #if defined(CONFIG_SEC_DISPLAYPORT)

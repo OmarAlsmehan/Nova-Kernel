@@ -634,8 +634,8 @@ static int _sde_connector_update_power_locked(struct sde_connector *c_conn)
 	if (mode != c_conn->last_panel_power_mode && c_conn->ops.set_power) {
 #else /* SS Modify */
 	if (mode != c_conn->last_panel_power_mode && c_conn->ops.set_power
-		&& !(mode == SDE_MODE_DPMS_OFF && c_conn->last_panel_power_mode == SDE_MODE_DPMS_ON)
-		&& !(mode == SDE_MODE_DPMS_ON && c_conn->last_panel_power_mode == SDE_MODE_DPMS_OFF)) {
+	    && !(mode == SDE_MODE_DPMS_OFF && c_conn->last_panel_power_mode == SDE_MODE_DPMS_ON)
+	    && !(mode == SDE_MODE_DPMS_ON && c_conn->last_panel_power_mode == SDE_MODE_DPMS_OFF)) {
 #endif
 		display = c_conn->display;
 		set_power = c_conn->ops.set_power;
@@ -655,8 +655,8 @@ static int _sde_connector_update_power_locked(struct sde_connector *c_conn)
 
 	return rc;
 }
-#ifndef CONFIG_DISPLAY_SAMSUNG /* to AVOID unexpectable brightness control */
 
+#ifndef CONFIG_DISPLAY_SAMSUNG /* to AVOID unexpectable brightness control */
 static int _sde_connector_update_bl_scale(struct sde_connector *c_conn)
 {
 	struct dsi_display *dsi_display;
@@ -701,6 +701,7 @@ static int _sde_connector_update_bl_scale(struct sde_connector *c_conn)
 	return rc;
 }
 #endif
+
 void sde_connector_set_colorspace(struct sde_connector *c_conn)
 {
 	int rc = 0;
@@ -854,7 +855,6 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 	struct msm_display_kickoff_params params;
 	struct dsi_display *display;
 	int rc;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd;
 	u32 finger_mask_state;
@@ -902,7 +902,7 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 		/* SAMSUNG_FINGERPRINT */
 		vdd = display->panel->panel_private;
 		finger_mask_state = sde_connector_get_property(c_conn->base.state,
-				CONNECTOR_PROP_FINGERPRINT_MASK);
+			CONNECTOR_PROP_FINGERPRINT_MASK);
 		vdd->finger_mask_updated = false;
 		if (finger_mask_state != vdd->finger_mask) {
 			SDE_ERROR("[FINGER MASK]updated finger mask mode %d\n", finger_mask_state);
@@ -1036,7 +1036,7 @@ void sde_connector_helper_bridge_enable(struct drm_connector *connector)
 		if (vdd->vrr.support_vrr_based_bl &&
 				(vdd->vrr.running_vrr_mdp || vdd->vrr.running_vrr)) {
 			LCD_INFO(vdd, "skip & backup props.brightness = %d during VRR\n",
-					c_conn->bl_device->props.brightness);
+				c_conn->bl_device->props.brightness);
 			vdd->br_info.common_br.bl_level = c_conn->bl_device->props.brightness;
 		} else {
 			backlight_update_status(c_conn->bl_device);

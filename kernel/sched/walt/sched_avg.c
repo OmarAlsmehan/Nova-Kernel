@@ -135,9 +135,9 @@ void sched_update_hyst_times(void)
 			     & sysctl_sched_busy_hyst_enable_cpus) ?
 #if IS_ENABLED(CONFIG_SEC_INPUT_BOOSTER)
 			     max(sysctl_sched_busy_hyst,
-				    (unsigned int)(pm_qos_request(PM_QOS_BIAS_HYST) * NSEC_PER_MSEC)) : 0;
+				     (unsigned int)(pm_qos_request(PM_QOS_BIAS_HYST) * NSEC_PER_MSEC)) : 0;
 #else
-				 sysctl_sched_busy_hyst : 0;
+			     sysctl_sched_busy_hyst : 0;
 #endif
 		per_cpu(coloc_hyst_time, cpu) = ((BIT(cpu)
 			     & sysctl_sched_coloc_busy_hyst_enable_cpus)

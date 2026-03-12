@@ -1374,10 +1374,10 @@ static void dsi_kickoff_msg_tx(struct dsi_ctrl *dsi_ctrl,
 {
 	u32 hw_flags = 0;
 	struct dsi_ctrl_hw_ops dsi_hw_ops = dsi_ctrl->hw.ops;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	u8 *tx_buf = (u8 *)msg->tx_buf;
 #endif
+
 	SDE_EVT32(dsi_ctrl->cell_index, SDE_EVTLOG_FUNC_ENTRY, flags,
 		msg->flags);
 
@@ -1395,12 +1395,12 @@ static void dsi_kickoff_msg_tx(struct dsi_ctrl *dsi_ctrl,
 	 * In video mode panel, if the DMA is triggered very close to
 	 * the beginning of the active window and the DMA transfer
 	 * happens in the last line of VBP, then the HW state will
-	 * stay in ?�wait??and return to ?�idle??in the first line of VFP.
+	 * stay in ‘wait’ and return to ‘idle’ in the first line of VFP.
 	 * But somewhere in the middle of the active window, if SW
 	 * disables DSI command mode engine while the HW is still
 	 * waiting and re-enable after timing engine is OFF. So the
-	 * HW never ?�sees??another vblank line and hence it gets
-	 * stuck in the ?�wait??state.
+	 * HW never ‘sees’ another vblank line and hence it gets
+	 * stuck in the ‘wait’ state.
 	 */
 	if ((flags & DSI_CTRL_CMD_CUSTOM_DMA_SCHED) ||
 		(dsi_ctrl->host_config.panel_mode == DSI_OP_VIDEO_MODE))
@@ -1435,7 +1435,6 @@ static void dsi_kickoff_msg_tx(struct dsi_ctrl *dsi_ctrl,
 				if (tx_buf[0] == 0x2a || tx_buf[0] == 0x2b)
 					SDE_ATRACE_END("dsi_message_tx_flush");
 #endif
-
 			}
 		} else if (flags & DSI_CTRL_CMD_FIFO_STORE) {
 			dsi_hw_ops.kickoff_fifo_command(&dsi_ctrl->hw,
@@ -1485,6 +1484,7 @@ static void dsi_kickoff_msg_tx(struct dsi_ctrl *dsi_ctrl,
 		if (tx_buf[0] == 0x2a || tx_buf[0] == 0x2b)
 			SDE_ATRACE_BEGIN("dsi_message_tx_wait");
 #endif
+
 		if (flags & DSI_CTRL_CMD_ASYNC_WAIT) {
 			dsi_ctrl->dma_wait_queued = true;
 			queue_work(dsi_ctrl->dma_cmd_workq,
@@ -1575,7 +1575,8 @@ static void dsi_ctrl_clear_slave_dma_status(struct dsi_ctrl *dsi_ctrl, u32 flags
 }
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-static void print_cmd_desc(const struct mipi_dsi_msg *msg, struct samsung_display_driver_data *vdd)
+static void print_cmd_desc(const struct mipi_dsi_msg *msg,
+			   struct samsung_display_driver_data *vdd)
 {
 	char buf[1024];
 	int len = 0;
@@ -1588,10 +1589,10 @@ static void print_cmd_desc(const struct mipi_dsi_msg *msg, struct samsung_displa
 		(msg->flags & MIPI_DSI_MSG_LASTCOMMAND) ? 1 : 0); /* Last bit */
 	len += snprintf(buf + len, sizeof(buf) - len, "%02x ", msg->channel);
 	len += snprintf(buf + len, sizeof(buf) - len, "%02x ",
-						(unsigned int)msg->flags);
+		(unsigned int)msg->flags);
 	len += snprintf(buf + len, sizeof(buf) - len, "%02x ", msg->wait_ms); /* Delay */
 	len += snprintf(buf + len, sizeof(buf) - len, "%02x ",
-						(unsigned int)msg->tx_len);
+		(unsigned int)msg->tx_len);
 
 	/* Packet Payload */
 	for (i = 0 ; i < msg->tx_len; i++) {
@@ -1727,8 +1728,8 @@ static int dsi_message_tx(struct dsi_ctrl *dsi_ctrl,
 			cmd_mem.length = dsi_ctrl->cmd_len;
 			dsi_ctrl->cmd_len = 0;
 		}
-		SDE_EVT32(dsi_ctrl->cell_index, SDE_EVTLOG_FUNC_CASE2, *flags,dsi_ctrl->cmd_len);
 
+		SDE_EVT32(dsi_ctrl->cell_index, SDE_EVTLOG_FUNC_CASE2, *flags, dsi_ctrl->cmd_len);
 	} else if (*flags & DSI_CTRL_CMD_FIFO_STORE) {
 		cmd.command =  (u32 *)buffer;
 		cmd.size = length;
@@ -2857,7 +2858,6 @@ static void dsi_ctrl_handle_error_status(struct dsi_ctrl *dsi_ctrl,
 				unsigned long error)
 {
 	struct dsi_event_cb_info cb_info;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG) && defined(CONFIG_SEC_DEBUG)
 	struct samsung_display_driver_data *vdd = ss_get_vdd(dsi_ctrl->cell_index);
 #endif
@@ -3845,7 +3845,7 @@ int dsi_ctrl_get_host_engine_init_state(struct dsi_ctrl *dsi_ctrl,
  * Return: error code.
  */
 int dsi_ctrl_update_host_engine_state_for_cont_splash(struct dsi_ctrl *dsi_ctrl,
-					enum dsi_engine_state state)
+		enum dsi_engine_state state)
 {
 	int rc = 0;
 
@@ -3859,7 +3859,7 @@ int dsi_ctrl_update_host_engine_state_for_cont_splash(struct dsi_ctrl *dsi_ctrl,
 	rc = dsi_ctrl_check_state(dsi_ctrl, DSI_CTRL_OP_HOST_ENGINE, state);
 	if (rc) {
 		DSI_CTRL_ERR(dsi_ctrl, "Controller state check failed, rc=%d\n",
-				rc);
+			rc);
 		goto error;
 	}
 

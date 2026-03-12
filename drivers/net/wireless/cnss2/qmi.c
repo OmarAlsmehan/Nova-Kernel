@@ -515,7 +515,7 @@ out:
 #ifdef CONFIG_SEC_SS_CNSS2_FEATURE_SYSFS
 extern int ant_from_macloader;
 
-void cnss_add_ss_naming_rule(struct cnss_plat_data *plat_priv, 
+void cnss_add_ss_naming_rule(struct cnss_plat_data *plat_priv,
 				  char *filename)
 {
 	char ant[3];
@@ -531,7 +531,7 @@ void cnss_add_ss_naming_rule(struct cnss_plat_data *plat_priv,
 		snprintf(ant, 3, "%d", ant_from_macloader); //convert to string
 		strncat(filename, ant, strlen(ant));
 	}
-	
+
 #ifdef CONFIG_WLAN_MULTIPLE_SUPPORT_FEM
 	if (high > 0)
 		strncat(filename, ".nxp", 4);

@@ -159,4 +159,5 @@ config USB_CHARGING_EVENT
 	help
 	  For satisfy BC1.2 specification
 	  In unconfigured state or suspend state, Set vbus current to 100mA
+
 endif

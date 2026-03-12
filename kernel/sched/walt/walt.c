@@ -3867,4 +3867,3 @@ int get_num_clusters(void)
 	return num_sched_clusters;
 }
 #endif
-

@@ -481,8 +481,8 @@ static int q6afe_load_avcs_modules(int num_modules, u16 port_id,
 					AVS_MODULE_ID_DEPACKETIZER_COP_V1;
 
 				if (format_id == ENC_CODEC_TYPE_LDAC ||
-					format_id == ASM_MEDIA_FMT_SBC_SS ||
-					format_id == ASM_MEDIA_FMT_SSC) {
+				    format_id == ASM_MEDIA_FMT_SBC_SS ||
+				    format_id == ASM_MEDIA_FMT_SSC) {
 					pm[i]->payload->load_unload_info[0].id1 =
 						AVS_MODULE_ID_DEPACKETIZER_COP;
 					goto load_unload;
@@ -2132,7 +2132,6 @@ fail_cmd:
 	return ret;
 }
 EXPORT_SYMBOL(afe_q6_slimbus_update_sbm);
-
 
 int afe_q6_update_mtu(int mtu)
 {
@@ -4677,6 +4676,7 @@ fail_cmd:
 	return result;
 }
 EXPORT_SYMBOL(afe_tfadsp_read);
+
 #if defined(AFE_TFADSP_SHARED_MEM_IPC)
 int afe_tfadsp_write(
 	void *dev, int buf_size, const char *buf)
@@ -6471,8 +6471,8 @@ static int q6afe_send_enc_config(u16 port_id,
 		format != ASM_MEDIA_FMT_APTX_ADAPTIVE &&
 		format != ASM_MEDIA_FMT_APTX_AD_SPEECH &&
 		format != ASM_MEDIA_FMT_LC3 &&
-		format != ASM_MEDIA_FMT_APTX_ADAPTIVE && format != ASM_MEDIA_FMT_APTX_AD_SPEECH &&
-		format != ASM_MEDIA_FMT_SSC && format != ASM_MEDIA_FMT_SBC_SS) {
+		format != ASM_MEDIA_FMT_SSC &&
+		format != ASM_MEDIA_FMT_SBC_SS) {
 		pr_err("%s:Unsuppported enc format. Ignore AFE config\n",
 				__func__);
 		return 0;
@@ -8410,7 +8410,6 @@ fail_cmd:
 	kfree(packed_param_data);
 	return ret;
 }
-
 EXPORT_SYMBOL(afe_set_volume_monitor);
 
 int afe_get_volume_monitor(int port_id, int *volume_monitor_value)
@@ -8536,7 +8535,6 @@ fail_cmd:
 }
 EXPORT_SYMBOL(afe_set_sa_listenback);
 #endif
-
 
 int afe_pseudo_port_start_nowait(u16 port_id)
 {

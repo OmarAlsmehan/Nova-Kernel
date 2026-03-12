@@ -238,6 +238,7 @@ static void sde_kms_disable_vblank(struct msm_kms *kms, struct drm_crtc *crtc)
 #if defined(CONFIG_DISPLAY_SAMSUNG) // case 04436106
 	int ret = 0;
 #endif
+
 	if (!kms || !crtc)
 		return;
 
@@ -801,12 +802,12 @@ static int _sde_kms_release_splash_buffer(unsigned int mem_addr,
 	/* leave ramdump memory only if base address matches */
 	if (ramdump_base == mem_addr &&
 #if defined(CONFIG_DISPLAY_SAMSUNG) && defined(CONFIG_SEC_DEBUG)
-		/* case 1) upload mode: release splash memory except disp_rdump_memory
-		 *		   which is used for framebuffer in upload mode bootloader
-		 * case 2) None-upload mode: release whole splash memory
-		 *		   which is used for framebuffer in normal booitng mode bootloader
-		 */
-		sec_debug_is_enabled() &&
+			/* case 1) upload mode: release splash memory except disp_rdump_memory
+			 *		   which is used for framebuffer in upload mode bootloader
+			 * case 2) None-upload mode: release whole splash memory
+			 *		   which is used for framebuffer in normal booitng mode bootloader
+			 */
+			sec_debug_is_enabled() &&
 #endif
 			ramdump_buffer_size <= splash_buffer_size) {
 		mem_addr +=  ramdump_buffer_size;
@@ -826,7 +827,7 @@ static int _sde_kms_release_splash_buffer(unsigned int mem_addr,
 
 #if defined(CONFIG_DISPLAY_SAMSUNG) && defined(CONFIG_SEC_DEBUG)
 	SDE_INFO("release splash buffer: addr: %lx, size: %x, sec_debug: %d\n",
-			mem_addr, splash_buffer_size, sec_debug_is_enabled());
+		mem_addr, splash_buffer_size, sec_debug_is_enabled());
 #endif
 
 	return ret;
@@ -2756,6 +2757,7 @@ static int _sde_kms_helper_reset_custom_properties(struct sde_kms *sde_kms,
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 #include "./dsi/dsi_display.h"
 #endif
+
 static void sde_kms_lastclose(struct msm_kms *kms)
 {
 	struct sde_kms *sde_kms;

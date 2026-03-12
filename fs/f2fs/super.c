@@ -396,7 +396,7 @@ static inline void limit_reserve_root(struct f2fs_sb_info *sbi)
 			  from_kuid_munged(&init_user_ns,
 					   F2FS_OPTION(sbi).s_resuid),
 			  from_kgid_munged(&init_user_ns,
-					F2FS_OPTION(sbi).s_resgid));
+					   F2FS_OPTION(sbi).s_resgid));
 }
 
 static inline int adjust_reserved_segment(struct f2fs_sb_info *sbi)

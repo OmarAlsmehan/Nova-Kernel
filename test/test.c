@@ -187,7 +187,6 @@ struct test_try_catch_context {
 	struct test_case *test_case;
 };
 
-
 /*
  * Performs post validations and cleanup after a test case was run.
  * XXX: Should ONLY BE CALLED AFTER test_run_case_internal!
@@ -251,7 +250,7 @@ static void test_catch_run_case(void *data)
 		 */
 		else
 			test_err(test, "internal error occurred preventing test case from running: %d\n",
-				  try_exit_code);
+				try_exit_code);
 		return;
 	}
 

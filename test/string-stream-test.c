@@ -58,4 +58,3 @@ static struct test_module string_stream_test_module = {
 	.test_cases = string_stream_test_cases
 };
 module_test(string_stream_test_module);
-

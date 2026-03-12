@@ -942,10 +942,10 @@ have_ifp:
 	if (neigh != NULL && neigh->dev != NULL && !strcmp(neigh->dev->name, "aware_data0")) {
 		pr_info("ipv6 neigh_lookup is done by receiving NS"
 			" from [:%02x%02x] to [:%02x%02x] and sending NA for %s\n",
-			saddr->s6_addr[14], saddr->s6_addr[15], 
-			daddr->s6_addr[14], daddr->s6_addr[15], 
+			saddr->s6_addr[14], saddr->s6_addr[15],
+			daddr->s6_addr[14], daddr->s6_addr[15],
 			neigh->dev->name);
-	}	
+	}
 
 	if (neigh || !dev->header_ops) {
 		ndisc_send_na(dev, saddr, &msg->target, !!is_router,
@@ -1066,8 +1066,8 @@ static void ndisc_recv_na(struct sk_buff *skb)
 		if (neigh->dev != NULL && !strcmp(neigh->dev->name, "aware_data0")) {
 			pr_info("ipv6 neigh_lookup is done by receiving NA"
 				" from [:%02x%02x] to [:%02x%02x] for %s\n",
-				saddr->s6_addr[14], saddr->s6_addr[15], 
-				daddr->s6_addr[14], daddr->s6_addr[15], 
+				saddr->s6_addr[14], saddr->s6_addr[15],
+				daddr->s6_addr[14], daddr->s6_addr[15],
 				dev->name);
 		}
 

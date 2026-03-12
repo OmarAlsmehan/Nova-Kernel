@@ -103,14 +103,13 @@ static int cam_ois_get_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 		return -EFAULT;
 	}
 #endif
-
 	if (copy_from_user(&ois_acq_dev, u64_to_user_ptr(cmd->handle),
 		sizeof(ois_acq_dev)))
 		return -EFAULT;
 
 	bridge_params.session_hdl = ois_acq_dev.session_handle;
 #if defined(CONFIG_SAMSUNG_OIS_MCU_STM32)
-    bridge_params.ops = &o_ctrl->bridge_intf[idx].ops;
+	bridge_params.ops = &o_ctrl->bridge_intf[idx].ops;
 #else
 	bridge_params.ops = &o_ctrl->bridge_intf.ops;
 #endif
@@ -154,8 +153,8 @@ static int cam_ois_get_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 static int cam_ois_release_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 	void *arg)
 {
-	struct cam_control				*cmd = (struct cam_control *)arg;
-	struct cam_sensor_release_dev	 ois_rel_dev;
+	struct cam_control *cmd = (struct cam_control *)arg;
+	struct cam_sensor_release_dev ois_rel_dev;
 	int i = 0, rc = 0;
 
 	if (!o_ctrl || !arg) {
@@ -164,7 +163,7 @@ static int cam_ois_release_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 	}
 
 	if (copy_from_user(&ois_rel_dev, u64_to_user_ptr(cmd->handle),
-		sizeof(struct cam_sensor_release_dev)))
+	    sizeof(struct cam_sensor_release_dev)))
 		return -EFAULT;
 
 	for (i = 0; i < MAX_BRIDGE_COUNT; i++) {
@@ -172,7 +171,7 @@ static int cam_ois_release_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 			continue;
 
 		if ((o_ctrl->bridge_intf[i].device_hdl == ois_rel_dev.device_handle) &&
-			(o_ctrl->bridge_intf[i].session_hdl == ois_rel_dev.session_handle)) {
+		    (o_ctrl->bridge_intf[i].session_hdl == ois_rel_dev.session_handle)) {
 			CAM_INFO(CAM_OIS, "Release the device hdl %d", o_ctrl->bridge_intf[i].device_hdl);
 			rc = cam_destroy_device_hdl(o_ctrl->bridge_intf[i].device_hdl);
 			if (rc < 0)
@@ -377,24 +376,23 @@ static int cam_ois_update_time(struct i2c_settings_array *i2c_set)
 	return rc;
 }
 
-static int cam_ois_convert_timestamp(
-	struct i2c_settings_array *i2c_settings)
+static int cam_ois_convert_timestamp(struct i2c_settings_array *i2c_settings)
 {
-	int32_t                   rc = 0;
-	struct i2c_settings_list  *i2c_list;
-	uint8_t                   *read_buff = NULL;
-	uint32_t                  buff_length = 0;
+	int32_t                         rc = 0;
+	struct i2c_settings_list       *i2c_list;
+	uint8_t                        *read_buff = NULL;
+	uint32_t                        buff_length = 0;
 
-	uint32_t                  byte_to_bit = 8;
-	uint32_t                  timestamp_fw_size = 4;
-	uint32_t                  timestamp_qtimer_size = 8;
-	uint32_t                  timestamp_buff_offset = 81; // SS should find offset
-	int32_t                   timestamp_ois_us = 0;
-	int32_t                   timestamp_tmp_us = 0;
-	int64_t                   timestamp_ois_ns = 0;
-	uint64_t                  timestamp_stored_ns = stored_timestamp;
-	uint64_t                  calibrated_timestamp_ns = 0;
-	uint32_t                  i = 0;
+	uint32_t                        byte_to_bit = 8;
+	uint32_t                        timestamp_fw_size = 4;
+	uint32_t                        timestamp_qtimer_size = 8;
+	uint32_t                        timestamp_buff_offset = 81; // SS should find offset
+	int32_t                         timestamp_ois_us = 0;
+	int32_t                         timestamp_tmp_us = 0;
+	int64_t                         timestamp_ois_ns = 0;
+	uint64_t                        timestamp_stored_ns = stored_timestamp;
+	uint64_t                        calibrated_timestamp_ns = 0;
+	uint32_t                        i = 0;
 
 	list_for_each_entry(i2c_list,
 		&(i2c_settings->list_head), list) {
@@ -466,8 +464,8 @@ static int cam_ois_apply_settings(struct cam_ois_ctrl_t *o_ctrl,
 		if (i2c_list->op_code ==  CAM_SENSOR_I2C_WRITE_RANDOM) {
 #if defined(CONFIG_SAMSUNG_OIS_MCU_STM32)
 			if ((i2c_list->i2c_settings.size == 1) &&
-				(i2c_list->i2c_settings.addr_type == CAMERA_SENSOR_I2C_TYPE_INVALID) &&
-				(i2c_list->i2c_settings.data_type == CAMERA_SENSOR_I2C_TYPE_INVALID))
+			    (i2c_list->i2c_settings.addr_type == CAMERA_SENSOR_I2C_TYPE_INVALID) &&
+			    (i2c_list->i2c_settings.data_type == CAMERA_SENSOR_I2C_TYPE_INVALID))
 				continue;
 
 			size = i2c_list->i2c_settings.size;
@@ -490,13 +488,13 @@ static int cam_ois_apply_settings(struct cam_ois_ctrl_t *o_ctrl,
 			uint8_t ois_i2c_write_flag = 0;
 
 			if (o_ctrl->io_master_info.master_type == CCI_MASTER) {
-				if(i2c_list->op_code == CAM_SENSOR_I2C_WRITE_SEQ) {
+				if (i2c_list->op_code == CAM_SENSOR_I2C_WRITE_SEQ) {
 					ois_i2c_write_flag = 0;
 				} else {
 					ois_i2c_write_flag = 1;
 				}
 			} else if (o_ctrl->io_master_info.master_type == I2C_MASTER) {
-				if(i2c_list->op_code == CAM_SENSOR_I2C_WRITE_SEQ) {
+				if (i2c_list->op_code == CAM_SENSOR_I2C_WRITE_SEQ) {
 					ois_i2c_write_flag = CAM_SENSOR_I2C_WRITE_SEQ;
 				} else {
 					ois_i2c_write_flag = CAM_SENSOR_I2C_WRITE_BURST;
@@ -578,7 +576,7 @@ static int cam_ois_slaveInfo_pkt_parser(struct cam_ois_ctrl_t *o_ctrl,
 #if defined(CONFIG_SAMSUNG_OIS_Z_AXIS_CAL)
 	o_ctrl->gyro_raw_z = ois_info->gyro_raw_z;
 #endif
-	o_ctrl->efs_cal    = ois_info->efs_cal;
+	o_ctrl->efs_cal = ois_info->efs_cal;
 #endif
 
 	return rc;
@@ -1152,6 +1150,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
 		return -EINVAL;
 	}
 	cam_mem_put_cpu_buf(dev_config.packet_handle);
+
 	if (!rc)
 		return rc;
 pwr_dwn:

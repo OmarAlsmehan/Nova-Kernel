@@ -3036,12 +3036,12 @@ void sec_clock_debug_print_enabled(void)
 {
 	struct clk_core *core;
 	int cnt = 0;
-	
+
 	if (!mutex_trylock(&sec_clk_debug_lock))
 		return;
 
 	pr_info("Enabled clocks:\n");
-	
+
 	hlist_for_each_entry(core, &sec_clk_debug_list, sec_debug_node)
 		cnt += sec_clock_debug_print_clock(core);
 
@@ -3910,7 +3910,6 @@ unlock:
 		mutex_unlock(&sec_clk_debug_lock);
 	}
 #else
-
 	if (!ret)
 		clk_debug_register(core);
 #endif
@@ -4359,7 +4358,7 @@ void clk_unregister(struct clk *clk)
 #if IS_ENABLED(CONFIG_SEC_PM)
 	mutex_lock(&sec_clk_debug_lock);
 	hlist_del_init(&clk->core->sec_debug_node);
-	mutex_unlock(&sec_clk_debug_lock);	
+	mutex_unlock(&sec_clk_debug_lock);
 #endif
 
 	clk_prepare_lock();

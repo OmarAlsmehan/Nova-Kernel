@@ -221,8 +221,8 @@ msm_disable_outputs(struct drm_device *dev, struct drm_atomic_state *old_state)
 			int blank = FB_BLANK_POWERDOWN;
 
 			if (encoder->encoder_type == DRM_MODE_ENCODER_DSI &&
-				(connector->state->crtc &&
-				connector->state->crtc->state->active_changed))
+			    (connector->state->crtc &&
+			     connector->state->crtc->state->active_changed))
 				__msm_drm_notifier_call_chain(FB_EVENT_BLANK, &blank);
 			else
 				pr_debug("%s %d\n", __func__, encoder->encoder_type);
@@ -461,8 +461,8 @@ static void msm_atomic_helper_commit_modeset_enables(struct drm_device *dev,
 
 			/* notify only in case state is changed (off -> on) */
 			if (encoder->encoder_type == DRM_MODE_ENCODER_DSI &&
-				(connector->state->crtc &&
-				connector->state->crtc->state->active_changed))
+			    (connector->state->crtc &&
+			     connector->state->crtc->state->active_changed))
 				__msm_drm_notifier_call_chain(FB_EVENT_BLANK, &blank);
 			else
 				pr_debug("%s %d\n", __func__, encoder->encoder_type);
@@ -535,6 +535,7 @@ int ss_get_vdd_ndx_from_state(struct drm_atomic_state *old_state);
 #endif
 
 extern int dbg_cnt;
+
 /* The (potentially) asynchronous part of the commit.  At this point
  * nothing can fail short of armageddon.
  */
@@ -715,7 +716,6 @@ int msm_atomic_commit(struct drm_device *dev,
 	struct drm_plane *plane;
 	struct drm_plane_state *old_plane_state, *new_plane_state;
 	int i, ret;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd;
 	int ndx;

@@ -125,7 +125,7 @@ static void sde_rotator_get_config_from_ctx(struct sde_rotator_ctx *ctx,
 	config->output.comp_ratio.denom = 1;
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-	if(config->input.width * config->input.height >= ((3840-100)*(2160-100)))
+	if (config->input.width * config->input.height >= ((3840 - 100) * (2160 - 100)))
 		config->frame_rate = 60;
 #endif
 

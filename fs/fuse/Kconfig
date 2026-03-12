@@ -41,5 +41,5 @@ config VIRTIO_FS
 
 config FUSE_SUPPORT_STLOG
 	bool "Enable storage log"
-	default y
 	depends on FUSE_FS && PROC_STLOG
+	default y

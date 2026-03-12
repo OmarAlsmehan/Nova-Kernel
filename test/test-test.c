@@ -65,9 +65,9 @@ static void test_test_free_resource(struct test *test)
 {
 	struct test_test_context *ctx = test->priv;
 	struct test_resource *res = test_alloc_resource(&ctx->test,
-							  fake_resource_init,
-							  fake_resource_free,
-							  ctx);
+							 fake_resource_init,
+							 fake_resource_free,
+							 ctx);
 
 	test_free_resource(&ctx->test, res);
 
@@ -78,7 +78,7 @@ static void test_test_free_resource(struct test *test)
 static void test_test_cleanup_resources(struct test *test)
 {
 	int i;
-/*        const int num_res = 5;*/
+	/* const int num_res = 5;*/
 	struct test_test_context *ctx = test->priv;
 	struct test_resource *resources[5];
 

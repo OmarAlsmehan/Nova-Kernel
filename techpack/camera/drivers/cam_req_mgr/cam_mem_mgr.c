@@ -218,21 +218,16 @@ static int32_t cam_mem_get_slot(void)
 	mutex_lock(&tbl.m_lock);
 	idx = find_first_zero_bit(tbl.bitmap, tbl.bits);
 	if (idx >= CAM_MEM_BUFQ_MAX || idx <= 0) {
-	
-	CAM_ERR(CAM_MEM,
-			"Dumping tbl info idx = %d",idx);
-	
-	for (idx = 0; idx < CAM_MEM_BUFQ_MAX; idx++)
-	{
-		CAM_DBG(CAM_MEM,
-		"Ion buf at idx = %d  fd = %d, imported %d, dma_buf %pK len = %d is_active = %d",
-		idx, tbl.bufq[idx].fd,
-		tbl.bufq[idx].is_imported,
-		tbl.bufq[idx].dma_buf,
-		tbl.bufq[idx].len,
-		tbl.bufq[idx].active);
-	}
-	
+		CAM_ERR(CAM_MEM, "Dumping tbl info idx = %d",idx);
+		for (idx = 0; idx < CAM_MEM_BUFQ_MAX; idx++) {
+			CAM_DBG(CAM_MEM,
+				"Ion buf at idx = %d  fd = %d, imported %d, dma_buf %pK len = %d is_active = %d",
+				idx, tbl.bufq[idx].fd,
+				tbl.bufq[idx].is_imported,
+				tbl.bufq[idx].dma_buf,
+				tbl.bufq[idx].len,
+				tbl.bufq[idx].active);
+		}
 		mutex_unlock(&tbl.m_lock);
 		return -ENOMEM;
 	}
@@ -242,7 +237,7 @@ static int32_t cam_mem_get_slot(void)
 	ktime_get_real_ts64(&(tbl.bufq[idx].timestamp));
 	mutex_init(&tbl.bufq[idx].q_lock);
 	mutex_unlock(&tbl.m_lock);
-	
+
 	CAM_DBG(CAM_MEM,
 		"Ion buf at idx = %d  fd = %d, imported %d, dma_buf %pK len = %d is_active = %d",
 		idx, tbl.bufq[idx].fd,
@@ -340,7 +335,7 @@ int cam_mem_get_cpu_buf(int32_t buf_handle, uintptr_t *vaddr_ptr, size_t *len)
 		return -EINVAL;
 
 	idx = CAM_MEM_MGR_GET_HDL_IDX(buf_handle);
-	
+
 	if (idx >= CAM_MEM_BUFQ_MAX || idx <= 0)
 		return -EINVAL;
 
@@ -1275,7 +1270,7 @@ int cam_mem_mgr_release(struct cam_mem_mgr_release_cmd *cmd)
 	}
 
 	CAM_DBG(CAM_MEM, "Releasing hdl = %x, idx = %d", cmd->buf_handle, idx);
-	
+
 	if (kref_put(&tbl.bufq[idx].krefcount, cam_mem_util_unmap))
 		CAM_DBG(CAM_MEM,
 			"Called unmap from here, buf_handle: %u, idx: %d",

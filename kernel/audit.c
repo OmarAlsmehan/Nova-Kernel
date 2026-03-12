@@ -88,7 +88,6 @@ EXPORT_SYMBOL_GPL(audit_enabled);
 static u32	audit_default = AUDIT_ON;
 // ] SEC_SELINUX_PORTING_COMMON
 
-
 /* If auditing cannot proceed, audit_failure selects what happens. */
 static u32	audit_failure = AUDIT_FAIL_PRINTK;
 
@@ -556,7 +555,6 @@ static void kauditd_printk_skb(struct sk_buff *skb)
 	if (nlh->nlmsg_type != AUDIT_EOE && nlh->nlmsg_type != AUDIT_NETFILTER_CFG)
 		sec_avc_log("%s\n", data);
 #else
-	
 	if (nlh->nlmsg_type != AUDIT_EOE && printk_ratelimit())
 		pr_notice("type=%d %s\n", nlh->nlmsg_type, data);
 #endif

@@ -81,6 +81,7 @@
 #define MAX_RSC_WAIT	5
 
 int dbg_cnt = 0;
+
 /**
  * enum sde_enc_rc_events - events for resource control state machine
  * @SDE_ENC_RC_EVENT_KICKOFF:
@@ -1321,7 +1322,6 @@ static int _sde_encoder_update_rsc_client(
 	struct drm_display_mode *mode;
 	bool is_vid_mode;
 	struct drm_encoder *enc;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	struct samsung_display_driver_data *vdd;
 #endif
@@ -1396,19 +1396,19 @@ static int _sde_encoder_update_rsc_client(
 		if ((vdd->vrr.running_vrr_mdp || vdd->vrr.running_vrr) &&
 				(mode_info->frame_rate < 120)) {
 			LCD_INFO(vdd, "During VRR (%d|%d): set max frame_rate: %d --> 120\n",
-					vdd->vrr.running_vrr_mdp,
-					vdd->vrr.running_vrr,
-					mode_info->frame_rate);
+				vdd->vrr.running_vrr_mdp,
+				vdd->vrr.running_vrr,
+				mode_info->frame_rate);
 			/* set maximum 120hz rsc fps */
 			mode_info->frame_rate = 120;
 			vdd->vrr.keep_max_rsc_fps = true;
 		} else if (!vdd->vrr.keep_max_rsc_fps &&
 				mode_info->frame_rate != mode_info->frame_rate_org) {
 			LCD_INFO(vdd, "VRR fin(%d|%d): restore mode frame_rate: %d -> %d\n",
-					vdd->vrr.running_vrr_mdp,
-					vdd->vrr.running_vrr,
-					mode_info->frame_rate,
-					mode_info->frame_rate_org);
+				vdd->vrr.running_vrr_mdp,
+				vdd->vrr.running_vrr,
+				mode_info->frame_rate,
+				mode_info->frame_rate_org);
 
 			mode_info->frame_rate = mode_info->frame_rate_org;
 		}
@@ -1671,6 +1671,7 @@ static void sde_encoder_input_event_handler(struct input_handle *handle,
 		SDE_DEBUG("invalid crtc\n");
 		return;
 	}
+
 	SDE_DEBUG("sde_enc->crtc->index %d \n", sde_enc->crtc->index);
 	vdd = ss_get_vdd(sde_enc->crtc->index);
 	if (!vdd)
@@ -1790,7 +1791,6 @@ static int _sde_encoder_rc_kickoff(struct drm_encoder *drm_enc,
 	/* return if the resource control is already in ON state */
 	if (sde_enc->rc_state == SDE_ENC_RC_STATE_ON) {
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-
 		struct samsung_display_driver_data *vdd;
 
 		if (!sde_enc->crtc) {
@@ -2606,10 +2606,10 @@ static void _sde_encoder_input_handler_register(
 {
 	struct sde_encoder_virt *sde_enc = to_sde_encoder_virt(drm_enc);
 	int rc;
-
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	static bool input_handler_registered = false;
-	if(!input_handler_registered)
+
+	if (!input_handler_registered)
 		input_handler_registered = true;
 	else
 		return;
@@ -3518,7 +3518,7 @@ static inline void _sde_encoder_trigger_flush(struct drm_encoder *drm_enc,
 		SDE_DEBUG("invalid crtc\n");
 
 	if (sde_encoder_check_curr_mode(drm_enc, MSM_DISPLAY_VIDEO_MODE)
-		&& (sde_enc->crtc)) {
+			&& (sde_enc->crtc)) {
 		if (vdd) {
 			/* If video mode, opt, fingermask off */
 			if (vdd->support_optical_fingerprint && vdd->finger_mask_updated && !vdd->finger_mask) {
@@ -3540,7 +3540,6 @@ static inline void _sde_encoder_trigger_flush(struct drm_encoder *drm_enc,
 					usleep_range(500, 500);
 				if (wait_cnt < 200)
 					LCD_INFO(vdd, "owner wait_cnt:%d, %dms passed\n", wait_cnt, (200-wait_cnt)/2);
-
 
 				vdd->exclusive_tx.permit_frame_update = 0;
 				ss_set_exclusive_tx_packet(vdd, TX_BRIGHT_CTRL, 1);
@@ -3585,7 +3584,7 @@ static inline void _sde_encoder_trigger_flush(struct drm_encoder *drm_enc,
 
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 	if (sde_encoder_check_curr_mode(drm_enc, MSM_DISPLAY_VIDEO_MODE)
-		&& (sde_enc->crtc)) {
+			&& (sde_enc->crtc)) {
 		if (vdd) {
 			SDE_DEBUG("[FINGER MASK]mask state:%d updated:%d.....wait_cnt:%d\n",
 				 vdd->finger_mask, vdd->finger_mask_updated, wait_cnt);
@@ -4249,23 +4248,20 @@ static int _helper_flush_qsync(struct sde_encoder_phys *phys_enc)
 }
 #if defined(CONFIG_DISPLAY_SAMSUNG)
 #include <drm/drm_encoder.h>
+
 int ss_get_vdd_ndx_from_state(struct drm_atomic_state *old_state)
 {
 	struct drm_crtc *crtc;
 	struct drm_crtc_state *old_crtc_state;
 	int i;
-
 	struct drm_encoder *encoder;
 	struct drm_device *dev;
-
 	struct sde_encoder_virt *sde_enc = NULL;
 	struct sde_encoder_phys *phys;
-
 	struct sde_connector *c_conn;
 	struct dsi_display *display;
 	struct samsung_display_driver_data *vdd;
 	int ndx = -EINVAL;
-
 
 	for_each_old_crtc_in_state(old_state, crtc, old_crtc_state, i) {
 		if (crtc->state->active) {
@@ -4281,7 +4277,7 @@ int ss_get_vdd_ndx_from_state(struct drm_atomic_state *old_state)
 		return -ENODEV;
 
 	/* TOOD: remove below W/A and debug why panic occurs in video mode (DP) or writeback case */
-    if (sde_enc->disp_info.intf_type != DRM_MODE_CONNECTOR_DSI)
+	if (sde_enc->disp_info.intf_type != DRM_MODE_CONNECTOR_DSI)
 		return MAX_DISPLAY_NDX;
 
 	for (i = 0; i < sde_enc->num_phys_encs; i++) {
@@ -5761,8 +5757,10 @@ void sde_encoder_enable_recovery_event(struct drm_encoder *encoder)
 	sde_enc = to_sde_encoder_virt(encoder);
 	sde_enc->recovery_events_enabled = true;
 }
+
 #if defined(CONFIG_DISPLAY_SAMSUNG)
-struct sde_encoder_phys *ss_get_encoder_phys(struct drm_encoder *drm_enc, int dsi_index)
+struct sde_encoder_phys *ss_get_encoder_phys(struct drm_encoder *drm_enc,
+	int dsi_index)
 {
 	struct sde_encoder_virt *sde_enc;
 	int i;

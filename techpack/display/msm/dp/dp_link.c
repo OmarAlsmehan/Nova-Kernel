@@ -1377,6 +1377,7 @@ static int dp_link_process_request(struct dp_link *dp_link)
 		secdp_link_backoff_start();
 	}
 #endif
+
 	if (dp_link_is_test_edid_read(link)) {
 		dp_link->sink_request |= DP_TEST_LINK_EDID_READ;
 		goto exit;

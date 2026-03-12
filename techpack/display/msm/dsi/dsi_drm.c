@@ -488,7 +488,7 @@ static bool dsi_bridge_mode_fixup(struct drm_bridge *bridge,
 				if ((cur_mode->hdisplay != adjusted_mode->hdisplay) ||
 						(cur_mode->vdisplay != adjusted_mode->vdisplay)) {
 					LCD_INFO(vdd, "DMS: MULTI RES flag: %d -> 1\n",
-							vrr->is_multi_resolution_changing);
+						vrr->is_multi_resolution_changing);
 					vrr->is_multi_resolution_changing = true;
 				}
 
