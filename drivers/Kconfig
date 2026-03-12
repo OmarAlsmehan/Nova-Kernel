@@ -286,6 +286,7 @@ source "drivers/vibrator/dc/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMI
 if !SEC_A73XQ_PROJECT
 source "drivers/regulator/s2mpb03/Kconfig"
 source "drivers/mfd/sm/sm5714/Kconfig"
+source "drivers/battery/charger/pca9468_charger/Kconfig"
 endif
 if SEC_A73XQ_PROJECT
 source "drivers/battery/charger/sm5451_charger/Kconfig"
