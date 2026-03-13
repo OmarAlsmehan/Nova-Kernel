@@ -297,7 +297,9 @@ endif
 if SEC_M52XQ_PROJECT
 source "drivers/battery/fuelgauge/sm5714_fuelgauge/Kconfig"
 endif
-source "drivers/input/misc/hall/Kconfig" # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+if !SEC_M52XQ_PROJECT
+source "drivers/input/misc/hall/Kconfig"
+endif
 if SEC_A52SXQ_PROJECT
 if !MACH_A52SXQ_EUR_OPEN
 source "drivers/mstdrv/Kconfig"

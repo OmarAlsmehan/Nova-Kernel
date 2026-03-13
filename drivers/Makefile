@@ -254,7 +254,9 @@ endif
 ifdef CONFIG_SEC_M52XQ_PROJECT
 obj-y += battery/fuelgauge/sm5714_fuelgauge/
 endif
-obj-y += input/misc/hall/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifndef CONFIG_SEC_M52XQ_PROJECT
+obj-y += input/misc/hall/
+endif
 ifdef CONFIG_SEC_A52SXQ_PROJECT
 ifndef CONFIG_MACH_A52SXQ_EUR_OPEN
 obj-y += mstdrv/

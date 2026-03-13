@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 
 dts-dirs += a52/a52sxq
+dts-dirs += m52/m52xq
 dts-dirs += a73/a73xq
 
 always          := $(dtb-y)
