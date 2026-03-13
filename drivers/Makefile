@@ -205,32 +205,57 @@ obj-y	+= pogo/
 # SPU signature verify
 obj-$(CONFIG_SPU_VERIFY) += spu_verify/
 obj-y += security/samsung/icdrv/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += usb/typec/slsi/common/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += usb/typec/slsi/common/
+endif
 obj-y += misc/drb/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += vibrator/common/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += security/samsung/five_tee_driver/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifndef CONFIG_SEC_A73XQ_PROJECT
+obj-y += sti/abc/
+obj-y += muic/common/
+endif
 obj-y += input/input_boost/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += security/samsung/tzic/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += battery/core/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += perf_mgr/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += input/sec_input/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += usb/common/vbus_notifier/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += muic/common/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += muic/common/
+endif
 obj-y += fingerprint/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += usb/typec/slsi/s2mu106/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += usb/typec/slsi/s2mu106/
+endif
 obj-y += usb/typec/manager/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += usb/typec/common/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += sti/abc/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += sti/abc/
+endif
 obj-y += vibrator/dc/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += battery/charger/sm5451_charger/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifndef CONFIG_SEC_A73XQ_PROJECT
+obj-y += regulator/s2mpb03/
+endif
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += battery/charger/sm5451_charger/
+endif
 obj-y += input/misc/hall/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += mfd/slsi/s2mu106/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += vibrator/slsi/s2mu106/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += regulator/s2mpb03/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += muic/slsi/s2mu106/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += mfd/slsi/s2mu106/
+obj-y += vibrator/slsi/s2mu106/
+obj-y += regulator/s2mpb03/
+obj-y += muic/slsi/s2mu106/
+endif
 obj-y += input/sec_input/stm/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += battery/fuelgauge/s2mu106_fuelgauge/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += battery/fuelgauge/s2mu106_fuelgauge/
+endif
 obj-y += hwmon/sec_thermistor/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += input/sec_input/synaptics/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += battery/charger/s2mu106_charger/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
+ifndef CONFIG_SEC_A52SXQ_PROJECT
+obj-y += input/sec_input/synaptics/
+endif
+ifdef CONFIG_SEC_A73XQ_PROJECT
+obj-y += battery/charger/s2mu106_charger/
+endif
 obj-y += battery/common/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
