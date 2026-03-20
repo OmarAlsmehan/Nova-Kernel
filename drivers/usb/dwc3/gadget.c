@@ -2040,9 +2040,11 @@ int __dwc3_gadget_ep_set_halt(struct dwc3_ep *dep, int value, int protocol)
 		if (!dep->gsi) {
 			dwc3_stop_active_transfer(dep, true, true);
 
-		if (!list_empty(&dep->started_list))
-			dep->flags |= DWC3_EP_DELAY_START;
+		        if (!list_empty(&dep->started_list)) {
+			        dep->flags |= DWC3_EP_DELAY_START;
+			}
 
+			/* If end transfer is pending, defer clear stall */
 			if (dep->flags & DWC3_EP_END_TRANSFER_PENDING) {
 				dep->flags |= DWC3_EP_PENDING_CLEAR_STALL;
 				if (protocol)
