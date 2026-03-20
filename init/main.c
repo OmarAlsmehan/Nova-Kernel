@@ -920,10 +920,10 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
 __setup("initcall_blacklist=", initcall_blacklist);
 
 #if IS_ENABLED(CONFIG_SEC_BOOTSTAT)
-static bool __init_or_module initcall_sec_debug = true;
+static bool __init_or_module __maybe_unused initcall_sec_debug = true;
 static DEFINE_SPINLOCK(device_init_time_list_lock);
 
-static int __init_or_module do_one_initcall_sec_debug(initcall_t fn)
+static int __init_or_module __maybe_unused do_one_initcall_sec_debug(initcall_t fn)
 {
 	ktime_t calltime, delta, rettime;
 	unsigned long long duration;

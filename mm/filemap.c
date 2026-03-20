@@ -2560,7 +2560,7 @@ static int lock_page_maybe_drop_mmap(struct vm_fault *vmf, struct page *page,
 }
 
 #ifdef CONFIG_TRACING
-static void filemap_tracing_mark_begin(struct file *file,
+static void __maybe_unused filemap_tracing_mark_begin(struct file *file,
 		pgoff_t offset, unsigned int size, bool sync)
 {
 	char buf[TRACING_MARK_BUF_SIZE], *path;
@@ -2577,7 +2577,7 @@ static void filemap_tracing_mark_begin(struct file *file,
 	tracing_mark_begin("%d , %s , %lu , %d", sync, path, offset, size);
 }
 
-static void filemap_tracing_mark_end(void)
+static void __maybe_unused filemap_tracing_mark_end(void)
 {
     tracing_mark_end();
 }
