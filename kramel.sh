@@ -48,6 +48,11 @@ export version
 PROCS=$(nproc --all)
 export PROCS
 
+# Flag: set to 1 if "mod" is passed as an argument.
+BUILD_MODULES=0
+for _a in "$@"; do [[ "$_a" == "mod" ]] && BUILD_MODULES=1; done
+export BUILD_MODULES
+
 # Compiler to use for builds.
 export COMPILER=clang
 
@@ -245,18 +250,9 @@ dtb() {
     echo -e "\n\e[1;32m[✓] Built DTBS! \e[0m"
 }
 
-# Build modules and pack them into vendor_boot.img.
-mod() {
-    if [[ "${TGI}" != "0" ]]; then
-        tg "*Building Modules*"
-    fi
-    rgn
-    echo -e "\n\e[1;93m[*] Building Modules! \e[0m"
-    mkdir -p "${KDIR}"/out/modules
-    make "${MAKE[@]}" modules_prepare
-    make -j"$PROCS" "${MAKE[@]}" modules INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="${KDIR}"/out/modules
-    make "${MAKE[@]}" modules_install INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="${KDIR}"/out/modules
-
+# Internal helper: repack vendor_boot.img (with or without newly built modules).
+# Called by mod() after building modules, or by mkzip() when mod was not requested.
+_repack_vendor_boot() {
     # -----------------------------------------------------------------
     # 1. Ensure helper tools (magiskboot, avbtool) are present
     # -----------------------------------------------------------------
@@ -361,10 +357,11 @@ mod() {
         echo -e "\e[1;33m[!] Firmware directory not found, skipping firmware\e[0m"
     fi
 
-    # Remove old modules and add newly built ones
+    # Remove old modules and add newly built ones (only if modules were built this run)
     cpio_cmds+=("rm -r lib/modules")
     cpio_cmds+=("mkdir 0755 lib/modules")
 
+    if [[ "${BUILD_MODULES}" == "1" ]]; then
     # Get kernel release
     KERNEL_RELEASE=$(cat "${KDIR}/out/include/config/kernel.release" 2>/dev/null)
     if [ -n "$KERNEL_RELEASE" ]; then
@@ -400,6 +397,9 @@ mod() {
     else
         echo -e "\e[1;33m[!] Kernel release not found, skipping modules\e[0m"
     fi
+    else
+        echo -e "\e[1;33m[!] Skipping module injection (build with 'mod' to include modules)\e[0m"
+    fi
 
     # Apply all cpio modifications
     magiskboot cpio ramdisk.cpio "${cpio_cmds[@]}"
@@ -415,12 +415,31 @@ mod() {
     echo -e "\n\e[1;32m[✓] vendor_boot.img rebuilt with new modules & firmware\e[0m"
 }
 
+# Build modules and pack them into vendor_boot.img.
+mod() {
+    if [[ "${TGI}" != "0" ]]; then
+        tg "*Building Modules*"
+    fi
+    rgn
+    echo -e "\n\e[1;93m[*] Building Modules! \e[0m"
+    mkdir -p "${KDIR}"/out/modules
+    make "${MAKE[@]}" modules_prepare
+    make -j"$PROCS" "${MAKE[@]}" modules INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="${KDIR}"/out/modules
+    make "${MAKE[@]}" modules_install INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH="${KDIR}"/out/modules
+    _repack_vendor_boot
+}
+
 # A function to build an AnyKernel3 zip.
 mkzip() {
     if [[ "${TGI}" != "0" ]]; then
         tg "*Building zip!*"
     fi
     echo -e "\n\e[1;93m[*] Building zip! \e[0m"
+    # If modules were not built this run, still repack vendor_boot (DTB + fstab, no new .ko files).
+    if [[ "${BUILD_MODULES}" != "1" ]]; then
+        echo -e "\n\e[1;93m[*] Repacking vendor_boot without modules (pass 'mod' to include modules)! \e[0m"
+        _repack_vendor_boot
+    fi
     mv "${KDIR}"/out/arch/arm64/boot/Image "${KDIR}"/anykernel3
     mv "${KDIR}"/out/arch/arm64/boot/dtbo.img "${KDIR}"/anykernel3
     if [ -f "${KDIR}/out/arch/arm64/boot/vendor_boot.img" ]; then
