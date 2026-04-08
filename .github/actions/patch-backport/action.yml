@@ -1,0 +1,23 @@
+name: Kernel backport patches
+description: Apply the existing backport patch set.
+runs:
+  using: composite
+  steps:
+    - name: 🧱 Apply backport
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🧱 Kernel backport patches"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        if grep -q "path_umount" fs/namespace.c 2>/dev/null; then
+          echo "ℹ️  Backport already present"
+        else
+          curl -fsSL --retry 3 \
+            "${BACKPORT_PATCH_URL:?BACKPORT_PATCH_URL is required}" \
+            -o "$RUNNER_TEMP/backport_patches.sh"
+          chmod +x "$RUNNER_TEMP/backport_patches.sh"
+          bash "$RUNNER_TEMP/backport_patches.sh"
+        fi
+        echo "✅ Backport step finished"

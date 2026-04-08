@@ -1,0 +1,21 @@
+name: Build Process
+description: Compile the kernel using the prepared configuration.
+runs:
+  using: composite
+  steps:
+    - name: 🚀 Compile kernel
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🚀 Starting kernel compilation"
+        echo "Device : ${VARIANT} (${DEVICE_IMAGE})"
+        echo "Jobs   : $(nproc)"
+        echo "Clang  : $(clang --version | head -n1)"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        make -j"$(nproc)" -C "$GITHUB_WORKSPACE" O="$OUT_DIR"
+
+        echo "✅ Kernel compilation finished"

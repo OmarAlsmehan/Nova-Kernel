@@ -1,0 +1,28 @@
+name: KernelSU integration
+description: Integrate KernelSU-Next without compiling the kernel.
+runs:
+  using: composite
+  steps:
+    - name: 🧩 Prepare KernelSU
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        REPO="${KSU_REPO:-https://github.com/KernelSU-Next/KernelSU-Next.git}"
+        BRANCH="${KSU_BRANCH:-legacy}"
+
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🧩 KernelSU integration"
+        echo "Repository: ${REPO}"
+        echo "Branch    : ${BRANCH}"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        rm -rf KernelSU
+        echo "Running KernelSU setup script..."
+        curl -fsSL --retry 3 "${KSU_SETUP_URL:?KSU_SETUP_URL is required}" | bash -
+
+        rm -rf KernelSU
+        git clone --depth=1 --filter=blob:none --single-branch -b "$BRANCH" "$REPO" KernelSU
+
+        echo "✅ KernelSU integration finished"
+        echo "ℹ️  This step intentionally does not run make."

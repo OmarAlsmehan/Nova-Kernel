@@ -1,0 +1,171 @@
+name: Get necessary tools
+description: Download and cache the compiler, image tools and stock kernel images.
+runs:
+  using: composite
+  steps:
+    - name: 📂 Restore compiler cache
+      uses: actions/cache@v4
+      with:
+        path: ~/toolchains/${{ env.CLANG_VERSION }}
+        key: clang-${{ runner.os }}-${{ env.CLANG_VERSION }}
+
+    - name: 📥 Download compiler
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        TC="$HOME/toolchains"
+        TOOLCHAIN_DIR="$TC/$CLANG_VERSION"
+        BIN="$TOOLCHAIN_DIR/bin"
+        ARCHIVE="$RUNNER_TEMP/${CLANG_VERSION}-clang.archive"
+
+        mkdir -p "$TOOLCHAIN_DIR"
+        echo "PATH=$BIN:$PATH" >> "$GITHUB_ENV"
+
+        if [[ -x "$BIN/clang" ]]; then
+          echo "✅ Clang cache is ready: ${CLANG_VERSION}"
+          exit 0
+        fi
+
+        echo "📥 Downloading compiler..."
+        rm -f "$ARCHIVE"
+        curl -fL --retry 5 --retry-delay 3 --connect-timeout 20 --max-time 1800 \
+          -o "$ARCHIVE" "$CLANG_URL"
+
+        echo "🔎 Detecting compiler archive format..."
+        FILE_TYPE="$(file -b "$ARCHIVE")"
+        echo "   $FILE_TYPE"
+
+        case "$FILE_TYPE" in
+          *"Zstandard compressed data"*)
+            echo "📦 Format: tar.zst / zstd"
+            tar --use-compress-program=unzstd -xf "$ARCHIVE" -C "$TOOLCHAIN_DIR"
+            ;;
+          *"XZ compressed data"*)
+            echo "📦 Format: tar.xz / xz"
+            tar -xJf "$ARCHIVE" -C "$TOOLCHAIN_DIR"
+            ;;
+          *"gzip compressed data"*)
+            echo "📦 Format: tar.gz / gzip"
+            tar -xzf "$ARCHIVE" -C "$TOOLCHAIN_DIR"
+            ;;
+          *"bzip2 compressed data"*)
+            echo "📦 Format: tar.bz2 / bzip2"
+            tar -xjf "$ARCHIVE" -C "$TOOLCHAIN_DIR"
+            ;;
+          *"POSIX tar archive"*|*"GNU tar archive"*|*"ustar archive"*)
+            echo "📦 Format: uncompressed tar"
+            tar -xf "$ARCHIVE" -C "$TOOLCHAIN_DIR"
+            ;;
+          *"Zip archive data"*)
+            echo "📦 Format: zip"
+            unzip -q "$ARCHIVE" -d "$TOOLCHAIN_DIR"
+            ;;
+          *)
+            echo "❌ Unsupported compiler archive format"
+            echo "   Detected: $FILE_TYPE"
+            exit 1
+            ;;
+        esac
+
+        rm -f "$ARCHIVE"
+
+        if [[ ! -x "$BIN/clang" ]]; then
+          echo "❌ clang executable not found after extraction"
+          echo "   Expected: $BIN/clang"
+          echo "   Toolchain directory contents:"
+          find "$TOOLCHAIN_DIR" -maxdepth 3 -type f | head -n 80 || true
+          exit 1
+        fi
+
+        echo "✅ Clang ready: ${CLANG_VERSION}"
+
+    - name: 🔧 Fetch magiskboot and avbtool
+      shell: bash
+      run: |
+        set -euo pipefail
+        TC="$HOME/toolchains"
+        mkdir -p "$TC"
+
+        # Make helper tools available to every following GitHub Actions step.
+        # Each `run:` step gets a fresh shell, so a plain `export PATH=...`
+        # here would not survive into pack-process.
+        echo "$TC" >> "$GITHUB_PATH"
+
+        if [[ ! -x "$TC/magiskboot" ]]; then
+          echo "📥 Fetching magiskboot..."
+          APK_URL="$(curl -fsSL --retry 5 --retry-delay 3 https://api.github.com/repos/topjohnwu/Magisk/releases/latest \
+            | grep -oE 'https://[^\"]+\.apk' | head -n1)"
+          test -n "$APK_URL"
+          wget -q "$APK_URL" -O "$TC/magisk.apk"
+          unzip -p "$TC/magisk.apk" 'lib/x86_64/libmagiskboot.so' > "$TC/magiskboot"
+          chmod +x "$TC/magiskboot"
+          rm -f "$TC/magisk.apk"
+        else
+          echo "✅ magiskboot cached"
+        fi
+
+        if [[ ! -x "$TC/avbtool" ]]; then
+          echo "📥 Fetching avbtool..."
+          curl -fsSL --retry 5 --retry-delay 3 \
+            "${AVBTOOL_URL:?AVBTOOL_URL is required}" \
+            | base64 --decode > "$TC/avbtool"
+          chmod +x "$TC/avbtool"
+        else
+          echo "✅ avbtool cached"
+        fi
+
+    - name: 📂 Restore stock image cache
+      uses: actions/cache@v4
+      with:
+        path: ~/toolchains/images
+        key: novakernel-stock-images-v2-${{ env.VARIANT }}
+
+    - name: 📥 Download stock images
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        DEVICE="${DEVICE_IMAGE:?DEVICE_IMAGE is required — did the build-env config step run?}"
+        IMAGE_URL="${STOCK_IMAGE_URL:?STOCK_IMAGE_URL is required}"
+        DEST="$HOME/toolchains/images/$DEVICE"
+
+        if [[ -f "$DEST/boot.img" && -f "$DEST/vendor_boot.img" ]]; then
+          echo "✅ Stock images cached: $DEVICE"
+          exit 0
+        fi
+
+        mkdir -p "$DEST"
+        ARCHIVE="$RUNNER_TEMP/${DEVICE}_kernel.tar"
+
+        echo "📥 Downloading stock kernel archive: $DEVICE"
+        curl -fL --retry 5 --retry-delay 3 --connect-timeout 20 --max-time 900 \
+          -o "$ARCHIVE" "$IMAGE_URL"
+
+        echo "🔎 Validating stock archive..."
+        FILE_TYPE="$(file -b "$ARCHIVE")"
+        echo "   $FILE_TYPE"
+
+        case "$FILE_TYPE" in
+          *"POSIX tar archive"*|*"GNU tar archive"*|*"ustar archive"*)
+            tar -xf "$ARCHIVE" -C "$DEST"
+            ;;
+          *)
+            echo "❌ Stock image download is not a tar archive"
+            echo "   URL: $IMAGE_URL"
+            echo "   Detected: $FILE_TYPE"
+            exit 1
+            ;;
+        esac
+
+        shopt -s nullglob
+        LZ4_FILES=("$DEST"/*.lz4)
+        for image in "${LZ4_FILES[@]}"; do
+          echo "🗜️ Decompressing $(basename "$image")"
+          lz4 -dm --rm "$image"
+        done
+
+        [[ -f "$DEST/boot.img" ]] || { echo "❌ Missing boot.img for $DEVICE"; exit 1; }
+        [[ -f "$DEST/vendor_boot.img" ]] || { echo "❌ Missing vendor_boot.img for $DEVICE"; exit 1; }
+
+        echo "✅ Stock images ready: $DEVICE"
