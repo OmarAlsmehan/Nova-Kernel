@@ -1,0 +1,8 @@
+name: Pack Process
+description: Automatically package NovaKernel as AnyKernel3 or GKI based on built kernel modules.
+runs:
+  using: composite
+  steps:
+    - name: 📦 Pack kernel
+      shell: bash
+      run: bash "${{ github.action_path }}/scripts/main.sh"

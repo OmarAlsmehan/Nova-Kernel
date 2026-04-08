@@ -1,0 +1,61 @@
+name: Kernel hook patch
+description: Apply the selected non-kprobe KernelSU hook.
+runs:
+  using: composite
+  steps:
+    - name: 🪝 Apply selected hook
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        HOOK="${HOOK_TYPE:-kprobes}"
+
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🪝 Kernel hook: ${HOOK}"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        case "$HOOK" in
+          scope-min-1.6)
+            if grep -q "ksu_handle_execveat" fs/exec.c 2>/dev/null; then
+              echo "ℹ️  Scope-min hook already present"
+            else
+              curl -fsSL --retry 3 \
+                "${HOOK_PATCH_URL_SCOPE_MIN:?HOOK_PATCH_URL_SCOPE_MIN is required}" \
+                -o "$RUNNER_TEMP/scope-min.patch"
+              patch -p1 < "$RUNNER_TEMP/scope-min.patch"
+            fi
+            ;;
+          rksu)
+            if grep -q "ksu_handle_execveat" fs/exec.c 2>/dev/null; then
+              echo "ℹ️  RKSU hook already present"
+            else
+              curl -fsSL --retry 3 \
+                "${HOOK_PATCH_URL_RKSU:?HOOK_PATCH_URL_RKSU is required}" \
+                -o "$RUNNER_TEMP/rksu.patch"
+              patch -p1 < "$RUNNER_TEMP/rksu.patch"
+            fi
+            ;;
+          syscall)
+            curl -fsSL --retry 3 \
+              "${HOOK_PATCH_URL_SYSCALL:?HOOK_PATCH_URL_SYSCALL is required}" \
+              -o "$RUNNER_TEMP/syscall_hook_patches.sh"
+            chmod +x "$RUNNER_TEMP/syscall_hook_patches.sh"
+            bash "$RUNNER_TEMP/syscall_hook_patches.sh"
+            ;;
+          inline)
+            curl -fsSL --retry 3 \
+              "${HOOK_PATCH_URL_INLINE:?HOOK_PATCH_URL_INLINE is required}" \
+              -o "$RUNNER_TEMP/susfs_inline_hook_patches.sh"
+            chmod +x "$RUNNER_TEMP/susfs_inline_hook_patches.sh"
+            bash "$RUNNER_TEMP/susfs_inline_hook_patches.sh"
+            ;;
+          kprobes)
+            echo "::warning::kprobes reached patch-hook — this should be unreachable; the workflow only calls this action when hook_type != kprobes"
+            ;;
+          *)
+            echo "::error::Unsupported hook: $HOOK"
+            exit 1
+            ;;
+        esac
+
+        echo "✅ Hook step finished"
