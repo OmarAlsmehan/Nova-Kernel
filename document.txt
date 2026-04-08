@@ -1,0 +1,73 @@
+Root Cause Analysis: Fast Charging and ADB Failure on Galaxy A52s/M52
+
+## Context
+The Android 16 USB and Type-C updates were ported from the Galaxy A73 (SM-A736B) to the Galaxy A52s (SM-A528B) and M52 (SM-M526B). All these devices share the Snapdragon 778G (SM7325) platform running kernel 5.4.
+A specific commit (4f80fbff6031199f76e67af03e408de12acf761d) introduced `CONFIG_USE_USB_COMMUNICATIONS_CAPABLE` along with aggressive lockscreen USB restrictions. While this works perfectly on the original A73, the A52s and M52 incorrectly triggered the security evaluation `check_time_secure_restrict_cond()`. This false positive resulted in broken ADB connections and dropped charging speeds to a baseline 500mA (SDP).
+
+## Technical Root-Cause Analysis
+The core discrepancy lies in the differing Power Delivery IC (PDIC) drivers used by the devices and how they interact with the `usb_notify` framework.
+
+1. Galaxy A73 (SM-A736B) - `usbpd_manager.c`
+In the A73 implementation, when a Type-C Power Delivery (PD) contract is successfully negotiated, the `usbpd_manager.c` driver parses the Source Capabilities (PDOs). It actively extracts the `usb_comm_capable` bit from the first Fixed Supply PDO (vSafe5V) and explicitly broadcasts the following events to the `usb_notify` layer using `send_otg_notify()`:
+- `NOTIFY_EVENT_PD_USB_COMM_CAPABLE` (value 1 or 0)
+- `NOTIFY_EVENT_PD_CONTRACT` (value 1 or 0)
+
+2. Galaxy A52s/M52 (SM-A528B / SM-M526B) - `sm5714` PDIC Driver
+The A52s and M52 utilize the `sm5714` PDIC driver (`CONFIG_PDIC_SM5714=y`). An analysis of `drivers/usb/typec/sm/sm5714/sm5714_pd.c` reveals that the driver successfully parses the `usb_comm_capable` bit (`pd_obj->power_data_obj.usb_comm_capable`) and stores it internally. However, it completely fails to broadcast this event to the `usb_notify` framework.
+Additionally, the `sm5714` driver lacks the `NOTIFY_EVENT_PD_CONTRACT` broadcast altogether.
+
+## Mechanism of Failure
+Because the `sm5714` driver never sends `NOTIFY_EVENT_PD_CONTRACT`, the `usb_notify` framework fundamentally assumes that no PD contract exists (`u_notify->typec_status.pd = 0`).
+
+When the device is plugged in, the `check_time_secure_restrict_cond()` function is invoked:
+```c
+if (u_notify->typec_status.pd && u_notify->typec_status.usb_comm_capable != USB_NOTIFY_NO_COMM_CAPABLE)
+    ret = 1; // Evaluates to False because pd is 0
+else if (!u_notify->typec_status.pd)
+    ret = 1; // Evaluates to TRUE because pd is 0
+```
+Since the framework falsely assumes the device lacks a PD contract, it defaults to the most aggressive lockscreen security fallback (`ret = 1`). This restriction forcefully clamps the USB gadget interface, blocks enumeration (breaking ADB), and restricts the VBUS notifier to 500mA slow charging.
+
+## The Proper Driver-Level Fix
+To resolve this issue properly without relying on a bypass, the `sm5714` driver was modified to match the broadcasting capabilities of the A73's `usbpd_manager.c`.
+
+1. Extracted and Broadcasted `usb_comm_capable`
+File: `drivers/usb/typec/sm/sm5714/sm5714_pd.c`
+Modified `sm5714_usbpd_evaluate_capability()` to extract the `usb_comm_capable` flag from the Fixed Supply PDO and broadcast it to the framework:
+```c
+#if IS_ENABLED(CONFIG_USE_USB_COMMUNICATIONS_CAPABLE)
+	if (usb_comm_capable)
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_COMM_CAPABLE);
+	else
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_NO_COMM_CAPABLE);
+#endif
+```
+
+2. Broadcasted PD Contract Formation
+File: `drivers/usb/typec/sm/sm5714/sm5714_pd.c`
+In `sm5714_usbpd_power_ready()`, when a successful contract is formed (`pdic_data->pd_support = 1`), the event is now broadcasted:
+```c
+#if IS_ENABLED(CONFIG_USB_NOTIFY_LAYER)
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_CONTRACT, 1);
+#endif
+```
+
+3. Cleared PD State on Detach
+File: `drivers/usb/typec/sm/sm5714/sm5714_typec.c`
+In `sm5714_usbpd_notify_detach()`, the `usb_comm_capable` and `pd_contract` values are safely reset on cable detach so subsequent plug-ins are evaluated correctly:
+```c
+#if defined(CONFIG_USB_HOST_NOTIFY)
+	if (o_notify) {
+#if IS_ENABLED(CONFIG_USE_USB_COMMUNICATIONS_CAPABLE)
+		send_otg_notify(o_notify, NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_NO_COMM_CAPABLE);
+#endif
+		send_otg_notify(o_notify, NOTIFY_EVENT_PD_CONTRACT, 0);
+		send_otg_notify(o_notify, NOTIFY_EVENT_POWER_SOURCE, 0);
+		send_otg_notify(o_notify, NOTIFY_EVENT_DR_SWAP, 0);
+	}
+#endif
+```
+
+4. Removed the Temporary Bypass
+File: `drivers/usb/notify/usb_notify.c`
+The `return 0;` bypass inside `check_time_secure_restrict_cond()` was removed. The lockscreen restriction framework is now fully operational and securely integrated with the hardware's native PD parser on the A52s and M52.
