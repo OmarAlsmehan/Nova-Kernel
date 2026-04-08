@@ -1,0 +1,177 @@
+name: 🔥 NovaKernel Kernel Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Target device"
+        required: true
+        type: choice
+        options:
+          - all
+          - a73xq
+          - a52sxq
+          - m52xq
+
+      kernelsu:
+        description: "Enable KernelSU?"
+        required: true
+        type: boolean
+        default: false
+
+      nomount:
+        description: "Enable NoMount?"
+        required: true
+        type: boolean
+        default: false
+
+      ksu_repo:
+        description: "KernelSU-Next repository"
+        required: false
+        default: "https://github.com/KernelSU-Next/KernelSU-Next.git"
+
+      ksu_branch:
+        description: "KernelSU-Next branch"
+        required: false
+        type: choice
+        default: "legacy"
+        options:
+          - legacy
+          - main
+          - next
+          - susfs-main
+          - susfs-next
+          - legacy-susfs-v2
+          - custom
+
+      ksu_branch_custom:
+        description: "Custom KernelSU branch"
+        required: false
+        default: ""
+
+      hook_type:
+        description: "KernelSU hook type"
+        required: false
+        type: choice
+        default: "kprobes"
+        options:
+          - kprobes
+          - scope-min-1.6
+          - rksu
+          - syscall
+          - inline
+
+      upload_to_telegram:
+        description: "Upload build to Telegram?"
+        required: true
+        type: boolean
+        default: true
+
+      release_type:
+        description: "Release type"
+        required: true
+        type: choice
+        default: "beta"
+        options:
+          - stable
+          - beta
+
+      changelog:
+        description: "Build changelog / notes"
+        required: false
+        default: "No changelog provided"
+
+concurrency:
+  group: nova-build-${{ github.ref }}-${{ github.event.inputs.variant }}
+  cancel-in-progress: true
+
+env:
+  KERNELSU_ENABLED: ${{ github.event.inputs.kernelsu }}
+  NOMOUNT_ENABLED: ${{ github.event.inputs.nomount }}
+  KSU_REPO: ${{ github.event.inputs.ksu_repo }}
+  KSU_BRANCH: ${{ github.event.inputs.ksu_branch == 'custom' && github.event.inputs.ksu_branch_custom || github.event.inputs.ksu_branch }}
+  HOOK_TYPE: ${{ github.event.inputs.hook_type }}
+  # Kernel name, OS label, clang toolchain, per-device defconfig,
+  # stock image URLs, DTB name, and every external patch/tool URL
+  # now live in .github/config/nova-env.sh — loaded once by build-env.
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    name: "🔨 Build (${{ matrix.device }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ${{ github.event.inputs.variant == 'all' && fromJSON('["a73xq","a52sxq","m52xq"]') || fromJSON(format('["{0}"]', github.event.inputs.variant)) }}
+
+    env:
+      VARIANT: ${{ matrix.device }}
+
+    steps:
+      - name: ⏰ Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: ⌛ Compilation environment preparation
+        uses: ./.github/actions/build-env
+
+      - name: ⚙️ Get necessary tools
+        uses: ./.github/actions/build-ready
+
+      - name: 🧩 KernelSU integration
+        if: ${{ env.KERNELSU_ENABLED == 'true' }}
+        timeout-minutes: 30
+        uses: ./.github/actions/setup-ksu
+
+      - name: 🛡️ NoMount integration
+        if: ${{ env.NOMOUNT_ENABLED == 'true' }}
+        timeout-minutes: 15
+        uses: ./.github/actions/patch-nomount
+
+      - name: 🪝 Kernel hook patch
+        if: ${{ env.KERNELSU_ENABLED == 'true' && env.HOOK_TYPE != 'kprobes' }}
+        timeout-minutes: 15
+        uses: ./.github/actions/patch-hook
+
+      - name: 🧱 Kernel backport patches
+        if: ${{ env.KERNELSU_ENABLED == 'true' }}
+        timeout-minutes: 15
+        uses: ./.github/actions/patch-backport
+
+      - name: ⚙️ Custom Kernel Configs
+        timeout-minutes: 15
+        uses: ./.github/actions/custom-configs
+
+      - name: 🚀 Build Process
+        timeout-minutes: 90
+        uses: ./.github/actions/build-process
+
+      - name: 📦 Build Modules
+        timeout-minutes: 20
+        uses: ./.github/actions/build-modules
+
+      - name: 🔩 Pack Process
+        timeout-minutes: 30
+        uses: ./.github/actions/pack-process
+
+      - name: 📤 Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.VARIANT }}-novakernel
+          path: ${{ env.OUTPUT_DIR }}/*.zip
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: 📤 Upload to Telegram
+        if: ${{ success() && github.event.inputs.upload_to_telegram == 'true' }}
+        uses: ./.github/actions/upload-telegram
+        with:
+          bot-token: ${{ secrets.TG_BOT_TOKEN }}
+          chat-id: ${{ secrets.TG_CHAT_ID }}
+          release-type: ${{ github.event.inputs.release_type }}
+          changelog: ${{ github.event.inputs.changelog }}
+
+      - name: 📋 Job summary
+        if: always()
+        uses: ./.github/actions/job-summary
