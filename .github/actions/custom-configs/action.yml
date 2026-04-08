@@ -1,0 +1,87 @@
+name: Custom Kernel Configs
+description: Prepare the kernel output, generate defconfig, and apply final configuration changes.
+runs:
+  using: composite
+  steps:
+    - name: ⚙️ Prepare kernel configuration
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+
+        export ARCH=arm64
+        export BRANCH="android11"
+        export KMI_GENERATION=2
+        export LLVM=1
+        export DEPMOD=depmod
+        export KCFLAGS="${KCFLAGS:-} -D__ANDROID_COMMON_KERNEL__"
+        export STOP_SHIP_TRACEPRINTK=1
+        export IN_KERNEL_MODULES=1
+        export DO_NOT_STRIP_MODULES=1
+        export INSTALL_MOD_STRIP=1
+        export ABI_DEFINITION=android/abi_gki_aarch64.xml
+        export KMI_SYMBOL_LIST=android/abi_gki_aarch64
+        export ADDITIONAL_KMI_SYMBOL_LISTS=$'android/abi_gki_aarch64_cuttlefish\nandroid/abi_gki_aarch64_db845c\nandroid/abi_gki_aarch64_exynos\nandroid/abi_gki_aarch64_exynosauto\nandroid/abi_gki_aarch64_fcnt\nandroid/abi_gki_aarch64_galaxy\nandroid/abi_gki_aarch64_goldfish\nandroid/abi_gki_aarch64_hikey960\nandroid/abi_gki_aarch64_imx\nandroid/abi_gki_aarch64_oneplus\nandroid/abi_gki_aarch64_microsoft\nandroid/abi_gki_aarch64_oplus\nandroid/abi_gki_aarch64_qcom\nandroid/abi_gki_aarch64_sony\nandroid/abi_gki_aarch64_sonywalkman\nandroid/abi_gki_aarch64_sunxi\nandroid/abi_gki_aarch64_trimble\nandroid/abi_gki_aarch64_unisoc\nandroid/abi_gki_aarch64_vivo\nandroid/abi_gki_aarch64_xiaomi\nandroid/abi_gki_aarch64_zebra'
+        export TRIM_NONLISTED_KMI=0
+        export KMI_SYMBOL_LIST_ADD_ONLY=1
+        export KMI_SYMBOL_LIST_STRICT_MODE=0
+        export KMI_ENFORCED=0
+
+        # Persist the exact build environment for the later compile step.
+        {
+          echo "ARCH=$ARCH"
+          echo "BRANCH=$BRANCH"
+          echo "KMI_GENERATION=$KMI_GENERATION"
+          echo "LLVM=$LLVM"
+          echo "DEPMOD=$DEPMOD"
+          echo "KCFLAGS=$KCFLAGS"
+          echo "STOP_SHIP_TRACEPRINTK=$STOP_SHIP_TRACEPRINTK"
+          echo "IN_KERNEL_MODULES=$IN_KERNEL_MODULES"
+          echo "DO_NOT_STRIP_MODULES=$DO_NOT_STRIP_MODULES"
+          echo "INSTALL_MOD_STRIP=$INSTALL_MOD_STRIP"
+          echo "ABI_DEFINITION=$ABI_DEFINITION"
+          echo "KMI_SYMBOL_LIST=$KMI_SYMBOL_LIST"
+          printf 'ADDITIONAL_KMI_SYMBOL_LISTS<<__KMI_EOF__\n%s\n__KMI_EOF__\n' "$ADDITIONAL_KMI_SYMBOL_LISTS"
+          echo "TRIM_NONLISTED_KMI=$TRIM_NONLISTED_KMI"
+          echo "KMI_SYMBOL_LIST_ADD_ONLY=$KMI_SYMBOL_LIST_ADD_ONLY"
+          echo "KMI_SYMBOL_LIST_STRICT_MODE=$KMI_SYMBOL_LIST_STRICT_MODE"
+          echo "KMI_ENFORCED=$KMI_ENFORCED"
+        } >> "$GITHUB_ENV"
+
+        : "${DEFCONFIG:?DEFCONFIG is required — did the build-env config step run?}"
+        : "${DEVICE_IMAGE:?DEVICE_IMAGE is required — did the build-env config step run?}"
+
+        COMREV="$(git rev-parse --short HEAD)"
+        LOCALVERSION="-${KERNEL_NAME}-${BRANCH}-${KMI_GENERATION}-${COMREV}-${VARIANT}"
+        echo "LOCALVERSION=$LOCALVERSION" >> "$GITHUB_ENV"
+
+        echo "🧹 Cleaning output directory..."
+        if [[ -d "$OUT_DIR" ]]; then
+          make -j"$(nproc)" -C "$GITHUB_WORKSPACE" O="$OUT_DIR" clean
+        fi
+        mkdir -p "$OUT_DIR"
+
+        echo "🧾 Generating ${DEFCONFIG}..."
+        make -j"$(nproc)" -C "$GITHUB_WORKSPACE" O="$OUT_DIR" "$DEFCONFIG"
+
+    - name: 🧩 Apply KernelSU configuration
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        [[ -f "$OUT_DIR/.config" ]] || { echo "::error::Missing $OUT_DIR/.config"; exit 1; }
+
+        if [[ "${KERNELSU_ENABLED:-false}" == "true" ]]; then
+          scripts/config --file "$OUT_DIR/.config" --enable CONFIG_KSU
+          case "${HOOK_TYPE:-kprobes}" in
+            kprobes) scripts/config --file "$OUT_DIR/.config" --enable CONFIG_KSU_KPROBES_HOOK ;;
+            scope-min-1.6|rksu|syscall) scripts/config --file "$OUT_DIR/.config" --enable CONFIG_KSU_MANUAL_HOOK ;;
+            inline) scripts/config --file "$OUT_DIR/.config" --enable CONFIG_KSU_MANUAL_HOOK ;;
+            *) echo "::error::Unsupported hook type: ${HOOK_TYPE}"; exit 1 ;;
+          esac
+        fi
+
+        scripts/config --file "$OUT_DIR/.config" --set-str LOCALVERSION ""
+        scripts/config --file "$OUT_DIR/.config" --disable LOCALVERSION_AUTO
+
+        echo "✅ Final kernel configuration prepared"
