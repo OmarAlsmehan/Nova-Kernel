@@ -1,0 +1,381 @@
+name: 🔥NovaKernel Kernel Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Target device"
+        required: true
+        type: choice
+        options:
+          - all
+          - a73xq
+          - a52sxq
+          - m52xq
+
+      kernelsu:
+        description: "Enable KernelSU?"
+        required: true
+        type: boolean
+        default: false
+
+      ksu_repo:
+        description: "KernelSU repo URL (overrides NK_KSU_REPO in buildscript)"
+        required: false
+        default: ""
+
+      ksu_branch:
+        description: "KernelSU branch"
+        required: false
+        type: choice
+        default: "legacy-susfs-v2"
+        options:
+          - legacy
+          - main
+          - next
+          - susfs-main
+          - susfs-next
+          - legacy-susfs-v2
+          - custom
+
+      ksu_branch_custom:
+        description: "Custom branch name (only if ksu_branch = custom)"
+        required: false
+        default: ""
+
+      hook_type:
+        description: "KernelSU hook type (ignored if kernelsu = false)"
+        required: false
+        type: choice
+        default: "kprobes"
+        options:
+          - kprobes
+          - scope-min-1.6
+          - rksu
+          - syscall
+          - inline
+
+      backport:
+        description: "Apply backport patches? (ignored if kernelsu = false)"
+        required: false
+        type: boolean
+        default: false
+
+      use_anykernel3:
+        description: "Package with AnyKernel3? (false = raw image ZIP via magiskboot)"
+        required: false
+        type: boolean
+        default: false
+
+      debug:
+        description: "SELinux permissive (debug build)"
+        required: false
+        type: boolean
+        default: false
+
+      upload_to_telegram:
+        description: "Upload build to Telegram?"
+        required: true
+        type: boolean
+        default: true
+
+      release_type:
+        description: "Release type"
+        required: true
+        type: choice
+        default: "beta"
+        options:
+          - stable
+          - beta
+
+      changelog:
+        description: "Build changelog / notes"
+        required: false
+        default: "No changelog provided"
+
+concurrency:
+  group: nova-build-${{ github.event.inputs.variant }}-${{ github.run_number }}
+  cancel-in-progress: true
+
+jobs:
+
+# ───────── Setup Matrix ─────────
+  setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: 🗂️  Prepare build matrix
+        id: set-matrix
+        run: |
+          case "${{ github.event.inputs.variant }}" in
+            all)    echo 'matrix=["a73xq","a52sxq","m52xq"]' >> "$GITHUB_OUTPUT" ;;
+            a73xq)  echo 'matrix=["a73xq"]'                  >> "$GITHUB_OUTPUT" ;;
+            a52sxq) echo 'matrix=["a52sxq"]'                 >> "$GITHUB_OUTPUT" ;;
+            m52xq)  echo 'matrix=["m52xq"]'                  >> "$GITHUB_OUTPUT" ;;
+          esac
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🚀  NovaKernel — Build Dispatch"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Variant    : ${{ github.event.inputs.variant }}"
+          echo "  KernelSU   : ${{ github.event.inputs.kernelsu }}"
+          echo "  Hook       : ${{ github.event.inputs.hook_type }}"
+          echo "  Backport   : ${{ github.event.inputs.backport }}"
+          echo "  AK3 Mode   : ${{ github.event.inputs.use_anykernel3 }}"
+          echo "  Debug      : ${{ github.event.inputs.debug }}"
+          echo "  Telegram   : ${{ github.event.inputs.upload_to_telegram }}"
+          echo "  Triggered  : ${{ github.actor }}"
+          echo "  Commit     : ${{ github.sha }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# ───────── Build Job ─────────
+  build:
+    needs: setup
+    runs-on: ubuntu-24.04
+    name: "🔨 Build (${{ matrix.device }})"
+
+    strategy:
+      matrix:
+        device: ${{ fromJSON(needs.setup.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+
+      - name: 📥  Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 📦  Install dependencies
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Installing build dependencies..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            git curl wget unzip tar lz4 zip patch \
+            bc bison flex libssl-dev libelf-dev \
+            python3 cpio rsync \
+            make gcc g++ binutils
+          echo "  ✔  Dependencies installed"
+
+      - name: 💾  Setup swap (10 GB)
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
+      # ───────── Detect clang version from configuration block ─────────
+      # Reads NK_CLANG_VERSION_DEFAULT from § 0 of buildscript.sh.
+      # This value is on its own line to make the grep reliable.
+      - name: 🔎  Detect clang version
+        id: clangver
+        shell: bash
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Detecting clang version from buildscript"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          CLANGVER=$(grep -oP 'NK_CLANG_VERSION_DEFAULT="\K[^"]+' buildscript.sh)
+
+          if [[ -z "$CLANGVER" ]]; then
+            echo "::error::Failed to detect NK_CLANG_VERSION_DEFAULT from buildscript.sh"
+            exit 1
+          fi
+
+          echo "Detected clang version: $CLANGVER"
+          echo "version=$CLANGVER" >> "$GITHUB_OUTPUT"
+
+      # ───────── Clang cache ─────────
+      - name: 📂  Clang cache
+        id: clang-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/toolchains/${{ steps.clangver.outputs.version }}
+          key: clang-${{ runner.os }}-${{ steps.clangver.outputs.version }}
+
+      - name: 💡  Cache status
+        run: |
+          if [[ "${{ steps.clang-cache.outputs.cache-hit }}" == "true" ]]; then
+            echo "  ✔  Clang restored from cache"
+          else
+            echo "  ℹ  No cache found — clang will download once"
+          fi
+
+      # ───────── Stock image cache ─────────
+      # Images are large tarballs that never change per release tag.
+      # Caching them avoids ~300 MB of downloads on repeat builds.
+      - name: 📂  Stock images cache
+        id: img-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/toolchains/images
+          key: stock-images-v1
+
+      - name: 💡  Image cache status
+        run: |
+          if [[ "${{ steps.img-cache.outputs.cache-hit }}" == "true" ]]; then
+            echo "  ✔  Stock images restored from cache"
+          else
+            echo "  ℹ  Stock images not cached — will download"
+          fi
+
+      # ───────── KernelSU phase ─────────
+      - name: ⚡  KernelSU Setup
+        if: ${{ fromJSON(github.event.inputs.kernelsu) == true }}
+        timeout-minutes: 15
+        env:
+          NK_VARIANT:        ${{ matrix.device }}
+          NK_KSU:            ${{ github.event.inputs.kernelsu }}
+          NK_KSU_REPO:       ${{ github.event.inputs.ksu_repo != '' && github.event.inputs.ksu_repo || '' }}
+          NK_KSU_BRANCH:     ${{ github.event.inputs.ksu_branch == 'custom' && github.event.inputs.ksu_branch_custom || github.event.inputs.ksu_branch }}
+          NK_HOOK_TYPE:      ${{ github.event.inputs.hook_type }}
+          NK_BACKPORT:       ${{ github.event.inputs.backport }}
+        run: |
+          chmod +x buildscript.sh
+          ./buildscript.sh --phase ksu
+
+      # ───────── Build phase ─────────
+      - name: 🔨  Build kernel
+        timeout-minutes: 60
+        env:
+          NK_VARIANT:        ${{ matrix.device }}
+          NK_KSU:            ${{ github.event.inputs.kernelsu }}
+          NK_KSU_BRANCH:     ${{ github.event.inputs.ksu_branch == 'custom' && github.event.inputs.ksu_branch_custom || github.event.inputs.ksu_branch }}
+          NK_HOOK_TYPE:      ${{ github.event.inputs.hook_type }}
+          NK_BACKPORT:       ${{ github.event.inputs.backport }}
+          USE_ANYKERNEL3:    ${{ github.event.inputs.use_anykernel3 }}
+          DEBUG:             ${{ github.event.inputs.debug }}
+        run: |
+          chmod +x buildscript.sh
+          ./buildscript.sh --phase build
+
+      # ───────── Locate output ZIP ─────────
+      # Handles both packaging modes:
+      #   AK3 mode  → ZIP is in $DEVICE/$BUILD_TYPE/
+      #   Raw mode  → ZIP is in $DEVICE/$BUILD_TYPE/ (same location from gen_zip)
+      - name: 🔍  Locate output ZIP
+        id: find-zip
+        run: |
+          case "${{ matrix.device }}" in
+            a73xq)  DEVICE_DIR="A73"  ;;
+            a52sxq) DEVICE_DIR="A52S" ;;
+            m52xq)  DEVICE_DIR="M52"  ;;
+          esac
+
+          BUILD_TYPE_DIR="${{ fromJSON(github.event.inputs.kernelsu) == true && 'KSU' || 'GKI' }}"
+
+          # Both gen_zip and package_anykernel3 place the ZIP under
+          # $TC_DIR/NovaKernel/$DEVICE/$BUILD_TYPE/  — one unified search.
+          ZIP=$(find "$HOME/toolchains/NovaKernel/$DEVICE_DIR" -name "*.zip" | head -n1)
+
+          if [[ -z "$ZIP" ]]; then
+            echo "::error::No ZIP found for $DEVICE_DIR"
+            exit 1
+          fi
+
+          ZIP_NAME=$(basename "$ZIP")
+          ZIP_SIZE=$(du -sh "$ZIP" | cut -f1)
+          ZIP_SHA=$(sha256sum "$ZIP" | awk '{print $1}')
+
+          echo "zip_path=$ZIP"      >> "$GITHUB_OUTPUT"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  📦  Output ZIP"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Name   : $ZIP_NAME"
+          echo "  Size   : $ZIP_SIZE"
+          echo "  SHA256 : $ZIP_SHA"
+          echo "  AK3    : ${{ github.event.inputs.use_anykernel3 }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: ⬆️   Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.find-zip.outputs.zip_name }}
+          path: ${{ steps.find-zip.outputs.zip_path }}
+          compression-level: 0
+
+      - name: 📤  Upload to Telegram
+        if: success() && github.event.inputs.upload_to_telegram == 'true'
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
+          CHANGELOG:    ${{ github.event.inputs.changelog }}
+        run: |
+          ZIP="${{ steps.find-zip.outputs.zip_path }}"
+          ZIP_NAME="${{ steps.find-zip.outputs.zip_name }}"
+          DEVICE="${{ matrix.device }}"
+          TYPE="${{ fromJSON(github.event.inputs.kernelsu) == true && 'KSU' || 'GKI' }}"
+          HOOK="${{ github.event.inputs.hook_type }}"
+          BACKPORT="${{ github.event.inputs.backport }}"
+          RELEASE="${{ github.event.inputs.release_type }}"
+
+          if [[ "$RELEASE" == "stable" ]]; then
+            RELEASE_LABEL="✅ Stable"
+          else
+            RELEASE_LABEL="🧪 Beta"
+          fi
+
+          TIME=$(date +"%Y-%m-%d %H:%M")
+          FULL_SHA="${{ github.sha }}"
+          SHORT_SHA="${FULL_SHA:0:7}"
+          REPO="${{ github.repository }}"
+          COMMIT_LINK="<a href=\"https://github.com/${REPO}/commit/${FULL_SHA}\">${SHORT_SHA}</a>"
+
+          if [[ "$TYPE" == "GKI" ]]; then
+            CAPTION="$(printf '📦 <b>NovaKernel Build</b>\n\n📱 Device:    %s\n⚙️  Type:      %s\n🏷️  Release:   %s\n🕐 Time:      %s\n🔖 Commit:    %s\n\n📝 <b>Changelog:</b>\n%s' \
+              "$DEVICE" "$TYPE" "$RELEASE_LABEL" "$TIME" "$COMMIT_LINK" "$CHANGELOG")"
+          else
+            CAPTION="$(printf '📦 <b>NovaKernel Build</b>\n\n📱 Device:    %s\n⚙️  Type:      %s\n🪝 Hook:      %s\n⬆️  Backport:  %s\n🏷️  Release:   %s\n🕐 Time:      %s\n🔖 Commit:    %s\n\n📝 <b>Changelog:</b>\n%s' \
+              "$DEVICE" "$TYPE" "$HOOK" "$BACKPORT" "$RELEASE_LABEL" "$TIME" "$COMMIT_LINK" "$CHANGELOG")"
+          fi
+
+          echo "  📤  Sending to Telegram..."
+          curl -sS -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendDocument" \
+            -F chat_id="$TG_CHAT_ID" \
+            -F document=@"$ZIP;filename=$ZIP_NAME" \
+            --form-string "caption=$CAPTION" \
+            --form-string "parse_mode=HTML"
+          echo "  ✔  Uploaded: $ZIP_NAME"
+
+      - name: 📋  Write job summary
+        if: always()
+        run: |
+          ZIP="${{ steps.find-zip.outputs.zip_name }}"
+          DEVICE="${{ matrix.device }}"
+          TYPE="${{ fromJSON(github.event.inputs.kernelsu) == true && 'KSU' || 'GKI' }}"
+          HOOK="${{ github.event.inputs.hook_type }}"
+          BACKPORT="${{ github.event.inputs.backport }}"
+          AK3="${{ github.event.inputs.use_anykernel3 }}"
+          RELEASE="${{ github.event.inputs.release_type }}"
+          if [[ "$RELEASE" == "stable" ]]; then
+            RELEASE_LABEL="✅ Stable"
+          else
+            RELEASE_LABEL="🧪 Beta"
+          fi
+          CHANGELOG="${{ github.event.inputs.changelog }}"
+
+          {
+            echo "## 🚀 NovaKernel — \`$DEVICE\` [\`$TYPE\`]"
+            echo ""
+            echo "> ### 📝 Changelog"
+            echo "> $CHANGELOG"
+            echo ""
+            echo "| Field | Value |"
+            echo "|:------|:------|"
+            echo "| 📱 Device     | \`$DEVICE\` |"
+            echo "| 🏷️  Type      | \`$TYPE\` |"
+            echo "| 🪝 Hook       | \`$HOOK\` |"
+            echo "| ⬆️  Backport  | \`$BACKPORT\` |"
+            echo "| 📦 AK3 Mode  | \`$AK3\` |"
+            echo "| 🏷️  Release  | $RELEASE_LABEL |"
+            echo "| 📦 Output    | \`$ZIP\` |"
+            echo "| 🔖 Commit    | \`${{ github.sha }}\` |"
+            echo "| 👤 Triggered | @${{ github.actor }} |"
+            echo "| 🕐 Time      | $(date '+%Y-%m-%d %H:%M:%S UTC') |"
+          } >> "$GITHUB_STEP_SUMMARY"
