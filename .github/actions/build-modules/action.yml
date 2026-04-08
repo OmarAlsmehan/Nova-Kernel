@@ -1,0 +1,48 @@
+name: Build Modules
+description: Install built kernel modules and stage them for packaging.
+runs:
+  using: composite
+  steps:
+    - name: 🔩 Install and stage modules
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+
+        [[ -f "$OUT_DIR/include/config/kernel.release" ]] || {
+          echo "::error::kernel.release not found; kernel build did not finish"
+          exit 1
+        }
+
+        TYPE=GKI
+        [[ "${KERNELSU_ENABLED:-false}" == "true" ]] && TYPE=KSU
+        OUTPUT_DIR="$TC_DIR/${KERNEL_NAME:?KERNEL_NAME is required}/$DEVICE_IMAGE/$TYPE"
+        MODOUT="$OUTPUT_DIR/modules"
+        rm -rf "$MODOUT"
+        mkdir -p "$MODOUT"
+
+        echo "📦 Installing kernel modules..."
+        make -j"$(nproc)" -C "$GITHUB_WORKSPACE" O="$OUT_DIR" \
+          INSTALL_MOD_PATH="$OUT_DIR/modules" INSTALL_MOD_STRIP=1 modules_install
+
+        KREL="$(cat "$OUT_DIR/include/config/kernel.release")"
+        MODLIB="$OUT_DIR/modules/lib/modules/$KREL"
+
+        find "$OUT_DIR/modules" -type f -name '*.ko' -exec cp -f '{}' "$MODOUT/" \;
+
+        for file in modules.alias modules.dep modules.softdep modules.order; do
+          [[ -f "$MODLIB/$file" ]] || continue
+          if [[ "$file" == "modules.order" ]]; then
+            cp -f "$MODLIB/$file" "$MODOUT/modules.load"
+          else
+            cp -f "$MODLIB/$file" "$MODOUT/$file"
+          fi
+        done
+
+        sed -i 's|\(kernel/[^: ]*/\)\([^: ]*\.ko\)|/lib/modules/\2|g' "$MODOUT/modules.dep" 2>/dev/null || true
+        sed -i 's|.*/||g' "$MODOUT/modules.load" 2>/dev/null || true
+
+        KO_COUNT="$(find "$MODOUT" -type f -name '*.ko' | wc -l)"
+        echo "MODULES_DIR=$MODOUT" >> "$GITHUB_ENV"
+        echo "OUTPUT_DIR=$OUTPUT_DIR" >> "$GITHUB_ENV"
+        echo "✅ Modules staged: ${KO_COUNT} .ko files"
