@@ -705,6 +705,9 @@ static int check_time_secure_restrict_cond(struct usb_notify *u_notify, unsigned
 		goto err;
 	}
 
+	/* Workaround: Bypass aggressive lockscreen restriction to fix ADB and Fast Charge */
+	return 0;
+
 	if (check_event_type(event) & NOTIFY_EVENT_NEED_CLIENT) {
 		if (u_notify->gadget_status.usb_cable_connect) {
 			if (u_notify->typec_status.pd
