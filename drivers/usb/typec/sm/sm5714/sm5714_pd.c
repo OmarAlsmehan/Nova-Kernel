@@ -1155,6 +1155,9 @@ void sm5714_usbpd_power_ready(struct device *dev,
 		}
 #endif
 		pdic_data->pd_support = 1;
+#if IS_ENABLED(CONFIG_USB_NOTIFY_LAYER)
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_CONTRACT, 1);
+#endif
 		pr_info("%s : pd_support : %d, short_cable : %d\n",
 				__func__, pdic_data->pd_support, short_cable);
 #if defined(CONFIG_TYPEC)
@@ -1686,6 +1689,7 @@ int sm5714_usbpd_evaluate_capability(struct sm5714_usbpd_data *pd_data)
 #endif
 	data_obj_type *pd_obj;
 	int min_volt = 0, max_volt = 0, max_current = 0, max_power = 0;
+	int usb_comm_capable = 0;
 
 	pd_data->specification_revision = USBPD_REV_20;
 	pdic_sink_status->has_apdo = false;
@@ -2591,6 +2595,14 @@ int sm5714_usbpd_init(struct device *dev, void *phy_driver_data)
 	sm5714_usbpd_init_policy(pd_data);
 	sm5714_usbpd_manager_init(pd_data);
 	sm5714_usbpd_change_source_cap(1, 500, 1);
+
+	INIT_WORK(&pd_data->worker, sm5714_usbpd_policy_work);
+	init_completion(&pd_data->msg_arrived);
+	init_completion(&pd_data->pd_completion);
+
+	return 0;
+}
+e_cap(1, 500, 1);
 
 	INIT_WORK(&pd_data->worker, sm5714_usbpd_policy_work);
 	init_completion(&pd_data->msg_arrived);

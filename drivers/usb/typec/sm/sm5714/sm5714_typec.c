@@ -3338,6 +3338,10 @@ static void sm5714_usbpd_notify_detach(void *data)
 #endif
 #if defined(CONFIG_USB_HOST_NOTIFY)
 	if (o_notify) {
+#if IS_ENABLED(CONFIG_USE_USB_COMMUNICATIONS_CAPABLE)
+		send_otg_notify(o_notify, NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_NO_COMM_CAPABLE);
+#endif
+		send_otg_notify(o_notify, NOTIFY_EVENT_PD_CONTRACT, 0);
 		send_otg_notify(o_notify, NOTIFY_EVENT_POWER_SOURCE, 0);
 		send_otg_notify(o_notify, NOTIFY_EVENT_DR_SWAP, 0);
 	}
