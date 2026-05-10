@@ -81,7 +81,11 @@ if [[ "${COMPILER}" = gcc ]]; then
 
 elif [[ "${COMPILER}" = clang ]]; then
     if [ ! -d "${KDIR}/clang" ]; then
-       mkdir clang;wget -O clang.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r563880c.tar.gz;tar -xf clang.tar.gz -C clang;rm -rf clang.tar.gz
+        mkdir clang
+        wget -O clang.tar.zst https://github.com/Madara273/Sakura-Clang-Compiler/releases/download/Sakura-Clang-R01/sakura-clang-24.0.0.tar.zst
+        tar --zstd -xf clang.tar.zst -C clang
+        rm -rf clang.tar.zst
+
     fi
 
     KBUILD_COMPILER_STRING=$("${KDIR}"/clang/bin/clang -v 2>&1 | head -n 1 | sed 's/(https..*//' | sed 's/ version//')
