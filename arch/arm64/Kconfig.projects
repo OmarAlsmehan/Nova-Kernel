@@ -12,6 +12,13 @@ config MACH_A52SXQ_EUR_OPEN
 	help
 	  Support for Samsung A52SXQ EUR OPEN device.
 
+config MACH_A52SXQ_KOR_SINGLE
+	depends on SEC_A52SXQ_PROJECT
+	default n
+	bool "Samsung A52SXQ KOR SINGLE"
+	help
+	  Support for Samsung A52SXQ KOR SINGLE device.
+
 config SEC_A73XQ_PROJECT
 	depends on ARCH_YUPIK
 	default n
