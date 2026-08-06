@@ -26,11 +26,20 @@ SEC_A52SXQ_KOR_DTBO := \
 		a52sxq_kor_single_w00_r01.dtbo \
 		a52sxq_kor_single_w00_r02.dtbo
 
+# A52SXQ CHN
+SEC_A52SXQ_CHN_DTBO := \
+		a52sxq_chn_tw_w00_r00.dtbo \
+		a52sxq_chn_tw_w00_r01.dtbo \
+		a52sxq_chn_tw_w00_r02.dtbo
+
 $(eval $(call sec_dtbo_build, \
 		$(SEC_A52SXQ_EUR_DTBO),$(CONFIG_MACH_A52SXQ_EUR_OPEN),$(SEC_YUPIK_BASE_DTB)))
 
 $(eval $(call sec_dtbo_build, \
 		$(SEC_A52SXQ_KOR_DTBO),$(CONFIG_MACH_A52SXQ_KOR_SINGLE),$(SEC_YUPIK_BASE_DTB)))
+
+$(eval $(call sec_dtbo_build, \
+		$(SEC_A52SXQ_CHN_DTBO),$(CONFIG_MACH_A52SXQ_CHN_TW),$(SEC_YUPIK_BASE_DTB)))
 
 always          := $(dtb-y)
 subdir-y        := $(dts-dirs)
