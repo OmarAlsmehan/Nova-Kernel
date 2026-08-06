@@ -22,8 +22,19 @@ SEC_M52XQ_EUR_DTBO := \
 		m52xq_eur_open_w00_r03.dtbo \
 		m52xq_eur_open_w00_r05.dtbo
 
+# M52XQ SWA
+SEC_M52XQ_SWA_DTBO := \
+		m52xq_swa_ins_w00_r00.dtbo \
+		m52xq_swa_ins_w00_r01.dtbo \
+		m52xq_swa_ins_w00_r02.dtbo \
+		m52xq_swa_ins_w00_r03.dtbo \
+		m52xq_swa_ins_w00_r05.dtbo
+
 $(eval $(call sec_dtbo_build, \
 		$(SEC_M52XQ_EUR_DTBO),$(CONFIG_MACH_M52XQ_EUR_OPEN),$(SEC_YUPIK_BASE_DTB)))
+
+$(eval $(call sec_dtbo_build, \
+		$(SEC_M52XQ_SWA_DTBO),$(CONFIG_MACH_M52XQ_SWA_INS),$(SEC_YUPIK_BASE_DTB)))
 
 always          := $(dtb-y)
 subdir-y        := $(dts-dirs)
