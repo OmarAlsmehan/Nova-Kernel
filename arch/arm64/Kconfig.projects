@@ -47,6 +47,13 @@ config MACH_M52XQ_SWA_INS
 	help
 	  Support for Samsung M52XQ SWA INS device.
 
+config MACH_M52XQ_CIS_SER
+	depends on SEC_M52XQ_PROJECT
+	default n
+	bool "Samsung M52XQ CIS SER"
+	help
+	  Support for Samsung M52XQ CIS SER device.
+
 config SEC_A73XQ_PROJECT
 	depends on ARCH_YUPIK
 	default n
