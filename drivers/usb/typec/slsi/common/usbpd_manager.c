@@ -1049,6 +1049,13 @@ void usbpd_manager_plug_detach(struct device *dev, bool notify)
 		pdic_event_work(pd_data, PDIC_NOTIFY_DEV_BATT, PDIC_NOTIFY_ID_POWER_STATUS,
 				0, 0, 0);
 	}
+
+#if IS_ENABLED(CONFIG_USB_NOTIFY_LAYER)
+#if IS_ENABLED(CONFIG_USE_USB_COMMUNICATIONS_CAPABLE)
+	send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_NO_COMM_CAPABLE);
+#endif
+	send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_CONTRACT, 0);
+#endif
 #endif
 }
 EXPORT_SYMBOL(usbpd_manager_plug_detach);
@@ -1522,7 +1529,7 @@ int usbpd_manager_evaluate_capability(struct usbpd_data *pd_data)
 	struct policy_data *policy = &pd_data->policy;
 	int i = 0;
 	int power_type = 0;
-	int min_volt = 0, max_volt = 0, cap_current = 0;
+	int min_volt = 0, max_volt = 0, cap_current = 0, usb_comm_capable = 0;
 	int pdo_type = 0;
 #if IS_ENABLED(CONFIG_BATTERY_SAMSUNG) && IS_ENABLED(CONFIG_USB_TYPEC_MANAGER_NOTIFIER)
 	int src_cap_changed = 0;
@@ -1566,10 +1573,13 @@ int usbpd_manager_evaluate_capability(struct usbpd_data *pd_data)
 			pdo_type = FPDO_TYPE;
 			max_volt = pd_obj->power_data_obj.voltage;
 			cap_current = pd_obj->power_data_obj.max_current;
-			dev_info(pd_data->dev, "[%d] FIXED volt(%d)mV, max cap_current(%d)\n", 
+			dev_info(pd_data->dev, "[%d] FIXED volt(%d)mV, max cap_current(%d) usb_comm_capabl(%d)\n",
 					i+1,
 					max_volt * max_volt_unit[power_type],
-					cap_current * cur_unit[power_type]);
+					cap_current * cur_unit[power_type],
+					pd_obj->power_data_obj.usb_comm_capable);
+			if (!usb_comm_capable)
+				usb_comm_capable = !!pd_obj->power_data_obj.usb_comm_capable;
 			break;
 		case POWER_TYPE_BATTERY:
 			max_volt = pd_obj->power_data_obj_battery.max_voltage;
@@ -1652,6 +1662,14 @@ int usbpd_manager_evaluate_capability(struct usbpd_data *pd_data)
 		}
 #endif
 	}
+
+#if IS_ENABLED(CONFIG_USE_USB_COMMUNICATIONS_CAPABLE)
+	if (usb_comm_capable)
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_COMM_CAPABLE);
+	else
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_USB_COMM_CAPABLE, USB_NOTIFY_NO_COMM_CAPABLE);
+#endif
+
 #if IS_ENABLED(CONFIG_BATTERY_SAMSUNG) && IS_ENABLED(CONFIG_USB_TYPEC_MANAGER_NOTIFIER)
 	if (manager->flash_mode == 1) {
 		available_pdo_num = 1;

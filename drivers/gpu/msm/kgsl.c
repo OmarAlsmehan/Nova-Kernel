@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2008-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <uapi/linux/msm_ion.h>
@@ -349,12 +349,14 @@ static void kgsl_destroy_ion(struct kgsl_memdesc *memdesc)
 
 	if (meta != NULL) {
 		remove_dmabuf_list(meta);
+		dma_buf_unmap_attachment(meta->attach, memdesc->sgt, DMA_BIDIRECTIONAL);
 		dma_buf_detach(meta->dmabuf, meta->attach);
 		dma_buf_put(meta->dmabuf);
 		kfree(meta);
 	}
 
 	memdesc->sgt = NULL;
+	entry->priv_data = NULL;
 }
 
 static const struct kgsl_memdesc_ops kgsl_dmabuf_ops = {
@@ -685,11 +687,11 @@ int kgsl_context_init(struct kgsl_device_private *dev_priv,
 	if (id == -ENOSPC) {
 		/*
 		 * Before declaring that there are no contexts left try
-		 * flushing the event workqueue just in case there are
+		 * flushing the event worker just in case there are
 		 * detached contexts waiting to finish
 		 */
 
-		flush_workqueue(device->events_wq);
+		kthread_flush_worker(device->events_worker);
 		id = _kgsl_get_context_id(device);
 	}
 
@@ -2995,7 +2997,7 @@ static int kgsl_setup_dma_buf(struct kgsl_device *device,
 {
 	int ret = 0;
 	struct scatterlist *s;
-	struct sg_table *sg_table;
+	struct sg_table *sg_table = NULL;
 	struct dma_buf_attachment *attach = NULL;
 	struct kgsl_dma_buf_meta *meta;
 
@@ -3036,8 +3038,6 @@ static int kgsl_setup_dma_buf(struct kgsl_device *device,
 		ret = PTR_ERR(sg_table);
 		goto out;
 	}
-
-	dma_buf_unmap_attachment(attach, sg_table, DMA_BIDIRECTIONAL);
 
 	meta->table = sg_table;
 	entry->priv_data = meta;
@@ -3093,6 +3093,9 @@ skip_access_check:
 
 out:
 	if (ret) {
+		if (!IS_ERR_OR_NULL(sg_table))
+			dma_buf_unmap_attachment(attach, sg_table, DMA_BIDIRECTIONAL);
+
 		if (!IS_ERR_OR_NULL(attach))
 			dma_buf_detach(dmabuf, attach);
 
@@ -4054,9 +4057,9 @@ static unsigned long _gpu_set_svm_region(struct kgsl_process_private *private,
 	return addr;
 }
 
-static unsigned long get_align(struct kgsl_mem_entry *entry)
+unsigned long kgsl_get_align(struct kgsl_memdesc *memdesc)
 {
-	int bit = kgsl_memdesc_get_align(&entry->memdesc);
+	u32 bit = kgsl_memdesc_get_align(memdesc);
 
 	if (bit >= ilog2(SZ_2M))
 		return SZ_2M;
@@ -4065,7 +4068,7 @@ static unsigned long get_align(struct kgsl_mem_entry *entry)
 	else if (bit >= ilog2(SZ_64K))
 		return SZ_64K;
 
-	return SZ_4K;
+	return PAGE_SIZE;
 }
 
 static unsigned long set_svm_area(struct file *file,
@@ -4098,7 +4101,7 @@ static unsigned long get_svm_unmapped_area(struct file *file,
 {
 	struct kgsl_device_private *dev_priv = file->private_data;
 	struct kgsl_process_private *private = dev_priv->process_priv;
-	unsigned long align = get_align(entry);
+	unsigned long align = kgsl_get_align(&entry->memdesc);
 	unsigned long ret, iova;
 	u64 start = 0, end = 0;
 	struct vm_area_struct *vma;
@@ -4525,14 +4528,15 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 	device->pwrctrl.interrupt_num = status;
 	disable_irq(device->pwrctrl.interrupt_num);
 
-	device->events_wq = alloc_workqueue("kgsl-events",
-		WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_HIGHPRI, 0);
+	device->events_worker = kthread_create_worker(0, "kgsl-events");
 
-	if (!device->events_wq) {
-		dev_err(device->dev, "Failed to allocate events workqueue\n");
-		status = -ENOMEM;
+	if (IS_ERR(device->events_worker)) {
+		status = PTR_ERR(device->events_worker);
+		dev_err(device->dev, "Failed to create events worker ret=%d\n", status);
 		goto error_pwrctrl_close;
 	}
+
+	sched_set_fifo(device->events_worker->task);
 
 	/* This can return -EPROBE_DEFER */
 	status = kgsl_mmu_probe(device);
@@ -4558,10 +4562,8 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 	return 0;
 
 error_pwrctrl_close:
-	if (device->events_wq) {
-		destroy_workqueue(device->events_wq);
-		device->events_wq = NULL;
-	}
+	if (!IS_ERR(device->events_worker))
+		kthread_destroy_worker(device->events_worker);
 
 	kgsl_pwrctrl_close(device);
 error:
@@ -4571,10 +4573,7 @@ error:
 
 void kgsl_device_platform_remove(struct kgsl_device *device)
 {
-	if (device->events_wq) {
-		destroy_workqueue(device->events_wq);
-		device->events_wq = NULL;
-	}
+	kthread_destroy_worker(device->events_worker);
 
 	kgsl_device_snapshot_close(device);
 
@@ -4596,27 +4595,6 @@ void kgsl_device_platform_remove(struct kgsl_device *device)
 	kgsl_device_debugfs_close(device);
 	_unregister_device(device);
 }
-
-#ifdef CONFIG_QCOM_KGSL
-static int kgsl_sharedmem_size_notifier(struct notifier_block *nb,
-					unsigned long action, void *data)
-{
-	struct seq_file *s;
-
-	s = (struct seq_file *)data;
-	if (s != NULL)
-		seq_printf(s, "KgslSharedmem:  %8lu kB\n",
-			atomic_long_read(&kgsl_driver.stats.page_alloc) >> 10);
-	else
-		pr_cont("KgslSharedmem:%lukB ",
-			atomic_long_read(&kgsl_driver.stats.page_alloc) >> 10);
-	return 0;
-}
-
-static struct notifier_block kgsl_sharedmem_size_nb = {
-	.notifier_call = kgsl_sharedmem_size_notifier,
-};
-#endif
 
 void kgsl_core_exit(void)
 {
@@ -4655,9 +4633,6 @@ void kgsl_core_exit(void)
 
 	kfree(memfree.list);
 	memset(&memfree, 0, sizeof(memfree));
-#ifdef CONFIG_QCOM_KGSL
-	show_mem_extra_notifier_unregister(&kgsl_sharedmem_size_nb);
-#endif
 
 	unregister_chrdev_region(kgsl_driver.major,
 		ARRAY_SIZE(kgsl_driver.devp));
@@ -4772,9 +4747,6 @@ int __init kgsl_core_init(void)
 	memfree.list = kcalloc(MEMFREE_ENTRIES, sizeof(struct memfree_entry),
 		GFP_KERNEL);
 
-#ifdef CONFIG_QCOM_KGSL
-	show_mem_extra_notifier_register(&kgsl_sharedmem_size_nb);
-#endif
 	place_marker("M - DRIVER KGSL Ready");
 
 	return 0;

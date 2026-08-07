@@ -424,6 +424,9 @@ policy_state usbpd_policy_src_ready(struct policy_data *policy)
 	if (policy->pd_support == 0) {
 		policy->pd_support = 1;
 		PDIC_OPS_PARAM_FUNC(set_pwr_opmode, pd_data, TYPEC_PWR_MODE_PD);
+#if IS_ENABLED(CONFIG_USB_NOTIFY_LAYER)
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_CONTRACT, 1);
+#endif
 	}
 #endif
 
@@ -1460,6 +1463,9 @@ policy_state usbpd_policy_snk_ready(struct policy_data *policy)
 	if (policy->pd_support == 0) {
 		policy->pd_support = 1;
 		PDIC_OPS_PARAM_FUNC(set_pwr_opmode, pd_data, TYPEC_PWR_MODE_PD);
+#if IS_ENABLED(CONFIG_USB_NOTIFY_LAYER)
+		send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_CONTRACT, 1);
+#endif
 	}
 #endif
 
@@ -6387,6 +6393,9 @@ void usbpd_init_policy(struct usbpd_data *pd_data)
 		policy->rx_data_obj[i].object = 0;
 		policy->tx_data_obj[i].object = 0;
 	}
+#if IS_ENABLED(CONFIG_USB_NOTIFY_LAYER)
+	send_otg_notify(get_otg_notify(), NOTIFY_EVENT_PD_CONTRACT, 0);
+#endif
 }
 EXPORT_SYMBOL(usbpd_init_policy);
 
