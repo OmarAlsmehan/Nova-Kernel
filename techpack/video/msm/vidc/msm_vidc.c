@@ -1482,7 +1482,6 @@ static void close_helper(struct kref *kref)
 {
 	struct msm_vidc_inst *inst = container_of(kref,
 			struct msm_vidc_inst, kref);
-
 	msm_vidc_destroy(inst);
 }
 
