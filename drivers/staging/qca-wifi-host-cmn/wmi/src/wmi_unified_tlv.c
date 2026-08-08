@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -1870,10 +1871,10 @@ static QDF_STATUS send_wow_enable_cmd_tlv(wmi_unified_t wmi_handle,
 		cmd->pause_iface_config = WOW_IFACE_PAUSE_DISABLED;
 	cmd->flags = param->flags;
 
-	wmi_info("suspend type: %s flag is 0x%x",
-		 cmd->pause_iface_config == WOW_IFACE_PAUSE_ENABLED ?
-		 "WOW_IFACE_PAUSE_ENABLED" : "WOW_IFACE_PAUSE_DISABLED",
-		 cmd->flags);
+	wmi_debug("suspend type: %s flag is 0x%x",
+		  cmd->pause_iface_config == WOW_IFACE_PAUSE_ENABLED ?
+		  "WOW_IFACE_PAUSE_ENABLED" : "WOW_IFACE_PAUSE_DISABLED",
+		  cmd->flags);
 
 	wmi_mtrace(WMI_WOW_ENABLE_CMDID, NO_SESSION, 0);
 	ret = wmi_unified_cmd_send(wmi_handle, buf, len,
@@ -3194,13 +3195,15 @@ static void wmi_scan_chanlist_dump(struct scan_chan_list_params *scan_chan_list)
 	for (i = 0; i < scan_chan_list->nallchans; i++) {
 		chan = &scan_chan_list->ch_param[i];
 		ret = qdf_scnprintf(info + len, sizeof(info) - len,
-				    " %d[%d][%d]", chan->mhz, chan->maxregpower,
-				    chan->dfs_set);
+				    " %d[%d][%d][%d]", chan->mhz,
+				    chan->maxregpower,
+				    chan->dfs_set, chan->nan_disabled);
 		if (ret <= 0)
 			break;
 		len += ret;
 		if (len >= (sizeof(info) - 20)) {
-			wmi_nofl_debug("Chan[TXPwr][DFS]:%s", info);
+			wmi_nofl_debug("Chan[TXPwr][DFS][nan_disabled]:%s",
+				       info);
 			len = 0;
 		}
 	}
@@ -4878,6 +4881,40 @@ static QDF_STATUS send_nlo_mawc_cmd_tlv(wmi_unified_t wmi_handle,
 }
 
 /**
+ * wmi_dump_pno_scan_freq_list() - dump frequency list associated with pno
+ * scan
+ * @scan_freq_list: frequency list for pno scan
+ *
+ * Return: void
+ */
+static void wmi_dump_pno_scan_freq_list(struct chan_list *scan_freq_list)
+{
+	uint32_t i;
+	uint8_t info[WMI_MAX_CHAN_INFO_LOG];
+	uint32_t len = 0;
+	struct chan_info *chan_info;
+	int ret;
+
+	wmi_debug("[PNO_SCAN] Total freq %d", scan_freq_list->num_chan);
+	for (i = 0; i < scan_freq_list->num_chan; i++) {
+		chan_info = &scan_freq_list->chan[i];
+		ret = qdf_scnprintf(info + len, sizeof(info) - len,
+				    " %d[%d]", chan_info->freq,
+				    chan_info->flags);
+		if (ret <= 0)
+			break;
+		len += ret;
+		if (len >= (sizeof(info) - 20)) {
+			wmi_nofl_debug("Freq[flag]:%s",
+				       info);
+			len = 0;
+		}
+	}
+	if (len)
+		wmi_nofl_debug("Freq[flag]:%s", info);
+}
+
+/**
  * send_pno_start_cmd_tlv() - PNO start request
  * @wmi_handle: wmi handle
  * @pno: PNO request
@@ -4892,6 +4929,7 @@ static QDF_STATUS send_pno_start_cmd_tlv(wmi_unified_t wmi_handle,
 	nlo_configured_parameters *nlo_list;
 	uint32_t *channel_list;
 	int32_t len;
+	qdf_freq_t freq;
 	wmi_buf_t buf;
 	uint8_t *buf_ptr;
 	uint8_t i;
@@ -4911,7 +4949,7 @@ static QDF_STATUS send_pno_start_cmd_tlv(wmi_unified_t wmi_handle,
 		WMI_TLV_HDR_SIZE + WMI_TLV_HDR_SIZE + WMI_TLV_HDR_SIZE +
 		WMI_TLV_HDR_SIZE + WMI_TLV_HDR_SIZE;
 
-	len += sizeof(uint32_t) * pno->networks_list[0].channel_cnt;
+	len += sizeof(uint32_t) * pno->networks_list[0].pno_chan_list.num_chan;
 	len += sizeof(nlo_configured_parameters) *
 	       QDF_MIN(pno->networks_cnt, WMI_NLO_MAX_SSIDS);
 	len += sizeof(nlo_channel_prediction_cfg);
@@ -4998,20 +5036,28 @@ static QDF_STATUS send_pno_start_cmd_tlv(wmi_unified_t wmi_handle,
 	buf_ptr += cmd->no_of_ssids * sizeof(nlo_configured_parameters);
 
 	/* Copy channel info */
-	cmd->num_of_channels = pno->networks_list[0].channel_cnt;
+	cmd->num_of_channels = pno->networks_list[0].pno_chan_list.num_chan;
 	WMITLV_SET_HDR(buf_ptr, WMITLV_TAG_ARRAY_UINT32,
 		       (cmd->num_of_channels * sizeof(uint32_t)));
 	buf_ptr += WMI_TLV_HDR_SIZE;
 
 	channel_list = (uint32_t *) buf_ptr;
 	for (i = 0; i < cmd->num_of_channels; i++) {
-		channel_list[i] = pno->networks_list[0].channels[i];
+		TARGET_SET_FREQ_IN_CHAN_LIST_TLV(channel_list[i],
+			pno->networks_list[0].pno_chan_list.chan[i].freq);
 
-		if (channel_list[i] < WMI_NLO_FREQ_THRESH)
-			channel_list[i] =
-				wlan_chan_to_freq(pno->
-					networks_list[0].channels[i]);
+		if (channel_list[i] < WMI_NLO_FREQ_THRESH) {
+			freq = pno->networks_list[0].pno_chan_list.chan[i].freq;
+			TARGET_SET_FREQ_IN_CHAN_LIST_TLV(channel_list[i],
+						     wlan_chan_to_freq(freq));
+		}
+
+		TARGET_SET_FLAGS_IN_CHAN_LIST_TLV(channel_list[i],
+			pno->networks_list[0].pno_chan_list.chan[i].flags);
 	}
+
+	wmi_dump_pno_scan_freq_list(&pno->networks_list[0].pno_chan_list);
+
 	buf_ptr += cmd->num_of_channels * sizeof(uint32_t);
 	WMITLV_SET_HDR(buf_ptr, WMITLV_TAG_ARRAY_STRUC,
 			sizeof(nlo_channel_prediction_cfg));
@@ -9639,12 +9685,21 @@ QDF_STATUS save_ext_service_bitmap_tlv(wmi_unified_t wmi_handle, void *evt_buf,
 		return QDF_STATUS_SUCCESS;
 	}
 
-	if (!soc->wmi_ext2_service_bitmap) {
+	if (!soc->wmi_ext2_service_bitmap ||
+	    (param_buf->num_wmi_service_ext_bitmap >
+	     soc->wmi_ext2_service_bitmap_len)) {
+		if (soc->wmi_ext2_service_bitmap) {
+			qdf_mem_free(soc->wmi_ext2_service_bitmap);
+			soc->wmi_ext2_service_bitmap = NULL;
+		}
 		soc->wmi_ext2_service_bitmap =
 			qdf_mem_malloc(param_buf->num_wmi_service_ext_bitmap *
 				       sizeof(uint32_t));
 		if (!soc->wmi_ext2_service_bitmap)
 			return QDF_STATUS_E_NOMEM;
+
+		soc->wmi_ext2_service_bitmap_len =
+			param_buf->num_wmi_service_ext_bitmap;
 	}
 
 	qdf_mem_copy(soc->wmi_ext2_service_bitmap,
@@ -10693,7 +10748,6 @@ static QDF_STATUS extract_profile_data_tlv(wmi_unified_t wmi_handle,
 {
 	WMI_WLAN_PROFILE_DATA_EVENTID_param_tlvs *param_buf;
 	wmi_wlan_profile_t *ev;
-	uint8_t *buf_ptr;
 
 	param_buf = (WMI_WLAN_PROFILE_DATA_EVENTID_param_tlvs *)evt_buf;
 	if (!param_buf) {
@@ -10701,12 +10755,7 @@ static QDF_STATUS extract_profile_data_tlv(wmi_unified_t wmi_handle,
 		return QDF_STATUS_E_INVAL;
 	}
 
-	buf_ptr = (uint8_t *)param_buf->profile_ctx;
-	buf_ptr = buf_ptr + sizeof(wmi_wlan_profile_ctx_t) + WMI_TLV_HDR_SIZE;
-
-	buf_ptr = buf_ptr + (sizeof(wmi_wlan_profile_t) * idx);
-	ev = (wmi_wlan_profile_t *)buf_ptr;
-
+	ev = &param_buf->profile_data[idx];
 	profile_data->id  = ev->id;
 	profile_data->cnt = ev->cnt;
 	profile_data->tot = ev->tot;
@@ -11502,6 +11551,13 @@ populate_thermal_stats(WMI_THERM_THROT_STATS_EVENTID_param_tlvs *param_buf,
 			       WMI_THERMAL_STATS_TEMP_THRESH_LEVEL_MAX) ?
 			       WMI_THERMAL_STATS_TEMP_THRESH_LEVEL_MAX :
 			       tt_stats_event->therm_throt_levels;
+
+	if (*therm_throt_levels > param_buf->num_temp_range_stats) {
+		wmi_err("therm_throt_levels:%u oob num_temp_range_stats:%u",
+			*therm_throt_levels,
+			param_buf->num_temp_range_stats);
+		return;
+	}
 
 	wmi_tt_stats = param_buf->temp_range_stats;
 	if (!wmi_tt_stats) {
@@ -14152,9 +14208,14 @@ extract_roam_scan_ap_stats_tlv(wmi_unified_t wmi_handle, void *evt_buf,
 		return QDF_STATUS_E_FAILURE;
 	}
 
-	if (ap_idx >= param_buf->num_roam_ap_info) {
-		wmi_err("Invalid roam scan AP tlv ap_idx:%d total_ap:%d",
-			ap_idx, param_buf->num_roam_ap_info);
+	/*
+	 * Check to validate that the requested number of APs do not exceed the
+	 * remaining APs in param_buf after ap_idx to prevent out of bounds
+	 * access.
+	 */
+	if ((ap_idx + num_cand) > param_buf->num_roam_ap_info) {
+		wmi_err("Invalid roam scan AP tlv ap_idx:%d, num_cand:%d, total_ap:%d",
+			ap_idx, num_cand, param_buf->num_roam_ap_info);
 		return QDF_STATUS_E_FAILURE;
 	}
 
@@ -14223,6 +14284,15 @@ extract_roam_scan_stats_tlv(wmi_unified_t wmi_handle, void *evt_buf,
 			dst->num_chan = MAX_ROAM_SCAN_CHAN;
 
 		src_chan = &param_buf->roam_scan_chan_info[chan_idx];
+
+		if ((dst->num_chan + chan_idx) >
+		    param_buf->num_roam_scan_chan_info) {
+			wmi_err("Invalid TLV. num_chan %d chan_idx %d num_roam_scan_chan_info %d",
+				dst->num_chan, chan_idx,
+				param_buf->num_roam_scan_chan_info);
+			return QDF_STATUS_SUCCESS;
+		}
+
 		for (i = 0; i < dst->num_chan; i++) {
 			dst->chan_freq[i] = src_chan->channel;
 			src_chan++;
@@ -14330,6 +14400,14 @@ extract_roam_11kv_stats_tlv(wmi_unified_t wmi_handle, void *evt_buf,
 
 	if (dst->num_freq > MAX_ROAM_SCAN_CHAN)
 		dst->num_freq = MAX_ROAM_SCAN_CHAN;
+
+	if ((dst->num_freq + rpt_idx) >
+	    param_buf->num_roam_neighbor_report_chan_info) {
+		wmi_err("Invalid TLV. num_freq %d rpt_idx %d num_roam_neighbor_report_chan_info %d",
+			dst->num_freq, rpt_idx,
+			param_buf->num_roam_scan_chan_info);
+		return QDF_STATUS_SUCCESS;
+	}
 
 	for (i = 0; i < dst->num_freq; i++) {
 		dst->freq[i] = src_freq->channel;
@@ -14466,7 +14544,7 @@ extract_smart_monitor_event_tlv(void *handle, void *evt_buf,
 	if (params->vdev_id >= WLAN_UMAC_PDEV_MAX_VDEVS)
 		return QDF_STATUS_E_INVAL;
 
-	params->rx_avg_rssi = smu_event->avg_rssi_data_dbm;
+	params->rx_vht_sgi = smu_event->rx_vht_sgi;
 
 	return QDF_STATUS_SUCCESS;
 }
@@ -15501,6 +15579,8 @@ event_ids[wmi_roam_scan_chan_list_id] =
 	event_ids[wmi_vdev_smart_monitor_event_id] =
 			WMI_VDEV_SMART_MONITOR_EVENTID;
 #endif
+	event_ids[wmi_roam_frame_event_id] =
+			WMI_ROAM_FRAME_EVENTID;
 }
 
 #ifdef WLAN_FEATURE_LINK_LAYER_STATS
@@ -15902,6 +15982,16 @@ static void populate_tlv_service(uint32_t *wmi_service)
 #ifdef THERMAL_STATS_SUPPORT
 	wmi_service[wmi_service_thermal_stats_temp_range_supported] =
 			WMI_SERVICE_THERMAL_THROT_STATS_TEMP_RANGE_SUPPORT;
+#endif
+	wmi_service[wmi_service_pno_scan_conf_per_ch_support] =
+			WMI_SERVICE_PNO_SCAN_CONFIG_PER_CHANNEL;
+#ifdef WLAN_FEATURE_P2P_P2P_STA
+	wmi_service[wmi_service_p2p_p2p_cc_support] =
+			WMI_SERVICE_P2P_P2P_CONCURRENCY_SUPPORT;
+#endif
+#ifdef WLAN_FEATURE_ROAM_OFFLOAD
+	wmi_service[wmi_service_5ghz_hi_rssi_roam_support] =
+					WMI_SERVICE_5GHZ_HI_RSSI_ROAM_SUPPORT;
 #endif
 }
 
