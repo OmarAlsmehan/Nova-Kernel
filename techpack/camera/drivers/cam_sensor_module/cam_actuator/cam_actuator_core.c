@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -843,6 +844,10 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 
 		/* Loop through multiple command buffers */
 		for (i = 0; i < csl_packet->num_cmd_buf; i++) {
+			rc = cam_packet_util_validate_cmd_desc(&cmd_desc[i]);
+			if (rc)
+				return rc;
+
 			total_cmd_buf_in_bytes = cmd_desc[i].length;
 			if (!total_cmd_buf_in_bytes)
 				continue;
@@ -855,6 +860,7 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 			cmd_buf = (uint32_t *)generic_ptr;
 			if (!cmd_buf) {
 				CAM_ERR(CAM_ACTUATOR, "invalid cmd buf");
+				cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 				rc = -EINVAL;
 				goto end;
 			}
@@ -863,6 +869,7 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 				sizeof(struct common_header)))) {
 				CAM_ERR(CAM_ACTUATOR,
 					"Invalid length for sensor cmd");
+				cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 				rc = -EINVAL;
 				goto end;
 			}
@@ -879,6 +886,7 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 				if (rc < 0) {
 					CAM_ERR(CAM_ACTUATOR,
 					"Failed to parse slave info: %d", rc);
+					cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 					goto end;
 				}
 				break;
@@ -894,6 +902,7 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 					CAM_ERR(CAM_ACTUATOR,
 					"Failed:parse power settings: %d",
 					rc);
+					cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 					goto end;
 				}
 				break;
@@ -914,6 +923,7 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 					CAM_ERR(CAM_ACTUATOR,
 					"Failed:parse init settings: %d",
 					rc);
+					cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 					goto end;
 				}
 				break;
@@ -1198,6 +1208,11 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 
 		actuator_acq_dev.device_handle =
 			cam_create_device_hdl(&bridge_params);
+		if (actuator_acq_dev.device_handle <= 0) {
+			rc = -EFAULT;
+			CAM_ERR(CAM_ACTUATOR, "Can not create device handle");
+			goto release_mutex;
+		}
 		a_ctrl->bridge_intf.device_hdl = actuator_acq_dev.device_handle;
 		a_ctrl->bridge_intf.session_hdl =
 			actuator_acq_dev.session_handle;

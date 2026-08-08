@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2015-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/of.h>
@@ -2161,7 +2162,7 @@ static int cam_soc_util_dump_cont_reg_range_user_buf(
 	if (rc) {
 		CAM_ERR(CAM_UTIL, "Invalid handle %u rc %d",
 			dump_args->buf_handle, rc);
-		goto end;
+		return rc;
 	}
 	if (buf_len <= dump_args->offset) {
 		CAM_WARN(CAM_UTIL, "Dump offset overshoot %zu %zu",
