@@ -39,6 +39,40 @@
 
 typedef void *WMA_HANDLE;
 
+#define WMA_MGMT_TX_INJECTION_DESC_ID 0xffff
+
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+QDF_STATUS wma_injection_tx(qdf_nbuf_t nbuf, uint8_t monitor_vdev_id);
+QDF_STATUS wma_injection_prepare(uint8_t monitor_vdev_id,
+				 uint32_t chanfreq);
+bool wma_injection_complete(void *wma_handle, uint16_t desc_id,
+			    uint32_t status);
+void wma_injection_pre_stop_cleanup(void);
+#else
+static inline QDF_STATUS
+wma_injection_tx(qdf_nbuf_t nbuf, uint8_t monitor_vdev_id)
+{
+	return QDF_STATUS_E_NOSUPPORT;
+}
+
+static inline QDF_STATUS
+wma_injection_prepare(uint8_t monitor_vdev_id, uint32_t chanfreq)
+{
+	return QDF_STATUS_E_NOSUPPORT;
+}
+
+static inline bool
+wma_injection_complete(void *wma_handle, uint16_t desc_id,
+		       uint32_t status)
+{
+	return false;
+}
+
+static inline void wma_injection_pre_stop_cleanup(void)
+{
+}
+#endif
+
 /**
  * enum GEN_PARAM - general parameters
  * @GEN_VDEV_PARAM_AMPDU: Set ampdu size
