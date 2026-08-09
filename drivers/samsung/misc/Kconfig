@@ -39,6 +39,7 @@ config VBUS_NOTIFIER
 	  
 config VBUS_NOTIFIER_MODULE
 	tristate "VBUS notifier support module"
+	depends on VBUS_NOTIFIER
 	default n
 	help
 	 this feature is for module build

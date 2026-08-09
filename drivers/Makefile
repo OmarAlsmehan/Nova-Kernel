@@ -229,7 +229,6 @@ obj-y += kperfmon/
 endif
 obj-y += perf_mgr/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 obj-y += input/sec_input/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
-obj-y += usb/common/vbus_notifier/ # ADDED BY LEGO AUTOMATICALLY: DO NOT SUBMIT
 ifdef CONFIG_SEC_A73XQ_PROJECT
 obj-y += muic/common/
 endif
