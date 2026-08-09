@@ -214,14 +214,15 @@ static void icc_release(struct device *dev)
 int input_booster_init_vendor(void)
 {
 
-	int bus_ret = 0;
+	int bus_ret = 0, reg_ret = 0;
 	current_hmp_boost = 0;
 
 //Bus boost factors initailized
 	dev = kzalloc(sizeof(struct device), GFP_KERNEL);
 	dev_set_name(dev, "input_booster");
 	dev->release = icc_release;
-	device_register(dev);
+	reg_ret = device_register(dev);
+	pr_info(ITAG "icc register result(%d)\n", reg_ret);
 
 	if (!register_ddr) {
 		path_touch_bw = icc_get(dev, MASTER_APPSS_PROC, SLAVE_EBI1);
