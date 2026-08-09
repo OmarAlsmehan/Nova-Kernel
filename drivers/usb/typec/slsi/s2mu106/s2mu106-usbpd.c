@@ -3350,7 +3350,7 @@ static int s2mu106_power_off_water_check(struct s2mu106_usbpd_data *pdic_data)
 static void s2mu106_power_off_water_notify(struct s2mu106_usbpd_data *pdic_data)
 {
 	int pm_ret = 0;
-	union power_supply_propval value;
+	union power_supply_propval value = {0, };
 
 	mutex_lock(&pdic_data->_mutex);
 	mutex_lock(&pdic_data->lpm_mutex);
