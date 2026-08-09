@@ -259,11 +259,7 @@ bool is_certificate_relevant_to_task(
 	const char system_server_app_name[] = "/system/framework/services.jar";
 	const char system_server[] = "system_server";
 	const size_t max_app_name = 1024;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0) || defined(PROCA_KUNIT_ENABLED))
 	char cmdline[1024 + 1];
-#else
-	char cmdline[max_app_name + 1];
-#endif
 	int cmdline_size;
 
 	if (!(parsed_cert->flags & (1 << PaFlagBits_bitAndroid)))
