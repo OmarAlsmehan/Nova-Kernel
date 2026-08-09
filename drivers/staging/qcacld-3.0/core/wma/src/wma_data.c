@@ -90,7 +90,9 @@
 #include <linux/moduleparam.h>
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
+#include <linux/ieee80211.h>
 #include "wlan_reg_services_api.h"
+#include "wlan_vdev_mlme_api.h"
 
 #define WMA_INJECTION_DESC_BASE 0xf000
 #define WMA_INJECTION_DESC_MASK 0x0fff
@@ -102,6 +104,9 @@
 #define WMA_INJECTION_QUEUE_TTL_MS_DEFAULT 500
 #define WMA_INJECTION_QUEUE_TTL_MS_MAX 5000
 #define WMA_INJECTION_TIMEOUT (2 * HZ)
+#define WMA_INJECTION_PEER_RETRY 3
+#define WMA_INJECTION_COOLDOWN_MS 1000
+#define WMA_INJECTION_PEER_WAIT_MS 10
 
 static unsigned int wma_injection_inflight_limit =
 	WMA_INJECTION_INFLIGHT_DEFAULT;
@@ -139,10 +144,13 @@ struct wma_injection_slot {
 
 struct wma_injection_helper {
 	bool created;
+	bool peer_created;
 	uint8_t vdev_id;
 	uint8_t monitor_vdev_id;
 	uint32_t chanfreq;
+	uint32_t last_peer_create;
 	uint8_t mac_addr[QDF_MAC_ADDR_SIZE];
+	uint8_t peer_addr[QDF_MAC_ADDR_SIZE];
 };
 
 static struct {
@@ -179,6 +187,17 @@ static void __wma_injection_destroy_helper(tp_wma_handle wma)
 	if (!helper->created || !wma || !wma->wmi_handle)
 		return;
 
+	if (helper->peer_created) {
+		wma_info("Pre-stop cleanup: deleting peer=%pM vdev=%u",
+			 helper->peer_addr, helper->vdev_id);
+		wmi_unified_peer_delete_send(wma->wmi_handle,
+					     helper->peer_addr,
+					     helper->vdev_id);
+		msleep(WMA_INJECTION_PEER_WAIT_MS);
+		helper->peer_created = false;
+		qdf_mem_zero(helper->peer_addr, QDF_MAC_ADDR_SIZE);
+	}
+
 	wmi_unified_peer_delete_send(wma->wmi_handle, helper->mac_addr,
 				     helper->vdev_id);
 	msleep(100);
@@ -191,6 +210,54 @@ static void __wma_injection_destroy_helper(tp_wma_handle wma)
 }
 
 static QDF_STATUS
+wma_injection_ensure_peer(tp_wma_handle wma,
+			  const uint8_t *peer_addr,
+			  uint32_t chanfreq)
+{
+	struct wma_injection_helper *helper = &wma_injection_ctx.helper;
+	struct peer_create_params create = {0};
+	QDF_STATUS status;
+
+	if (!wma || !wma->wmi_handle || !helper->created || !peer_addr)
+		return QDF_STATUS_E_INVAL;
+	if (qdf_is_macaddr_group((struct qdf_mac_addr *)peer_addr) ||
+	    qdf_is_macaddr_zero((struct qdf_mac_addr *)peer_addr))
+		return QDF_STATUS_E_INVAL;
+	if (helper->peer_created &&
+	    helper->chanfreq == chanfreq &&
+	    qdf_mem_cmp(helper->peer_addr, peer_addr, QDF_MAC_ADDR_SIZE) == 0)
+		return QDF_STATUS_SUCCESS;
+	if (helper->peer_created) {
+	wmi_unified_peer_delete_send(wma->wmi_handle,
+				     helper->peer_addr,
+				     helper->vdev_id);
+		helper->peer_created = false;
+		qdf_mem_zero(helper->peer_addr, QDF_MAC_ADDR_SIZE);
+		msleep(WMA_INJECTION_PEER_WAIT_MS);
+	}
+	create.peer_addr = (uint8_t *)peer_addr;
+	create.peer_type = WMI_PEER_TYPE_DEFAULT;
+	create.vdev_id = helper->vdev_id;
+	status = wmi_unified_peer_create_send(wma->wmi_handle, &create);
+	if (QDF_IS_STATUS_ERROR(status))
+		return status;
+
+	msleep(WMA_INJECTION_PEER_WAIT_MS);
+
+	status = wma_set_peer_param(wma, (uint8_t *)peer_addr,
+				    WMI_PEER_AUTHORIZE, 1,
+				    helper->vdev_id);
+	if (QDF_IS_STATUS_ERROR(status))
+		wma_warn("Peer authorize failed: %pM", peer_addr);
+	qdf_mem_copy(helper->peer_addr, peer_addr, QDF_MAC_ADDR_SIZE);
+	helper->peer_created = true;
+	helper->chanfreq = chanfreq;
+	wma_info("Peer ready: vdev=%u peer=%pM freq=%u",
+		 helper->vdev_id, peer_addr, chanfreq);
+	return QDF_STATUS_SUCCESS;
+}
+
+static QDF_STATUS
 __wma_injection_ensure_helper(tp_wma_handle wma, uint8_t monitor_vdev_id,
 			      uint32_t chanfreq)
 {
@@ -198,6 +265,9 @@ __wma_injection_ensure_helper(tp_wma_handle wma, uint8_t monitor_vdev_id,
 	struct vdev_start_params start = {0};
 	struct peer_create_params peer = {0};
 	struct wma_injection_helper *helper = &wma_injection_ctx.helper;
+	struct wlan_objmgr_vdev *monitor_vdev;
+	struct vdev_mlme_obj *monitor_mlme;
+	struct wlan_channel *monitor_chan;
 	uint8_t *monitor_mac;
 	int i, max_id;
 	QDF_STATUS status;
@@ -205,9 +275,59 @@ __wma_injection_ensure_helper(tp_wma_handle wma, uint8_t monitor_vdev_id,
 	if (helper->created && helper->monitor_vdev_id == monitor_vdev_id &&
 	    helper->chanfreq == chanfreq)
 		return QDF_STATUS_SUCCESS;
-	if (helper->created)
+	if (helper->created && helper->monitor_vdev_id != monitor_vdev_id)
 		__wma_injection_destroy_helper(wma);
 
+	monitor_vdev = wma->interfaces[monitor_vdev_id].vdev;
+	if (!monitor_vdev)
+		return QDF_STATUS_E_INVAL;
+	monitor_mac = wlan_vdev_mlme_get_macaddr(monitor_vdev);
+	if (!monitor_mac)
+		return QDF_STATUS_E_INVAL;
+
+	monitor_mlme = wlan_vdev_mlme_get_cmpt_obj(monitor_vdev);
+	monitor_chan = wlan_vdev_mlme_get_des_chan(monitor_vdev);
+	if (!monitor_chan || monitor_chan->ch_freq != chanfreq)
+		monitor_chan = wlan_vdev_mlme_get_bss_chan(monitor_vdev);
+	if (!monitor_mlme || !monitor_chan ||
+	    monitor_chan->ch_freq != chanfreq)
+		return QDF_STATUS_E_AGAIN;
+
+	start.channel.chan_id = monitor_chan->ch_ieee;
+	start.channel.pwr = monitor_mlme->mgmt.generic.tx_power;
+	start.channel.mhz = chanfreq;
+	start.channel.half_rate = monitor_mlme->mgmt.rate_info.half_rate;
+	start.channel.quarter_rate = monitor_mlme->mgmt.rate_info.quarter_rate;
+	start.channel.dfs_set = wlan_reg_is_dfs_for_freq(wma->pdev, chanfreq);
+	start.channel.is_chan_passive = start.channel.dfs_set;
+	start.channel.allow_ht = monitor_mlme->proto.ht_info.allow_ht;
+	start.channel.allow_vht = monitor_mlme->proto.vht_info.allow_vht;
+	start.channel.phy_mode = monitor_mlme->mgmt.generic.phy_mode;
+	start.channel.cfreq1 = monitor_chan->ch_cfreq1 ?: chanfreq;
+	start.channel.cfreq2 = monitor_chan->ch_cfreq2;
+	start.channel.maxpower = monitor_mlme->mgmt.generic.maxpower;
+	start.channel.minpower = monitor_mlme->mgmt.generic.minpower;
+	start.channel.maxregpower = monitor_mlme->mgmt.generic.maxregpower;
+	start.channel.antennamax = monitor_mlme->mgmt.generic.antennamax;
+	start.channel.reg_class_id = monitor_mlme->mgmt.generic.reg_class_id;
+#ifdef WLAN_FEATURE_11BE
+	start.channel.puncture_bitmap = monitor_chan->puncture_bitmap;
+	start.eht_ops = monitor_mlme->proto.eht_ops_info.eht_ops;
+#endif
+	start.preferred_tx_streams = 1;
+	start.preferred_rx_streams = 1;
+	start.he_ops = monitor_mlme->proto.he_ops_info.he_ops;
+	if (helper->created && helper->monitor_vdev_id == monitor_vdev_id) {
+	start.vdev_id = helper->vdev_id;
+	start.is_restart = true;
+	status = wmi_unified_vdev_start_send(wma->wmi_handle, &start);
+		if (QDF_IS_STATUS_SUCCESS(status)) {
+		helper->chanfreq = chanfreq;
+		msleep(15);
+			return QDF_STATUS_SUCCESS;
+		}
+		__wma_injection_destroy_helper(wma);
+	}
 	max_id = qdf_min((int)wma->max_bssid - 1,
 			 CFG_TGT_NUM_VDEV - 2);
 	for (i = max_id; i >= 0; i--)
@@ -216,16 +336,11 @@ __wma_injection_ensure_helper(tp_wma_handle wma, uint8_t monitor_vdev_id,
 	if (i < 0)
 		return QDF_STATUS_E_RESOURCES;
 
-	monitor_mac = wlan_vdev_mlme_get_macaddr(
-			wma->interfaces[monitor_vdev_id].vdev);
-	if (!monitor_mac)
-		return QDF_STATUS_E_INVAL;
-
 	helper->vdev_id = i;
 	helper->monitor_vdev_id = monitor_vdev_id;
 	helper->chanfreq = chanfreq;
 	qdf_mem_copy(helper->mac_addr, monitor_mac, QDF_MAC_ADDR_SIZE);
-	helper->mac_addr[0] |= 0x02;
+	helper->mac_addr[0] = (helper->mac_addr[0] & 0xFE) | 0x02;
 
 	create.vdev_id = helper->vdev_id;
 	create.type = WMI_VDEV_TYPE_STA;
@@ -238,13 +353,7 @@ __wma_injection_ensure_helper(tp_wma_handle wma, uint8_t monitor_vdev_id,
 	msleep(150);
 
 	start.vdev_id = helper->vdev_id;
-	start.channel.mhz = chanfreq;
-	start.channel.cfreq1 = chanfreq;
-	start.channel.phy_mode = chanfreq < 4000 ?
-				 WLAN_PHYMODE_11G : WLAN_PHYMODE_11A;
-	start.channel.maxregpower =
-		wlan_reg_get_channel_reg_power_for_freq(wma->pdev, chanfreq);
-	start.channel.maxpower = start.channel.maxregpower;
+	start.is_restart = false;
 	status = wmi_unified_vdev_start_send(wma->wmi_handle, &start);
 	if (QDF_IS_STATUS_ERROR(status))
 		goto delete_vdev;
@@ -258,6 +367,7 @@ __wma_injection_ensure_helper(tp_wma_handle wma, uint8_t monitor_vdev_id,
 		goto stop_vdev;
 	msleep(100);
 
+	helper->peer_created = true;
 	helper->created = true;
 	wma_info("Injection helper ready: monitor=%u helper=%u freq=%u mac=%pM",
 		 monitor_vdev_id, helper->vdev_id, chanfreq, helper->mac_addr);
@@ -296,11 +406,13 @@ wma_injection_send(tp_wma_handle wma, qdf_nbuf_t nbuf,
 {
 	struct wmi_mgmt_params params = {0};
 	struct wma_injection_slot *slot;
+	struct ieee80211_hdr_3addr *hdr;
+	struct qdf_mac_addr mac;
 	uint32_t chanfreq;
 	uint16_t desc_id;
 	QDF_STATUS status;
 
-	if (monitor_vdev_id >= wma->max_bssid ||
+	if (!wma || monitor_vdev_id >= wma->max_bssid ||
 	    !wma->interfaces[monitor_vdev_id].vdev)
 		return QDF_STATUS_E_INVAL;
 	chanfreq = wma->interfaces[monitor_vdev_id].ch_freq;
@@ -315,6 +427,18 @@ wma_injection_send(tp_wma_handle wma, qdf_nbuf_t nbuf,
 		return status;
 	}
 
+	if (qdf_nbuf_len(nbuf) < sizeof(struct ieee80211_hdr_3addr))
+		goto skip_peer;
+	hdr = (struct ieee80211_hdr_3addr *)qdf_nbuf_data(nbuf);
+	qdf_mem_copy(mac.bytes, hdr->addr1, QDF_MAC_ADDR_SIZE);
+	if (!qdf_is_macaddr_group(&mac) && !qdf_is_macaddr_zero(&mac)) {
+		status = wma_injection_ensure_peer(wma, hdr->addr1, chanfreq);
+		if (QDF_IS_STATUS_ERROR(status)) {
+			mutex_unlock(&wma_injection_ctx.helper_lock);
+			return status;
+		}
+	}
+skip_peer:
 	desc_id = wma_injection_next_desc();
 	slot = &wma_injection_ctx.slots[desc_id % WMA_INJECTION_SLOT_COUNT];
 	spin_lock_bh(&wma_injection_ctx.lock);
@@ -464,6 +588,7 @@ QDF_STATUS wma_injection_tx(qdf_nbuf_t nbuf, uint8_t monitor_vdev_id)
 
 QDF_STATUS wma_injection_prepare(uint8_t monitor_vdev_id, uint32_t chanfreq)
 {
+	struct wma_injection_helper *helper = &wma_injection_ctx.helper;
 	tp_wma_handle wma = wma_injection_ctx.wma;
 	QDF_STATUS status = QDF_STATUS_E_BUSY;
 	unsigned long flags;
@@ -489,6 +614,15 @@ QDF_STATUS wma_injection_prepare(uint8_t monitor_vdev_id, uint32_t chanfreq)
 			break;
 		msleep(10);
 	} while (--retries);
+
+	if (helper->created && helper->chanfreq != chanfreq && helper->peer_created) {
+		wmi_unified_peer_delete_send(wma->wmi_handle,
+					     helper->peer_addr,
+					     helper->vdev_id);
+		helper->peer_created = false;
+		qdf_mem_zero(helper->peer_addr, QDF_MAC_ADDR_SIZE);
+	}
+
 	if (!in_flight)
 		status = __wma_injection_ensure_helper(wma, monitor_vdev_id,
 						       chanfreq);
