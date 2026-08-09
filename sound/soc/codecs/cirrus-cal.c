@@ -982,13 +982,13 @@ static ssize_t cirrus_cal_v_status_store(struct device *dev,
 			if (reg < vmin[j])
 				vmin[j] = reg;
 
-				cirrus_amp_read_ctl(&amp_group->amps[j], "CAL_STATUS",
-					WMFW_ADSP2_XM,
-					CIRRUS_AMP_ALG_ID_CSPL, &reg);
+			cirrus_amp_read_ctl(&amp_group->amps[j], "CAL_STATUS",
+				WMFW_ADSP2_XM,
+				CIRRUS_AMP_ALG_ID_CSPL, &reg);
 
-				if (reg != 0 && reg != CSPL_STATUS_INCOMPLETE)
-					count++;
-			}
+			if (reg != 0 && reg != CSPL_STATUS_INCOMPLETE)
+				count++;
+		}
 
 		if (count == num_amps) {
 			dev_info(amp_group->cal_dev,
