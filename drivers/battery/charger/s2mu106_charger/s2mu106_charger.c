@@ -1335,7 +1335,7 @@ static int s2mu106_chg_set_property(struct power_supply *psy,
 	enum power_supply_ext_property ext_psp = (enum power_supply_ext_property) psp;
 	enum power_supply_lsi_property lsi_psp = (enum power_supply_lsi_property) psp;
 	int buck_state = ENABLE;
-	union power_supply_propval value;
+	union power_supply_propval value = {0, };
 	int ret;
 	u8 data = 0;
 	u8 temp;
