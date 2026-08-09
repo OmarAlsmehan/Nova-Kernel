@@ -2973,7 +2973,7 @@ int cam_ois_parsing_raw_data(struct cam_ois_ctrl_t *o_ctrl,
 				j++;
 			}
 		}
-		kstrtol(efs_data, 10, raw_data_x);
+		ret = kstrtol(efs_data, 10, raw_data_x);
 
 		memset(efs_data, 0x00, sizeof(efs_data));
 		j = 0;
@@ -2983,7 +2983,7 @@ int cam_ois_parsing_raw_data(struct cam_ois_ctrl_t *o_ctrl,
 				j++;
 			}
 		}
-		kstrtol(efs_data, 10, raw_data_y);
+		ret = kstrtol(efs_data, 10, raw_data_y);
 
 #if defined(CONFIG_SAMSUNG_OIS_Z_AXIS_CAL)
 		if (detect_comma_z) {
@@ -2995,7 +2995,7 @@ int cam_ois_parsing_raw_data(struct cam_ois_ctrl_t *o_ctrl,
 					j++;
 				}
 			}
-			kstrtol(efs_data, 10, raw_data_z);
+			ret = kstrtol(efs_data, 10, raw_data_z);
 		}
 #endif
 	} else {

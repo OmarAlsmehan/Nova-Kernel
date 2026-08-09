@@ -137,18 +137,18 @@ int cam_mipi_select_mipi_by_rf_channel(const struct cam_mipi_channel *channel_li
 		uint32_t value = 0;
 		char temp[10] = "\n";
 		memcpy(temp, &band_info[0], 1);
-		kstrtouint(temp, 10, &value);
+		(void)kstrtouint(temp, 10, &value);
 		if (value > 0) {
 			input_ch.rat = value;
 
 			memset(temp, 0, sizeof(temp));
 			memcpy(temp, &band_info[1], 3);
-			kstrtouint(temp, 10, &value);
+			(void)kstrtouint(temp, 10, &value);
 			input_ch.band = value;
 
 			memset(temp, 0, sizeof(temp));
 			memcpy(temp, &band_info[4], 5);
-			kstrtouint(temp, 10, &value);
+			(void)kstrtouint(temp, 10, &value);
 			input_ch.channel = value;
 		}
 	}
