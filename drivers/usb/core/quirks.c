@@ -776,7 +776,6 @@ int usb_detect_interface_lpm(struct usb_device *udev)
 {
 	const struct usb_device_id *id = usb_interface_list_lpm;
 	int l1_enable = 0;
-
 	for (; id->match_flags; id++) {
 		if (!usb_match_device(udev, id))
 			continue;
