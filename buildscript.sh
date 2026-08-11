@@ -19,9 +19,9 @@ set -o pipefail
 # ── Clang toolchain ──────────────────────────────────────────────
 # Bump NK_CLANG_VERSION_DEFAULT to update the toolchain.
 # The YAML detects this value via grep, so keep it on its own line.
-NK_CLANG_VERSION_DEFAULT="clang-r584948"
+NK_CLANG_VERSION_DEFAULT="clang-r596125"
 NK_CLANG_VERSION="${NK_CLANG_VERSION:-$NK_CLANG_VERSION_DEFAULT}"
-NK_CLANG_URL="${NK_CLANG_URL:-https://github.com/MrR0b0X/Android-tools/releases/download/clang-r584948-2/clang-r584948.tar.gz}"
+NK_CLANG_URL="${NK_CLANG_URL:-https://github.com/bachnxuan/aosp_clang_mirror/releases/download/clang-r596125-15682573/clang-r596125.tar.gz}"
 
 # ── KernelSU repositories ────────────────────────────────────────
 NK_KSU_SETUP_URL="${NK_KSU_SETUP_URL:-https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh}"
