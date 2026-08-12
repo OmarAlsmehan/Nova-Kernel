@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022, 2026 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -2732,6 +2732,10 @@ void wma_process_update_opmode(tp_wma_handle wma_handle,
 	wma_set_peer_param(wma_handle, update_vht_opmode->peer_mac,
 			   WMI_PEER_CHWIDTH, update_vht_opmode->opMode,
 			   update_vht_opmode->smesessionId);
+
+	wma_set_peer_param(wma_handle, update_vht_opmode->peer_mac,
+			   WMI_PEER_PHYMODE,
+			   fw_phymode, update_vht_opmode->smesessionId);
 }
 
 /**
@@ -2815,7 +2819,7 @@ QDF_STATUS wma_set_cts2self_for_p2p_go(void *wma_handle,
 {
 	int32_t ret;
 	tp_wma_handle wma = (tp_wma_handle)wma_handle;
-	struct pdev_params pdevparam;
+	struct pdev_params pdevparam = {};
 
 	pdevparam.param_id = WMI_PDEV_PARAM_CTS2SELF_FOR_P2P_GO_CONFIG;
 	pdevparam.param_value = cts2self_for_p2p_go;
