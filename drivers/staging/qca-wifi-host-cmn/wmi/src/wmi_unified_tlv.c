@@ -912,33 +912,36 @@ send_vdev_nss_chain_params_cmd_tlv(wmi_unified_t wmi_handle,
 /**
  * send_vdev_stop_cmd_tlv() - send vdev stop command to fw
  * @wmi: wmi handle
- * @vdev_id: vdev id
+ * @params: VDEV stop params
  *
  * Return: QDF_STATUS_SUCCESS for success or erro code
  */
 static QDF_STATUS send_vdev_stop_cmd_tlv(wmi_unified_t wmi,
-					uint8_t vdev_id)
+					 struct vdev_stop_params *params)
 {
 	wmi_vdev_stop_cmd_fixed_param *cmd;
 	wmi_buf_t buf;
 	int32_t len = sizeof(*cmd);
+	uint8_t *buf_ptr;
 
 	buf = wmi_buf_alloc(wmi, len);
 	if (!buf)
 		return QDF_STATUS_E_NOMEM;
 
-	cmd = (wmi_vdev_stop_cmd_fixed_param *) wmi_buf_data(buf);
+	buf_ptr = wmi_buf_data(buf);
+	cmd = (wmi_vdev_stop_cmd_fixed_param *)buf_ptr;
 	WMITLV_SET_HDR(&cmd->tlv_header,
 		       WMITLV_TAG_STRUC_wmi_vdev_stop_cmd_fixed_param,
 		       WMITLV_GET_STRUCT_TLVLEN(wmi_vdev_stop_cmd_fixed_param));
-	cmd->vdev_id = vdev_id;
+	cmd->vdev_id = params->vdev_id;
+	buf_ptr += sizeof(wmi_vdev_stop_cmd_fixed_param);
 	wmi_mtrace(WMI_VDEV_STOP_CMDID, cmd->vdev_id, 0);
 	if (wmi_unified_cmd_send(wmi, buf, len, WMI_VDEV_STOP_CMDID)) {
 		wmi_err("Failed to send vdev stop command");
 		wmi_buf_free(buf);
 		return QDF_STATUS_E_FAILURE;
 	}
-	wmi_debug("vdev id = %d", vdev_id);
+	wmi_debug("vdev id = %d", cmd->vdev_id);
 
 	return 0;
 }
@@ -1166,31 +1169,34 @@ static QDF_STATUS send_peer_flush_tids_cmd_tlv(wmi_unified_t wmi,
  * send_peer_delete_cmd_tlv() - send PEER delete command to fw
  * @wmi: wmi handle
  * @peer_addr: peer mac addr
- * @vdev_id: vdev id
+ * @param: peer delete parameters
  *
  * Return: QDF_STATUS_SUCCESS for success or error code
  */
 static QDF_STATUS send_peer_delete_cmd_tlv(wmi_unified_t wmi,
 				 uint8_t peer_addr[QDF_MAC_ADDR_SIZE],
-				 uint8_t vdev_id)
+				 struct peer_delete_cmd_params *param)
 {
 	wmi_peer_delete_cmd_fixed_param *cmd;
 	wmi_buf_t buf;
 	int32_t len = sizeof(*cmd);
+	uint8_t *buf_ptr;
 	buf = wmi_buf_alloc(wmi, len);
 	if (!buf)
 		return QDF_STATUS_E_NOMEM;
 
-	cmd = (wmi_peer_delete_cmd_fixed_param *) wmi_buf_data(buf);
+	buf_ptr = (uint8_t *)wmi_buf_data(buf);
+	cmd = (wmi_peer_delete_cmd_fixed_param *)buf_ptr;
 	WMITLV_SET_HDR(&cmd->tlv_header,
 		       WMITLV_TAG_STRUC_wmi_peer_delete_cmd_fixed_param,
 		       WMITLV_GET_STRUCT_TLVLEN
 			       (wmi_peer_delete_cmd_fixed_param));
 	WMI_CHAR_ARRAY_TO_MAC_ADDR(peer_addr, &cmd->peer_macaddr);
-	cmd->vdev_id = vdev_id;
+	cmd->vdev_id = param->vdev_id;
+	buf_ptr = (uint8_t *)(((uintptr_t) cmd) + sizeof(*cmd));
 
 	wmi_debug("peer_addr "QDF_MAC_ADDR_FMT" vdev_id %d",
-		 QDF_MAC_ADDR_REF(peer_addr), vdev_id);
+		 QDF_MAC_ADDR_REF(peer_addr), param->vdev_id);
 	wmi_mtrace(WMI_PEER_DELETE_CMDID, cmd->vdev_id, 0);
 	if (wmi_unified_cmd_send(wmi, buf, len, WMI_PEER_DELETE_CMDID)) {
 		wmi_err("Failed to send peer delete command");

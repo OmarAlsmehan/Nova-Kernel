@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2021 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -800,12 +800,12 @@ wmi_unified_vdev_nss_chain_params_send(
 /**
  * wmi_unified_vdev_stop_send() - send vdev stop command to fw
  * @wmi_handle: wmi handle
- * @vdev_id: vdev id
+ * @params: VDEV stop params
  *
  * Return: QDF_STATUS_SUCCESS on success and QDF_STATUS_E_FAILURE for failure
  */
 QDF_STATUS wmi_unified_vdev_stop_send(wmi_unified_t wmi_handle,
-				      uint8_t vdev_id);
+				      struct vdev_stop_params *params);
 
 /**
  * wmi_unified_vdev_up_send() - send vdev up command in fw
@@ -896,14 +896,14 @@ QDF_STATUS wmi_unified_sifs_trigger_send(wmi_unified_t wmi_handle,
  * wmi_unified_peer_delete_send() - send PEER delete command to fw
  * @wmi_handle: wmi handle
  * @peer_addr: peer mac addr
- * @vdev_id: vdev id
+ * @param: pointer to hold peer delete parameters
  *
  * Return: QDF_STATUS_SUCCESS on success and QDF_STATUS_E_FAILURE for failure
  */
 QDF_STATUS
 wmi_unified_peer_delete_send(wmi_unified_t wmi_handle,
 			     uint8_t peer_addr[QDF_MAC_ADDR_SIZE],
-			     uint8_t vdev_id);
+			     struct peer_delete_cmd_params *param);
 
 /**
  * wmi_unified_peer_flush_tids_send() - flush peer tids packets in fw

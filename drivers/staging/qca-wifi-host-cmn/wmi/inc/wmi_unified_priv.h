@@ -419,7 +419,7 @@ QDF_STATUS (*send_vdev_nss_chain_params_cmd)(wmi_unified_t wmi_handle,
 					 struct vdev_nss_chains *user_cfg);
 
 QDF_STATUS (*send_vdev_stop_cmd)(wmi_unified_t wmi,
-					uint8_t vdev_id);
+				 struct vdev_stop_params *params);
 
 QDF_STATUS (*send_vdev_down_cmd)(wmi_unified_t wmi,
 			uint8_t vdev_id);
@@ -436,7 +436,7 @@ QDF_STATUS (*send_peer_flush_tids_cmd)(wmi_unified_t wmi,
 
 QDF_STATUS (*send_peer_delete_cmd)(wmi_unified_t wmi,
 				    uint8_t peer_addr[QDF_MAC_ADDR_SIZE],
-				    uint8_t vdev_id);
+				    struct peer_delete_cmd_params *param);
 
 QDF_STATUS (*send_peer_delete_all_cmd)(
 				wmi_unified_t wmi,

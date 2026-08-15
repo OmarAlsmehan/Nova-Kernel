@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2021-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -101,11 +101,10 @@ wmi_unified_vdev_nss_chain_params_send(wmi_unified_t wmi_handle,
 }
 
 QDF_STATUS wmi_unified_vdev_stop_send(wmi_unified_t  wmi_handle,
-				      uint8_t vdev_id)
+				      struct vdev_stop_params *params)
 {
 	if (wmi_handle->ops->send_vdev_stop_cmd)
-		return wmi_handle->ops->send_vdev_stop_cmd(wmi_handle,
-			   vdev_id);
+		return wmi_handle->ops->send_vdev_stop_cmd(wmi_handle, params);
 
 	return QDF_STATUS_E_FAILURE;
 }
@@ -152,11 +151,10 @@ wmi_unified_peer_flush_tids_send(wmi_unified_t wmi_handle,
 
 QDF_STATUS wmi_unified_peer_delete_send(wmi_unified_t wmi_handle,
 					uint8_t peer_addr[QDF_MAC_ADDR_SIZE],
-					uint8_t vdev_id)
+					struct peer_delete_cmd_params *param)
 {
 	if (wmi_handle->ops->send_peer_delete_cmd)
-		return wmi_handle->ops->send_peer_delete_cmd(wmi_handle,
-				  peer_addr, vdev_id);
+		return wmi_handle->ops->send_peer_delete_cmd(wmi_handle, peer_addr, param);
 
 	return QDF_STATUS_E_FAILURE;
 }
