@@ -1,0 +1,30 @@
+name: Job summary
+description: Generate the NovaKernel GitHub Actions job summary
+runs:
+  using: composite
+  steps:
+    - name: 📋 Generate summary
+      if: always()
+      shell: bash
+      run: |
+        if [[ "${KERNELSU_ENABLED:-false}" == "true" ]]; then
+          BACKPORT_STATUS="auto"
+        else
+          BACKPORT_STATUS="disabled"
+        fi
+
+        {
+          echo "## 🚀 ${KERNEL_NAME} — \`${VARIANT}\`"
+          echo
+          echo "| Field | Value |"
+          echo "|:--|:--|"
+          echo "| KernelSU | \`${KERNELSU_ENABLED:-false}\` |"
+          echo "| NoMount | \`${NOMOUNT_ENABLED:-false}\` |"
+          echo "| Hook | \`${HOOK_TYPE:-kprobes}\` |"
+          echo "| Backport | \`${BACKPORT_STATUS}\` |"
+          echo "| Package | \`${ZIP_NAME:-unknown}\` |"
+          echo "| Mode | \`${PACKAGE_MODE:-unknown}\` |"
+          echo "| SHA256 | \`${ZIP_SHA256:-unknown}\` |"
+          echo "| Release | \`${{ github.event.inputs.release_type }}\` |"
+          echo "| Commit | \`${GITHUB_SHA}\` |"
+        } >> "$GITHUB_STEP_SUMMARY"
