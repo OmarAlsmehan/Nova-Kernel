@@ -1,0 +1,17 @@
+name: NoMount integration
+description: Apply NoMount kernel integration.
+runs:
+  using: composite
+  steps:
+    - name: 🛡️ Apply NoMount
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🛡️ NoMount integration"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        curl -fsSL --retry 3 \
+          "${NOMOUNT_SETUP_URL:?NOMOUNT_SETUP_URL is required}" \
+          | bash -s dev
+        echo "✅ NoMount step finished"
