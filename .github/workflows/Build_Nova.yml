@@ -18,7 +18,13 @@ on:
         required: true
         type: boolean
         default: false
-
+        
+      SuSFS:
+        description: "Enable SuSFS?"
+        required: true
+        type: boolean
+        default: false
+ 
       nomount:
         description: "Enable NoMount?"
         required: true
@@ -87,6 +93,7 @@ concurrency:
 
 env:
   KERNELSU_ENABLED: ${{ github.event.inputs.kernelsu }}
+  SUSFS_ENABLED: ${{ github.event.inputs.SuSFS }}
   NOMOUNT_ENABLED: ${{ github.event.inputs.nomount }}
   KSU_REPO: ${{ github.event.inputs.ksu_repo }}
   KSU_BRANCH: ${{ github.event.inputs.ksu_branch == 'custom' && github.event.inputs.ksu_branch_custom || github.event.inputs.ksu_branch }}
@@ -123,6 +130,11 @@ jobs:
         if: ${{ env.KERNELSU_ENABLED == 'true' }}
         timeout-minutes: 30
         uses: ./.github/actions/setup-ksu
+        
+      - name: 🛡️ SuSFS integration
+        if: ${{ env.SUSFS_ENABLED == 'true' }}
+        timeout-minutes: 15
+        uses: ./.github/actions/patch-susfs
 
       - name: 🛡️ NoMount integration
         if: ${{ env.NOMOUNT_ENABLED == 'true' }}

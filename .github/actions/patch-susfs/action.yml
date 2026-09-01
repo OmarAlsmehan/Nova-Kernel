@@ -1,0 +1,22 @@
+name: SuSFS integration
+description: Apply SuSFS kernel integration.
+runs:
+  using: composite
+  steps:
+    - name: 🛡️ Add SuSFS
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "🛡️ SuSFS integration"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        curl https://raw.githubusercontent.com/OmarAlsmehan/Random-stuff/refs/heads/main/0001-Import-de-inlined-hooks-SUSFS-v2.3.0.patch | patch -p1
+        curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
+        scripts/config --file arch/arm64/configs/lineage-a73xq_defconfig --enable CONFIG_KSU
+        scripts/config --file arch/arm64/configs/lineage-a73xq_defconfig --enable CONFIG_KSU_SUSFS
+        scripts/config --file arch/arm64/configs/lineage-a52sxq_defconfig --enable CONFIG_KSU
+        scripts/config --file arch/arm64/configs/lineage-a52sxq_defconfig --enable CONFIG_KSU_SUSFS
+        scripts/config --file arch/arm64/configs/lineage-m52xq_defconfig --enable CONFIG_KSU
+        scripts/config --file arch/arm64/configs/lineage-m52xq_defconfig --enable CONFIG_KSU_SUSFS
+        echo "✅ SuSFS step finished"
