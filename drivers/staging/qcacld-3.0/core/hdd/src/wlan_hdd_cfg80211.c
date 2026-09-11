@@ -24997,6 +24997,10 @@ static int __wlan_hdd_cfg80211_set_mon_ch(struct wiphy *wiphy,
 	status = wma_injection_channel_change_begin(
 			adapter->vdev_id,
 			chandef->chan->center_freq);
+	if (status == QDF_STATUS_E_ALREADY) {
+		adapter->monitor_mode_vdev_up_in_progress = false;
+		return 0;
+	}
 	if (QDF_IS_STATUS_ERROR(status)) {
 		hdd_warn("failed to quiesce monitor injection: %d", status);
 		adapter->monitor_mode_vdev_up_in_progress = false;
@@ -25007,7 +25011,7 @@ static int __wlan_hdd_cfg80211_set_mon_ch(struct wiphy *wiphy,
 					     &roam_profile.ch_params,
 					     &roam_profile);
 	if (status) {
-		wma_injection_channel_change_end();
+		wma_injection_channel_change_end(false);
 		hdd_err_rl("Failed to set sme_RoamChannel for monitor mode status: %d",
 			   status);
 		adapter->monitor_mode_vdev_up_in_progress = false;
@@ -25020,7 +25024,7 @@ static int __wlan_hdd_cfg80211_set_mon_ch(struct wiphy *wiphy,
 				       &adapter->qdf_monitor_mode_vdev_up_event,
 					WLAN_MONITOR_MODE_VDEV_UP_EVT);
 	if (QDF_IS_STATUS_ERROR(status)) {
-		wma_injection_channel_change_end();
+		wma_injection_channel_change_end(false);
 		hdd_err_rl("monitor vdev up event time out vdev id: %d",
 			  adapter->vdev_id);
 		if (adapter->qdf_monitor_mode_vdev_up_event.force_set)
@@ -25047,7 +25051,7 @@ static int __wlan_hdd_cfg80211_set_mon_ch(struct wiphy *wiphy,
 		hdd_warn("failed to restore monitor RX filters: %d", status);
 	else
 		msleep(20);
-	wma_injection_channel_change_end();
+	wma_injection_channel_change_end(true);
 
 	hdd_exit();
 
