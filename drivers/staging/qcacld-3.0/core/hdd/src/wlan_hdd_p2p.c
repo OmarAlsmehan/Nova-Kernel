@@ -1031,6 +1031,87 @@ static void hdd_queue_monitor_station_restore(struct hdd_context *hdd_ctx)
 	qdf_queue_work(0, hdd_ctx->adapter_ops_wq,
 		       &hdd_ctx->monitor_restore_work);
 }
+
+/*
+ * Deferred MISSION -> MONITOR -> MISSION driver mode cycle.
+ *
+ * On single-VDEV chipsets (icnss2, wcn6750, ...) deleting the monitor VDEV
+ * created by 'iw phy <phy> interface add <iface>mon type monitor' leaves the
+ * STA side unable to associate. Only a full psoc restart clears it, and the
+ * con_mode handler performs one (hdd_driver_mode_change()). It must run from
+ * a work item, never inline in the cfg80211 delete op, because it takes the
+ * driver sync lock and shuts the modules down.
+ *
+ * request_hw_sync() cannot be used twice back to back for this: the second
+ * write to con_mode overwrites the first before the work reads it, so the
+ * driver would see "already in the requested mode" and do nothing. Here the
+ * two con_mode writes are done sequentially inside a single work item.
+ */
+static void hdd_monitor_mode_cycle_work(struct work_struct *work);
+static DECLARE_WORK(hdd_monitor_mode_cycle, hdd_monitor_mode_cycle_work);
+static atomic_t hdd_monitor_mode_cycle_pending = ATOMIC_INIT(0);
+
+static int hdd_write_con_mode(enum QDF_GLOBAL_MODE mode)
+{
+	struct kernel_param kp = {
+		.name = "con_mode",
+		.ops  = &con_mode_ops,
+		.arg  = &con_mode,
+	};
+	char mode_str[16];
+
+	if (!con_mode_ops.set)
+		return -EOPNOTSUPP;
+
+	snprintf(mode_str, sizeof(mode_str), "%d", mode);
+
+	return con_mode_ops.set(mode_str, &kp);
+}
+
+static void hdd_monitor_mode_cycle_work(struct work_struct *work)
+{
+	struct hdd_context *hdd_ctx = cds_get_context(QDF_MODULE_ID_HDD);
+	int ret;
+
+	if (!hdd_ctx)
+		goto done;
+
+	hdd_info("Cycling driver mode MISSION->MONITOR->MISSION to recover STA");
+
+	ret = hdd_write_con_mode(QDF_GLOBAL_MONITOR_MODE);
+	if (ret) {
+		hdd_err("Failed to enter monitor driver mode: %d", ret);
+		goto restore;
+	}
+
+	ret = hdd_write_con_mode(QDF_GLOBAL_MISSION_MODE);
+	if (ret)
+		hdd_err("Failed to return to mission driver mode: %d", ret);
+
+restore:
+	/* Bring the (re-created) station netdev back up under RTNL. */
+	hdd_queue_monitor_station_restore(hdd_ctx);
+done:
+	atomic_set(&hdd_monitor_mode_cycle_pending, 0);
+}
+
+/**
+ * hdd_schedule_monitor_mode_cycle() - queue the driver mode cycle
+ *
+ * Return: true if a cycle is queued or already running (the station restore
+ * is then queued by the work itself), false if it was not scheduled and the
+ * caller must restore the station itself.
+ */
+static bool hdd_schedule_monitor_mode_cycle(void)
+{
+	if (hdd_get_conparam() != QDF_GLOBAL_MISSION_MODE)
+		return false;
+
+	if (atomic_xchg(&hdd_monitor_mode_cycle_pending, 1) == 0)
+		queue_work(system_unbound_wq, &hdd_monitor_mode_cycle);
+
+	return true;
+}
 #else
 static inline bool
 hdd_preserve_station_for_monitor(struct hdd_context *hdd_ctx,
@@ -1042,6 +1123,11 @@ hdd_preserve_station_for_monitor(struct hdd_context *hdd_ctx,
 static inline void
 hdd_queue_monitor_station_restore(struct hdd_context *hdd_ctx)
 {
+}
+
+static inline bool hdd_schedule_monitor_mode_cycle(void)
+{
+	return false;
 }
 #endif
 
@@ -1129,7 +1215,18 @@ int wlan_hdd_del_virtual_intf(struct wiphy *wiphy, struct wireless_dev *wdev)
 	osif_vdev_sync_destroy(vdev_sync);
 
 	if (!errno && restore_station) {
-		hdd_queue_monitor_station_restore(hdd_ctx);
+		/*
+		 * The firmware is left in a state where wpa_supplicant cannot
+		 * associate after a monitor VDEV is deleted, and resetting only
+		 * the STA VDEV is not enough to clear it. Cycle the whole driver
+		 * mode (MISSION -> MONITOR -> MISSION), exactly like the
+		 * 'iw dev <iface> set type monitor/managed' path does through
+		 * request_hw_sync(). The netdev bring-up is handed to
+		 * hdd_queue_monitor_station_restore() once the cycle is done.
+		 * If no cycle can be scheduled, restore the station directly.
+		 */
+		if (!hdd_schedule_monitor_mode_cycle())
+			hdd_queue_monitor_station_restore(hdd_ctx);
 	}
 	return errno;
 }

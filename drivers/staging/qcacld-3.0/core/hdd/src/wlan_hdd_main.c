@@ -4513,12 +4513,34 @@ static void hdd_populate_wifi_pos_cfg(struct hdd_context *hdd_ctx)
 /* Asynchronous Wi-Fi adapter "defrost": clears FROZEN and opens the interface */
 static void hdd_defrost_worker(struct work_struct *work)
 {
-	struct hdd_adapter *adapter = container_of(work, struct hdd_adapter, defrost_work);
+	struct hdd_adapter *adapter = container_of(work, struct hdd_adapter,
+						   defrost_work);
+	int ret;
+
+	qdf_atomic_set(&adapter->defrost_scheduled, 0);
+
+	if (!test_bit(DEVICE_IFACE_FROZEN, &adapter->event_flags)) {
+		hdd_debug("Adapter %s already unfrozen, nothing to do",
+			  adapter->dev->name);
+		return;
+	}
 
 	hdd_err("WLAN: Async defrosting in progress...");
 	clear_bit(DEVICE_IFACE_FROZEN, &adapter->event_flags);
-	set_bit(DEVICE_IFACE_OPENED, &adapter->event_flags);
-	qdf_atomic_set(&adapter->defrost_scheduled, 0);
+
+	if (!test_bit(DEVICE_IFACE_OPENED, &adapter->event_flags)) {
+		ret = hdd_start_adapter(adapter);
+		if (ret) {
+			hdd_err("hdd_start_adapter failed for %s: %d",
+				adapter->dev->name, ret);
+			return;
+		}
+		set_bit(DEVICE_IFACE_OPENED, &adapter->event_flags);
+	}
+
+	wlan_hdd_netif_queue_control(adapter,
+				     WLAN_START_ALL_NETIF_QUEUE_N_CARRIER,
+				     WLAN_CONTROL_PATH);
 }
 
 /**
@@ -19535,15 +19557,37 @@ wlan_hdd_add_monitor_check(struct hdd_context *hdd_ctx,
 	uint8_t num_open_session = 0;
 	QDF_STATUS status;
 
-	/* if no interface is up do not add monitor mode */
-	if (!hdd_is_any_interface_open(hdd_ctx))
-		return -EINVAL;
-
 	sta_adapter = hdd_get_adapter(hdd_ctx, QDF_STA_MODE);
 	if (!sta_adapter) {
 		hdd_err("No station adapter");
 		return -EINVAL;
 	}
+
+	/*
+	 * Firmware on single-VDEV chipsets (icnss2, wcn6750, ...) rejects
+	 * monitor VDEV creation on a closed parent with -EINVAL. airmon-ng
+	 * does:
+	 *     ip link set <iface> down
+	 *     iw phy <phy> interface add <iface>mon type monitor
+	 * and relies on the driver to still have the parent open when the
+	 * add-iface call arrives. On a cold boot the parent is not open
+	 * yet, so bring it up here.
+	 */
+	if (!hdd_is_any_interface_open(hdd_ctx)) {
+		cancel_work_sync(&sta_adapter->defrost_work);
+		qdf_atomic_set(&sta_adapter->defrost_scheduled, 0);
+		clear_bit(DEVICE_IFACE_FROZEN, &sta_adapter->event_flags);
+
+		if (hdd_start_adapter(sta_adapter)) {
+			hdd_err("Failed to bring up STA parent for monitor add");
+			return -EINVAL;
+		}
+		set_bit(DEVICE_IFACE_OPENED, &sta_adapter->event_flags);
+	}
+
+	/* if no interface is up do not add monitor mode */
+	if (!hdd_is_any_interface_open(hdd_ctx))
+		return -EINVAL;
 
 	status = policy_mgr_check_mon_concurrency(hdd_ctx->psoc);
 
