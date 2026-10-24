@@ -13,5 +13,5 @@ runs:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         curl -fsSL --retry 3 \
           "${NOMOUNT_SETUP_URL:?NOMOUNT_SETUP_URL is required}" \
-          | bash -s dev
+          | bash -s master
         echo "✅ NoMount step finished"
